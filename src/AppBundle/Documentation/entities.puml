@@ -1,0 +1,46 @@
+@startuml
+
+namespace AppBundle\Entity {
+    abstract class AbstractEntity {
+        # id : int
+        + getId() : int
+    }
+    class Asset extends AbstractEntity {
+        - title : string
+        + getTitle() : string
+    }
+    class Change extends AbstractEntity {
+        - title : string
+        - version : string
+        - type : string
+        + getTitle() : string
+        + getVersion() : string
+        + getType() : string
+    }
+    class Project extends AbstractEntity {
+        - title : string
+        + getTitle() : string
+    }
+    class User extends AbstractEntity implements \Symfony\Component\Security\Core\User.UserInterface {
+        - username : string
+        - email : string
+        - password : string
+        - roles : array
+        + getUsername() : string
+        + setUsername(username : string)
+        + getEmail() : string
+        + setEmail(email : string)
+        + getPassword() : string
+        + setPassword(password : string)
+        + getRoles() : array
+        + setRoles(roles : array)
+        + getSalt() : null
+        + eraseCredentials()
+    }
+
+    Change "1" --> "0..*" Asset
+    Project "1" <--> "0..*" Change
+}
+
+
+@enduml

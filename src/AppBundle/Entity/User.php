@@ -18,7 +18,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @author Ryan Weaver <weaverryan@gmail.com>
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  */
-class User extends AbstractModel implements UserInterface
+class User extends AbstractEntity implements UserInterface
 {
     /**
      * @var string
