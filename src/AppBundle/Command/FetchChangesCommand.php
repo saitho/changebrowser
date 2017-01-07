@@ -13,7 +13,7 @@ namespace AppBundle\Command;
 
 use AppBundle\Entity\Change;
 use AppBundle\Entity\Project;
-use AppBundle\Source\AbstractSource;
+use AppBundle\Entity\AbstractSource;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -43,8 +43,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
     /**
      * {@inheritdoc}
      */
-    protected function configure()
-    {
+    protected function configure() {
         $this
             // a good practice is to use the 'app:' prefix to group all your custom application commands
             ->setName('app:changes:fetch')
@@ -64,8 +63,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
      * Beware that the input options and arguments are validated after executing
      * the interact() method, so you can't blindly trust their values in this method.
      */
-    protected function initialize(InputInterface $input, OutputInterface $output)
-    {
+    protected function initialize(InputInterface $input, OutputInterface $output) {
         $this->entityManager = $this->getContainer()->get('doctrine')->getManager();
     }
 	
@@ -77,7 +75,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
 		));
 		$startTime = microtime(true);
     	$changeRepo = $this->entityManager->getRepository(Change::class);
-    	$className = '\AppBundle\Source\Github';
+    	$className = '\AppBundle\Entity\GithubSource';
 		/** @var AbstractSource $source */
 		$source = new $className();
 	
@@ -143,8 +141,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
      * it's too long, it's better to define a separate method to maintain the
      * code readability.
      */
-    private function getCommandHelp()
-    {
+    private function getCommandHelp() {
         return <<<'HELP'
 The <info>%command.name%</info> command fetches changes and saves them in the database:
 
