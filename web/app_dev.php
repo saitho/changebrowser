@@ -13,14 +13,28 @@ use Symfony\Component\HttpFoundation\Request;
 // http://symfony.com/doc/current/book/installation.html#configuration-and-setup for more information
 //umask(0000);
 
-$allowedIps = ['192.168.2.108', '127.0.0.1', 'fe80::1', '::1'];
+/**
+ * @see http://snipplr.com/view/19069/
+ * @param       $string
+ * @param array $array
+ * @return bool
+ */
+function wildcard_in_array ($string, $array = array ()) {
+	foreach ($array as $value) {
+		if (preg_match('/'.$string.'/', $value) !== false) {
+			return true;
+		}
+	}
+	return false;
+}
+$allowedIps = ['192.168.2.*', '127.0.0.1', 'fe80::1', '::1'];
 
 // This check prevents access to debug front controllers that are deployed by
 // accident to production servers. Feel free to remove this, extend it, or make
 // something more sophisticated.
 if (isset($_SERVER['HTTP_CLIENT_IP'])
     || isset($_SERVER['HTTP_X_FORWARDED_FOR'])
-    || !(in_array(@$_SERVER['REMOTE_ADDR'], $allowedIps) || php_sapi_name() === 'cli-server')
+    || !(wildcard_in_array(@$_SERVER['REMOTE_ADDR'], $allowedIps) || php_sapi_name() === 'cli-server')
 ) {
     header('HTTP/1.0 403 Forbidden');
     exit('You are not allowed to access this file. Check '.basename(__FILE__).' for more information.');
