@@ -1,5 +1,28 @@
 @startuml
 
+namespace AppBundle\Source {
+    abstract class AbstractSource {
+        {abstract} - changelogUrl : string
+        {abstract} + getChangelogs(projectName : string[, lastId : string]) : array
+    }
+    class Github extends AbstractSource {
+        - changelogUrl : string
+        + getChangelogUrl(projectName : string) : string
+        + getChangelogs([lastId : string]) : array
+    }
+}
+
+AppBundle\Manager.SourceManager --> AppBundle\Entity.Project
+AppBundle\Manager.SourceManager --> AppBundle\Source.AbstractSource
+
+namespace AppBundle\Manager {
+    class SourceManager {
+        + {static} fetchNewChanges(project : Project, lastId : string)
+        + {static} fetchAllChanges(project : Project)
+    }
+}
+
+
 namespace AppBundle\Entity {
     abstract class AbstractEntity {
         # id : int
@@ -10,16 +33,29 @@ namespace AppBundle\Entity {
         + getTitle() : string
     }
     class Change extends AbstractEntity {
+        - externalId : string
         - title : string
         - version : string
         - type : string
+        - author : string
         + getTitle() : string
         + getVersion() : string
         + getType() : string
+        + getAuthor() : string
+        + getExternalId() : string
+        + setTitle(title : string)
+        + setVersion(version : string)
+        + setType(type : string)
+        + setAuthor(author : string)
+        + setExternalId(externalId : string)
     }
     class Project extends AbstractEntity {
         - title : string
+        - externalId : string
+        - source : string
         + getTitle() : string
+        + getSource() : string
+        + getExternalId() : string
     }
     class User extends AbstractEntity implements \Symfony\Component\Security\Core\User.UserInterface {
         - username : string

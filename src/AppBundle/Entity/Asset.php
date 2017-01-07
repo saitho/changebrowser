@@ -15,4 +15,11 @@ class Asset extends AbstractEntity {
 	 * @ORM\Column(type="string")
 	 */
 	private $title;
+	
+	/**
+	 * @var int
+	 *
+	 * @ORM\Column(type="integer")
+	 */
+	private $change_id;
 }
