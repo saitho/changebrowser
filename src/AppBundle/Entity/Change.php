@@ -51,7 +51,7 @@ class Change extends AbstractEntity {
 	 * @var ArrayCollection
 	 *
 	 * One Change has Many Assets.
-	 * @ORM\OneToMany(targetEntity="Asset", mappedBy="change_id")
+	 * @ORM\OneToMany(targetEntity="Asset", mappedBy="change")
 	 */
 	private $assets;
 	

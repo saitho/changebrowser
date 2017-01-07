@@ -17,9 +17,15 @@ class Asset extends AbstractEntity {
 	private $title;
 	
 	/**
-	 * @var int
+	 * @var Change
 	 *
-	 * @ORM\Column(type="integer")
+	 * @ORM\ManyToOne(targetEntity="Change", inversedBy="assets")
+	 * @ORM\JoinColumn(name="change_id", referencedColumnName="id")
+	 */
+	private $change;
+	
+	/**
+	 * @var int
 	 */
 	private $change_id;
 }
