@@ -14,7 +14,7 @@ namespace AppBundle\Command;
 use AppBundle\DBAL\EnumChangeTypeType;
 use AppBundle\Entity\Change;
 use AppBundle\Entity\Project;
-use AppBundle\Entity\AbstractSource;
+use AppBundle\Entity\Source\AbstractSource;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;

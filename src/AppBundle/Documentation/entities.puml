@@ -10,19 +10,20 @@ namespace AppBundle\Manager {
     }
 }
 
-
-namespace AppBundle\Entity {
+namespace AppBundle\Entity\Source {
     abstract class AbstractSource {
         {abstract} + getChangelogs(projectName : string[, lastId : string]) : array
         {abstract} + create()
     }
-    class GithubSource extends AbstractSource {
+    class Github extends AbstractSource {
         + changelogUrl : string = 'https://api.github.com/repos/{projectName}/commits'
         + getChangelogUrl(projectName : string) : string
         + getChangelogs([lastId : string]) : array
         + create()
     }
+}
 
+namespace AppBundle\Entity {
     abstract class AbstractEntity {
         # id : int
         + getId() : int

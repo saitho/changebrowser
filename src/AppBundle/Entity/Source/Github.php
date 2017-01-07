@@ -1,19 +1,19 @@
 <?php
 
-namespace AppBundle\Entity;
+namespace AppBundle\Entity\Source;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
  */
-class GithubSource extends AbstractSource {
+class Github extends AbstractSource {
 	const changelogUrl = 'https://api.github.com/repos/{projectName}/commits';
 	
-	public function create() {
+	public function create($accessToken='') {
 		$this->id = 'github';
 		$this->options = [
-			'accessToken' => ''
+			'accessToken' => $accessToken
 		];
 	}
 	

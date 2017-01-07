@@ -1,6 +1,6 @@
 <?php
 
-namespace AppBundle\Entity;
+namespace AppBundle\Entity\Source;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -10,7 +10,6 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="discr", type="string")
- * @ORM\DiscriminatorMap({"github" = "GithubSource"})
  */
 abstract class AbstractSource {
 	/**
