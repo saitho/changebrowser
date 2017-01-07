@@ -12,8 +12,8 @@
 namespace AppBundle\DataFixtures\ORM;
 
 use AppBundle\Entity\Project;
+use AppBundle\Entity\Source\Github;
 use AppBundle\Entity\User;
-use AppBundle\Entity\GithubSource;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -41,8 +41,8 @@ class LoadFixtures implements FixtureInterface, ContainerAwareInterface {
      */
     public function load(ObjectManager $manager) {
         #$this->loadUsers($manager);
-		$source = new GithubSource();
-		$source->create();
+		$source = new Github();
+		$source->create($this->container->getParameter('github_accesstoken'));
 		$manager->persist($source);
 		
 		$project = new Project();
