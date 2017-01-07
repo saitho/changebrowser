@@ -13,7 +13,7 @@ class Change extends AbstractEntity {
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(type="string")
+	 * @ORM\Column(type="string", options={"comment":"Version, e.g. commit hash"})
 	 */
 	private $externalId;
 	
@@ -32,14 +32,7 @@ class Change extends AbstractEntity {
 	 * @ORM\JoinColumn(referencedColumnName="id")
 	 */
 	private $project;
-	
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(type="string")
-	 */
-	private $version;
-	
+		
 	/**
 	 * @var string
 	 *
@@ -110,21 +103,7 @@ class Change extends AbstractEntity {
 	public function getTitle() {
 		return $this->title;
 	}
-	
-	/**
-	 * @param string $version
-	 */
-	public function setVersion($version) {
-		$this->version = $version;
-	}
-	
-	/**
-	 * @return string
-	 */
-	public function getVersion() {
-		return $this->version;
-	}
-	
+		
 	/**
 	 * @return \AppBundle\Entity\Project
 	 */

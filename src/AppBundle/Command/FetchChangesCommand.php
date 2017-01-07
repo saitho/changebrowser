@@ -97,7 +97,6 @@ class FetchChangesCommand extends ContainerAwareCommand {
 			$change->setDate(new \DateTime($date));
 			$change->setExternalId($externalId);
 			$change->setProject($project);
-			$change->setVersion('0');
 			
 			$allowedTypes = EnumChangeTypeType::$values;
 			foreach($allowedTypes AS $allowedType) {

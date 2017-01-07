@@ -35,16 +35,13 @@ namespace AppBundle\Entity {
     class Change extends AbstractEntity {
         - externalId : string
         - title : string
-        - version : string
         - type : string
         - author : string
         + getTitle() : string
-        + getVersion() : string
         + getType() : string
         + getAuthor() : string
         + getExternalId() : string
         + setTitle(title : string)
-        + setVersion(version : string)
         + setType(type : string)
         + setAuthor(author : string)
         + setExternalId(externalId : string)
