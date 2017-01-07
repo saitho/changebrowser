@@ -1,0 +1,12 @@
+table.parseDiff {
+    width: 100%;
+}
+table.parseDiff > tbody > tr > td.line-type-added {
+    background-color: #dbffdb;
+}
+table.parseDiff > tbody > tr > td.line-type-removed {
+    background-color: #ffecec;
+}
+table.parseDiff > tbody > tr > td.line-code {
+    white-space: pre;
+}

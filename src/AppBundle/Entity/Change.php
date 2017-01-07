@@ -56,6 +56,14 @@ class Change extends AbstractEntity {
 	private $assets;
 	
 	/**
+	 * @var ArrayCollection
+	 *
+	 * One Change has Many ChangeContents.
+	 * @ORM\OneToMany(targetEntity="ChangeContent", mappedBy="change")
+	 */
+	private $changeContents;
+	
+	/**
 	 * @var \DateTime
 	 *
 	 * @ORM\Column(type="datetime")

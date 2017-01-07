@@ -13,6 +13,7 @@ namespace AppBundle\Command;
 
 use AppBundle\DBAL\EnumChangeTypeType;
 use AppBundle\Entity\Change;
+use AppBundle\Entity\ChangeContent;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\Source\AbstractSource;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -112,7 +113,21 @@ class FetchChangesCommand extends ContainerAwareCommand {
 			if(!$changeRepo->findBy(['project' => $project, 'externalId' => $externalId])) {
 				$this->entityManager->persist($change);
 				$this->entityManager->flush();
-				$output->writeln(sprintf('[OK] Change %s was successfully created: %s', $externalId, $title));
+				$contents = $source->getChangeContent($project->getExternalId(), $change->getExternalId());
+				foreach($contents AS $content) {
+					$changeContent = new ChangeContent();
+					$changeContent->setFilename($content['filename']);
+					$changeContent->setStatus($content['status']);
+					$changeContent->setAdditions($content['additions']);
+					$changeContent->setDeletions($content['deletions']);
+					$changeContent->setChanges($content['changes']);
+					$changeContent->setPatch($content['patch']);
+					$changeContent->setChange($change);
+					$this->entityManager->persist($changeContent);
+				}
+				
+				$this->entityManager->flush();
+				$output->writeln(sprintf('[OK] Change %s with %s ChangeContents was successfully created: %s', $externalId, count($contents), $title));
 				
 				if ($output->isVerbose()) {
 					$finishTime = microtime(true);

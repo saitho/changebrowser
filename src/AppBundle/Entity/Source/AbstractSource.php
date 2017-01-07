@@ -30,4 +30,5 @@ abstract class AbstractSource {
 	
 	abstract public function create();
 	abstract public function getChangelogs($projectName, $lastId=null);
+	abstract public function getChangeContent($projectName, $changeLogId);
 }
