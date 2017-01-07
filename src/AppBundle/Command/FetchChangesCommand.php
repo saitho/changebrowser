@@ -11,6 +11,7 @@
 
 namespace AppBundle\Command;
 
+use AppBundle\DBAL\EnumChangeTypeType;
 use AppBundle\Entity\Change;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\AbstractSource;
@@ -74,10 +75,11 @@ class FetchChangesCommand extends ContainerAwareCommand {
 			$project->getId()
 		));
 		$startTime = microtime(true);
-    	$changeRepo = $this->entityManager->getRepository(Change::class);
-    	$className = '\AppBundle\Entity\GithubSource';
+		$changeRepo = $this->entityManager->getRepository(Change::class);
+		
+		$sourceRepo = $this->entityManager->getRepository(AbstractSource::class);
 		/** @var AbstractSource $source */
-		$source = new $className();
+		$source = $sourceRepo->find($project->getSource());
 	
 		$changes = $source->getChangelogs($project->getExternalId());
 		foreach($changes AS $changeData) {
@@ -97,6 +99,17 @@ class FetchChangesCommand extends ContainerAwareCommand {
 			$change->setProject($project);
 			$change->setVersion('0');
 			
+			$allowedTypes = EnumChangeTypeType::$values;
+			foreach($allowedTypes AS $allowedType) {
+				if($allowedType === null) {
+					continue;
+				}
+				if(preg_match('/^(('.$allowedType.'|\['.$allowedType.'\])(.*:)?)/i', $title)) {
+					$change->setType($allowedType);
+					break;
+				}
+			}
+			
 			if(!$changeRepo->findBy(['project' => $project, 'externalId' => $externalId])) {
 				$this->entityManager->persist($change);
 				$this->entityManager->flush();
@@ -107,13 +120,15 @@ class FetchChangesCommand extends ContainerAwareCommand {
 					$elapsedTime = $finishTime - $startTime;
 					
 					$output->writeln(sprintf(
-						'[INFO] New user database id: %d / Elapsed time: %.2f ms',
+						'[INFO] New change: %d / Elapsed time: %.2f ms',
 						$change->getId(),
 						$elapsedTime * 1000
 					));
 				}
 			}else{
-				$output->writeln(sprintf('[INFO] Change %s skipped as it already exists.', $externalId));
+				if($output->isVerbose()) {
+					$output->writeln(sprintf('[INFO] Change %s skipped as it already exists.', $externalId));
+				}
 			}
 		}
 	}
@@ -130,8 +145,12 @@ class FetchChangesCommand extends ContainerAwareCommand {
 			$this->fetchChangesForProject($project, $output);
 		}else{
 			$projects = $this->entityManager->getRepository(Project::class)->findAll();
-			foreach($projects AS $project) {
-				$this->fetchChangesForProject($project, $output);
+			if(count($projects)) {
+				foreach($projects AS $project) {
+					$this->fetchChangesForProject($project, $output);
+				}
+			}else{
+				$output->writeln('[INFO] No projects found.');
 			}
 		}
     }

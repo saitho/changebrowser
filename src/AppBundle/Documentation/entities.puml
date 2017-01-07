@@ -1,17 +1,5 @@
 @startuml
 
-namespace AppBundle\Source {
-    abstract class AbstractSource {
-        {abstract} - changelogUrl : string
-        {abstract} + getChangelogs(projectName : string[, lastId : string]) : array
-    }
-    class Github extends AbstractSource {
-        - changelogUrl : string
-        + getChangelogUrl(projectName : string) : string
-        + getChangelogs([lastId : string]) : array
-    }
-}
-
 AppBundle\Manager.SourceManager --> AppBundle\Entity.Project
 AppBundle\Manager.SourceManager --> AppBundle\Source.AbstractSource
 
@@ -24,6 +12,17 @@ namespace AppBundle\Manager {
 
 
 namespace AppBundle\Entity {
+    abstract class AbstractSource {
+        {abstract} + getChangelogs(projectName : string[, lastId : string]) : array
+        {abstract} + create()
+    }
+    class GithubSource extends AbstractSource {
+        + changelogUrl : string = 'https://api.github.com/repos/{projectName}/commits'
+        + getChangelogUrl(projectName : string) : string
+        + getChangelogs([lastId : string]) : array
+        + create()
+    }
+
     abstract class AbstractEntity {
         # id : int
         + getId() : int

@@ -1,18 +1,32 @@
 <?php
 
-namespace AppBundle\Source;
+namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-class Github extends AbstractSource {
+/**
+ * @ORM\Entity
+ */
+class GithubSource extends AbstractSource {
 	const changelogUrl = 'https://api.github.com/repos/{projectName}/commits';
+	
+	public function create() {
+		$this->id = 'github';
+		$this->options = [
+			'accessToken' => ''
+		];
+	}
 	
 	public function getChangelogs($projectName, $lastId=null) {
 		$replacements = [
 			'{projectName}' => $projectName
 		];
 		$array = [];
-		$url = str_replace(array_keys($replacements), array_values($replacements), self::changelogUrl);
+		$url = self::changelogUrl;
+		if(!empty($this->options['accessToken'])) {
+			$url .= '?access_token='.$this->options['accessToken'];
+		}
+		$url = str_replace(array_keys($replacements), array_values($replacements), $url);
 		
 		$context = stream_context_create([
 			'http'=> [

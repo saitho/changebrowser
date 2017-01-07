@@ -11,7 +11,9 @@
 
 namespace AppBundle\DataFixtures\ORM;
 
+use AppBundle\Entity\Project;
 use AppBundle\Entity\User;
+use AppBundle\Entity\GithubSource;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -38,7 +40,24 @@ class LoadFixtures implements FixtureInterface, ContainerAwareInterface {
      * {@inheritdoc}
      */
     public function load(ObjectManager $manager) {
-        $this->loadUsers($manager);
+        #$this->loadUsers($manager);
+		$source = new GithubSource();
+		$source->create();
+		$manager->persist($source);
+		
+		$project = new Project();
+		$project->setExternalId('saitho/watajax-doctrine');
+		$project->setSource('github');
+		$project->setTitle('Doctrine Implementation for WATAJAX (public)');
+		$manager->persist($project);
+	
+		$project = new Project();
+		$project->setExternalId('saitho/changebrowser');
+		$project->setSource('github');
+		$project->setTitle('This project (private)');
+		$manager->persist($project);
+		
+		$manager->flush();
     }
 
     private function loadUsers(ObjectManager $manager) {

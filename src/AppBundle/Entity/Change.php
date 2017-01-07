@@ -43,7 +43,7 @@ class Change extends AbstractEntity {
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(type="string", columnDefinition="ENUM('feature', 'bugfix', 'task', 'cleanup')")
+	 * @ORM\Column(type="enumChangeType", nullable=true)
 	 */
 	private $type;
 	
