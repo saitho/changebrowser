@@ -1,21 +1,19 @@
 <?php
 namespace AppBundle\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 /**
- * @Route("/")
+ * @Route("/home")
  */
 class HomeController extends Controller {
     /**
-     * @Route("/", name="homepage")
+     * @Route("/", name="home")
      * @Method("GET")
-     * @Cache(smaxage="10")
      */
-    public function indexAction($page) {
-        return $this->render('default/homepage.html.twig', []);
+    public function indexAction() {
+        return $this->render('home/home.html.twig');
     }
 }
