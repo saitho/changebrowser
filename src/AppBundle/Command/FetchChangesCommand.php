@@ -140,7 +140,13 @@ class FetchChangesCommand extends ContainerAwareCommand {
         $projectId = $input->getArgument('project');
 
         if(!empty($projectId)) {
-			$project = $this->entityManager->getRepository(Project::class)->find($projectId);
+        	$project = null;
+        	if(is_numeric($projectId)) {
+				$project = $this->entityManager->getRepository(Project::class)->find($projectId);
+			}
+        	if(empty($project)) {
+				$project = $this->entityManager->getRepository(Project::class)->findOneBy(['externalId'=>$projectId]);
+			}
 			$this->fetchChangesForProject($project, $output);
 		}else{
 			$projects = $this->entityManager->getRepository(Project::class)->findAll();

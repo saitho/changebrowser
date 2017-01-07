@@ -33,7 +33,7 @@ namespace AppBundle\Entity {
         + getTitle() : string
     }
     class Change extends AbstractEntity {
-        - externalId : string
+        - externalId : string {unique}
         - title : string
         - type : string
         - author : string
