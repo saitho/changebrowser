@@ -40,20 +40,27 @@ class LoadFixtures implements FixtureInterface, ContainerAwareInterface {
      * {@inheritdoc}
      */
     public function load(ObjectManager $manager) {
-        #$this->loadUsers($manager);
-		$source = new Github();
-		$source->create($this->container->getParameter('github_accesstoken'));
-		$manager->persist($source);
+        $this->loadUsers($manager);
+        
+		$github = new Github();
+		$github->create();
+		$manager->persist($github);
 		
 		$project = new Project();
-		$project->setExternalId('saitho/watajax-doctrine');
-		$project->setSource('github');
+		$project->setSource($github);
+		$project->setOptions(['source' => ['vendor' => 'saitho', 'repository' => 'watajax-doctrine']]);
 		$project->setTitle('Doctrine Implementation for WATAJAX (public)');
 		$manager->persist($project);
 	
 		$project = new Project();
-		$project->setExternalId('saitho/changebrowser');
-		$project->setSource('github');
+		$project->setSource($github);
+		$project->setOptions([
+			'source' => [
+				'vendor' => 'saitho',
+				'repository' => 'changebrowser',
+				'accessToken' => '172ebc7651b9daa618806c03fff8c25848e5a9c4'
+			]
+		]);
 		$project->setTitle('This project (private)');
 		$manager->persist($project);
 		
