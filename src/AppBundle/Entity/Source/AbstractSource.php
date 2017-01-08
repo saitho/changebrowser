@@ -2,6 +2,7 @@
 
 namespace AppBundle\Entity\Source;
 
+use AppBundle\Entity\Project;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -19,7 +20,7 @@ abstract class AbstractSource {
 	 * @ORM\Column(type="string", unique=true)
 	 */
 	protected $id;
-	
+		
 	/**
 	 * @var array
 	 *
@@ -29,6 +30,20 @@ abstract class AbstractSource {
 	
 	
 	abstract public function create();
-	abstract public function getChangelogs($projectName, $lastId=null);
-	abstract public function getChangeContent($projectName, $changeLogId);
+	abstract public function getChangeLogs(Project $project);
+	abstract public function getChangeContent(Project $project, $changeLogId);
+	
+	/**
+	 * @return string
+	 */
+	public function getId(): string {
+		return $this->id;
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getOptions(): array {
+		return $this->options;
+	}
 }

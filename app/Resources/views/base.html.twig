@@ -47,15 +47,15 @@
 
                                 {% block header_navigation_links %}
                                     <li>
-                                        <a href="{{ path('blog_index') }}">
+                                        <a href="{{ path('homepage') }}">
                                             <i class="fa fa-home" aria-hidden="true"></i> {{ 'menu.homepage'|trans }}
                                         </a>
                                     </li>
 
                                     {% if is_granted('ROLE_ADMIN') %}
                                         <li>
-                                            <a href="{{ path('admin_product_index') }}">
-                                                <i class="fa fa-lock" aria-hidden="true"></i> {{ 'menu.admin'|trans }}
+                                            <a href="{{ path('project_index') }}">
+                                                <i class="fa fa-list-alt" aria-hidden="true"></i> {{ 'menu.project_list'|trans }}
                                             </a>
                                         </li>
                                     {% endif %}
@@ -99,11 +99,6 @@
 
                     <div id="sidebar" class="col-sm-3">
                         {% block sidebar %}
-                            {{ render_esi(controller('FrameworkBundle:Template:template', {
-                                'template': 'blog/about.html.twig',
-                                'sharedAge': 600,
-                                '_locale': app.request.locale
-                            })) }}
                         {% endblock %}
                     </div>
                 </div>

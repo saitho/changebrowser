@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block body_id 'project_edit' %}
+
+{% block main %}
+    <h1>{{ 'title.edit_project'|trans({'%id%': project.id}) }}</h1>
+
+    {{ include('project/_form.html.twig', {
+        form: edit_form,
+        button_label: 'action.save'|trans,
+        include_back_to_home_link: true,
+    }, with_context = false) }}
+{% endblock %}
+
+{% block sidebar %}
+    <div class="section actions">
+        {{ include('project/_form.html.twig', {
+            form: delete_form,
+            button_label: 'action.delete_project'|trans,
+            button_css: 'btn btn-lg btn-block btn-danger',
+            show_confirmation: true,
+        }, with_context = false) }}
+    </div>
+
+    {{ parent() }}
+{% endblock %}

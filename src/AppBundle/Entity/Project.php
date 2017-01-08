@@ -2,6 +2,7 @@
 
 namespace AppBundle\Entity;
 
+use AppBundle\Entity\Source\AbstractSource;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -15,23 +16,44 @@ class Project extends AbstractEntity {
 	 * @ORM\Column(type="string")
 	 */
 	private $title;
-	
+		
 	/**
-	 * @var string
-	 *
-	 * @ORM\Column(type="string", unique=true)
-	 */
-	private $externalId;
-	
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(type="string")
+	 * Many Projects have One Source.
+	 * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source\AbstractSource")
+	 * @ORM\JoinColumn(name="source", referencedColumnName="id")
 	 */
 	private $source;
 	
 	/**
-	 * @return string
+	 * @var array
+	 *
+	 * @ORM\Column(type="array")
+	 */
+	protected $options = [];
+	
+	/**
+	 * @var array
+	 *
+	 * @ORM\Column(type="array")
+	 */
+	protected $metadata = [];
+	
+	/**
+	 * @return array
+	 */
+	public function getMetadata(): array {
+		return $this->metadata;
+	}
+	
+	/**
+	 * @return array
+	 */
+	public function getOptions(): array {
+		return $this->options;
+	}
+	
+	/**
+	 * @return AbstractSource
 	 */
 	public function getSource() {
 		return $this->source;
@@ -45,23 +67,16 @@ class Project extends AbstractEntity {
 	}
 	
 	/**
-	 * @return string
+	 * @param array $options
 	 */
-	public function getExternalId() {
-		return $this->externalId;
+	public function setOptions(array $options) {
+		$this->options = $options;
 	}
 	
 	/**
-	 * @param string $externalId
+	 * @param AbstractSource $source
 	 */
-	public function setExternalId(string $externalId) {
-		$this->externalId = $externalId;
-	}
-	
-	/**
-	 * @param string $source
-	 */
-	public function setSource(string $source) {
+	public function setSource(AbstractSource $source) {
 		$this->source = $source;
 	}
 	

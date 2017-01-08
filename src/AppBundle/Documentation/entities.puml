@@ -5,20 +5,25 @@ AppBundle\Manager.SourceManager --> AppBundle\Source.AbstractSource
 
 namespace AppBundle\Manager {
     class SourceManager {
-        + {static} fetchNewChanges(project : Project, lastId : string)
+        + {static} fetchNewChanges(project : Project)
         + {static} fetchAllChanges(project : Project)
     }
 }
 
 namespace AppBundle\Entity\Source {
     abstract class AbstractSource {
-        {abstract} + getChangelogs(projectName : string[, lastId : string]) : array
+        # id : string
+        # options : array
+        + getId() : string
+        + getOptions() : array
+        {abstract} + getChangeLogs(project : Project) : array
+        {abstract} + getChangeContent(project : Project, changeLogId : int) : array
         {abstract} + create()
     }
     class Github extends AbstractSource {
         + changelogUrl : string = 'https://api.github.com/repos/{projectName}/commits'
-        + getChangelogUrl(projectName : string) : string
-        + getChangelogs([lastId : string]) : array
+        + getChangeLogs(project : Project) : array
+        + getChangeContent(project : Project, changeLogId : int) : array
         + create()
     }
 }
@@ -26,7 +31,10 @@ namespace AppBundle\Entity\Source {
 namespace AppBundle\Entity {
     abstract class AbstractEntity {
         # id : int
+        # dateAdded : \DateTime
         + getId() : int
+        + getDateAdded() : \DateTime
+        + onPrePersistSetDateAdded()
     }
     class Asset extends AbstractEntity {
         - title : string
@@ -48,11 +56,14 @@ namespace AppBundle\Entity {
     }
     class Project extends AbstractEntity {
         - title : string
-        - externalId : string
         - source : string
+        - options : array
+        - metadata : array
         + getTitle() : string
         + getSource() : string
-        + getExternalId() : string
+        + setOptions(array : array)
+        + getOptions() : array
+        + getMetadata() : array
     }
     class User extends AbstractEntity implements \Symfony\Component\Security\Core\User.UserInterface {
         - username : string

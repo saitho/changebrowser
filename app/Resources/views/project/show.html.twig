@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block body_id 'project_show' %}
+
+{% block main %}
+    <h2>{{ project.title }}</h2>
+    <h3>{{ 'label.source'|trans }}: {{ project.source.id }}</h3>
+    {% for sourceOption in project.source.options %}
+        {{ 'label.source_$1.$2'|replace({'$1': project.source.id, '$2': sourceOption})|trans }}:
+        {% if project.options.source[sourceOption] is defined %}
+            {{ project.options.source[sourceOption] }}
+        {% else %}
+            -
+        {% endif %}<br />
+    {% endfor %}
+{% endblock %}
+
+{% block sidebar %}
+    <div class="section">
+        <a href="{{ path('project_edit', { id: project.id }) }}" class="btn btn-lg btn-block btn-success">
+            <i class="fa fa-edit" aria-hidden="true"></i> {{ 'action.edit_project'|trans }}
+        </a>
+    </div>
+
+    <div class="section">
+        {{ include('project/_form.html.twig', {
+            form: delete_form,
+            button_label: 'action.delete_project'|trans,
+            button_css: 'btn btn-lg btn-block btn-danger',
+            show_confirmation: true,
+        }, with_context = false) }}
+    </div>
+{% endblock %}

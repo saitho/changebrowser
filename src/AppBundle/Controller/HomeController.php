@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\ChangeContent;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 /**
@@ -71,6 +72,7 @@ class HomeController extends Controller {
     /**
      * @Route("/", name="homepage")
      * @Method("GET")
+	 * @Security("has_role('ROLE_ADMIN')")
      */
     public function indexAction() {
         return $this->render('home/home.html.twig');

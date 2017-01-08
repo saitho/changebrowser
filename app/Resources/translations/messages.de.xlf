@@ -1,11 +1,174 @@
-<?xml version="1.0"?>
-<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file source-language="en" target-language="de" datatype="plaintext" original="file.ext">
-        <body>
-            <trans-unit id="action.login_backend">
-                <source>action.login_backend</source>
-                <target>Zugriff nur über das Adminpanel möglich.</target>
-            </trans-unit>
-        </body>
-    </file>
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="de" datatype="plaintext" original="file.ext">
+    <header>
+      <tool tool-id="symfony" tool-name="Symfony"/>
+    </header>
+    <body>
+      <trans-unit id="d7d0dc5d9eaeedc89b1c87bd4a21d1ec" resname="title.login">
+        <source>title.login</source>
+        <target>Login</target>
+      </trans-unit>
+      <trans-unit id="717ecfaa9d198197bc4a8a5403461d48" resname="label.username">
+        <source>label.username</source>
+        <target>Username</target>
+      </trans-unit>
+      <trans-unit id="a14f198f3da0de3396729d0fd7636731" resname="label.password">
+        <source>label.password</source>
+        <target>Passwort</target>
+      </trans-unit>
+      <trans-unit id="4bfbf0db73df22d646d141f80acf1f4d" resname="action.sign_in">
+        <source>action.sign_in</source>
+        <target>Einloggen</target>
+      </trans-unit>
+      <trans-unit id="83c8f6b769170fd9fbd13da3dab0fa66" resname="help.login_users">
+        <source>help.login_users</source>
+        <target>login_users</target>
+      </trans-unit>
+      <trans-unit id="462cc3f86a1fee6c52348107e9dca891" resname="label.role">
+        <source>label.role</source>
+        <target>Rolle</target>
+      </trans-unit>
+      <trans-unit id="d7d9935a52a4e41dd0cbd1e32a2d4c6d" resname="help.role_user">
+        <source>help.role_user</source>
+        <target>User</target>
+      </trans-unit>
+      <trans-unit id="be31f309c74bd604b2622f99a88f434b" resname="help.role_admin">
+        <source>help.role_admin</source>
+        <target>Admin</target>
+      </trans-unit>
+      <trans-unit id="aad653ca3ee669635f2938b73098b6d7" resname="note">
+        <source>note</source>
+        <target>Hinweis</target>
+      </trans-unit>
+      <trans-unit id="50e55fc1ed34cb602fbfdb36b91a9136" resname="help.reload_fixtures">
+        <source>help.reload_fixtures</source>
+        <target>Fixtures neu laden</target>
+      </trans-unit>
+      <trans-unit id="6a2139364f96787c8ce1bbb0070b898c" resname="tip">
+        <source>tip</source>
+        <target>Tip</target>
+      </trans-unit>
+      <trans-unit id="932f7d3714683328370a456f66af3bc4" resname="help.add_user">
+        <source>help.add_user</source>
+        <target>Benutzer anlegen</target>
+      </trans-unit>
+      <trans-unit id="af5b532be2a4a9c1d29ec29bf744dba0" resname="menu.toggle_nav">
+        <source>menu.toggle_nav</source>
+        <target>Navigation toggeln</target>
+      </trans-unit>
+      <trans-unit id="797a9670e2732097498906b9e515da2d" resname="menu.logout">
+        <source>menu.logout</source>
+        <target>Logout</target>
+      </trans-unit>
+      <trans-unit id="a4a8dcc5417afa9ea0c18f4c5670708f" resname="menu.choose_language">
+        <source>menu.choose_language</source>
+        <target>Sprache auswählen</target>
+      </trans-unit>
+      <trans-unit id="170ebfa198986e2b77913834c0b4c5c3" resname="menu.homepage">
+        <source>menu.homepage</source>
+        <target>Home</target>
+      </trans-unit>
+      <trans-unit id="ac83eba1ba0facdc40012f6f253e72d5" resname="menu.project_list">
+        <source>menu.project_list</source>
+        <target>Projekte</target>
+      </trans-unit>
+      <trans-unit id="40f177fc22066acbbf94d36495ccc7a9" resname="title.project_list">
+        <source>title.project_list</source>
+        <target>Projektübersicht</target>
+      </trans-unit>
+      <trans-unit id="4f5a5b8dd21bd8863bdb222a509bcd25" resname="label.id">
+        <source>label.id</source>
+        <target>ID</target>
+      </trans-unit>
+      <trans-unit id="1dac0a2327e9a4b8516f7ffc8d27871f" resname="label.title">
+        <source>label.title</source>
+        <target>Titel</target>
+      </trans-unit>
+      <trans-unit id="15534ea437585961cc72992fc9722073" resname="label.actions">
+        <source>label.actions</source>
+        <target>Aktionen</target>
+      </trans-unit>
+      <trans-unit id="0f979b3ce9426b2631a3fe2790fcff66" resname="action.show">
+        <source>action.show</source>
+        <target>Anzeigen</target>
+      </trans-unit>
+      <trans-unit id="78a93d081740517015711367da2007ee" resname="action.edit">
+        <source>action.edit</source>
+        <target>Bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="a33e37a0f268683a318a854cd4438281" resname="no_entries_found">
+        <source>no_entries_found</source>
+        <target>Keine Einträge gefunden.</target>
+      </trans-unit>
+      <trans-unit id="d0fc3debf7ebdf98edc6274e919c4706" resname="action.create_project">
+        <source>action.create_project</source>
+        <target>Projekt anlegen</target>
+      </trans-unit>
+      <trans-unit id="19eddd558f3eb9d90c830318155fecb4" resname="label.create_project">
+        <source>label.create_project</source>
+        <target>Projekt anlegen</target>
+      </trans-unit>
+      <trans-unit id="78004a37c7ef69db7437279402a272ef" resname="label.save_and_create_new">
+        <source>label.save_and_create_new</source>
+        <target>Speichern und hierher zurückkehren</target>
+      </trans-unit>
+      <trans-unit id="5c6b5c0769ee5dbee4319b85d5df557b" resname="action.back_to_list">
+        <source>action.back_to_list</source>
+        <target>Zurück zur Übersicht</target>
+      </trans-unit>
+      <trans-unit id="135a7ca574f192828cf0d0e766e72f1b" resname="delete_project_modal.title">
+        <source>delete_project_modal.title</source>
+        <target>Projekt löschen</target>
+      </trans-unit>
+      <trans-unit id="dbcd8f8925f5e39b8578894973abfa9f" resname="delete_project_modal.body">
+        <source>delete_project_modal.body</source>
+        <target>Möchten Sie dieses Projekt und alle damit verbundenen Daten löschen? Dieser Schritt kann nicht rückgängig gemacht werden!</target>
+      </trans-unit>
+      <trans-unit id="8b104002f62df6f7ab45fc174877bbb9" resname="label.cancel">
+        <source>label.cancel</source>
+        <target>Abbrechen</target>
+      </trans-unit>
+      <trans-unit id="24c8b5767001f4785021c31ab703a084" resname="label.delete">
+        <source>label.delete</source>
+        <target>Löschen</target>
+      </trans-unit>
+      <trans-unit id="be7cdbe9a96ffa8cb91b0f1c020289e4" resname="title.edit_project">
+        <source>title.edit_project</source>
+        <target>Projekt bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="e0cecfbe5aa7f0480019f8d6a9951057" resname="action.save">
+        <source>action.save</source>
+        <target>Speichern</target>
+      </trans-unit>
+      <trans-unit id="6ae99f43264176c6043e6455505002eb" resname="action.delete_project">
+        <source>action.delete_project</source>
+        <target>Projekt löschen</target>
+      </trans-unit>
+      <trans-unit id="73afedcb65e5f948ecaabb9d76814c94" resname="action.edit_project">
+        <source>action.edit_project</source>
+        <target>Projekt bearbeiten</target>
+      </trans-unit>
+      <trans-unit id="e90c276ad448fec35efbbbbcfc852474" resname="title.project_new">
+        <source>title.project_new</source>
+        <target>Projekt anlegen</target>
+      </trans-unit>
+      <trans-unit id="label.source">
+        <source>label.source</source>
+        <target>Quelle</target>
+      </trans-unit>
+      <trans-unit id="label.source_Github.accessToken">
+        <source>label.source_Github.accessToken</source>
+        <target>GitHub Access Token</target>
+      </trans-unit>
+      <trans-unit id="label.source_Github.vendor">
+        <source>label.source_Github.vendor</source>
+        <target>GitHub Vendor-Name</target>
+      </trans-unit>
+      <trans-unit id="label.source_Github.repository">
+        <source>label.source_Github.repository</source>
+        <target>GitHub Repository-Name</target>
+      </trans-unit>
+    </body>
+  </file>
 </xliff>
