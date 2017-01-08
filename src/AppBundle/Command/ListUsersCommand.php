@@ -71,20 +71,21 @@ HELP
             ->addOption('send-to', null, InputOption::VALUE_OPTIONAL, 'If set, the result is sent to the given email address')
         ;
     }
-
-    /**
-     * This method is executed before the the execute() method. It's main purpose
-     * is to initialize the variables used in the rest of the command methods.
-     */
+	
+	/**
+	 * @param \Symfony\Component\Console\Input\InputInterface   $input
+	 * @param \Symfony\Component\Console\Output\OutputInterface $output
+	 */
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         $this->entityManager = $this->getContainer()->get('doctrine')->getManager();
     }
-
-    /**
-     * This method is executed after initialize(). It usually contains the logic
-     * to execute to complete this command task.
-     */
+	
+	/**
+	 * @param \Symfony\Component\Console\Input\InputInterface   $input
+	 * @param \Symfony\Component\Console\Output\OutputInterface $output
+	 * @return void
+	 */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $maxResults = $input->getOption('max-results');
@@ -121,13 +122,11 @@ HELP
 
         $output->writeln($tableContents);
     }
-
-    /**
-     * Sends the given $contents to the $recipient email address.
-     *
-     * @param string $contents
-     * @param string $recipient
-     */
+	
+	/**
+	 * @param $contents string
+	 * @param $recipient string
+	 */
     private function sendReport($contents, $recipient)
     {
         // See http://symfony.com/doc/current/cookbook/email/email.html

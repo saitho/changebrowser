@@ -63,30 +63,20 @@ class AddUserCommand extends ContainerAwareCommand
             ->addOption('is-admin', null, InputOption::VALUE_NONE, 'If set, the user is created as an administrator')
         ;
     }
-
-    /**
-     * This method is executed before the interact() and the execute() methods.
-     * It's main purpose is to initialize the variables used in the rest of the
-     * command methods.
-     *
-     * Beware that the input options and arguments are validated after executing
-     * the interact() method, so you can't blindly trust their values in this method.
-     */
+	
+	/**
+	 * @param \Symfony\Component\Console\Input\InputInterface   $input
+	 * @param \Symfony\Component\Console\Output\OutputInterface $output
+	 */
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         $this->entityManager = $this->getContainer()->get('doctrine')->getManager();
     }
-
-    /**
-     * This method is executed after initialize() and before execute(). Its purpose
-     * is to check if some of the options/arguments are missing and interactively
-     * ask the user for those values.
-     *
-     * This method is completely optional. If you are developing an internal console
-     * command, you probably should not implement this method because it requires
-     * quite a lot of work. However, if the command is meant to be used by external
-     * users, this method is a nice way to fall back and prevent errors.
-     */
+	
+	/**
+	 * @param \Symfony\Component\Console\Input\InputInterface   $input
+	 * @param \Symfony\Component\Console\Output\OutputInterface $output
+	 */
     protected function interact(InputInterface $input, OutputInterface $output)
     {
         if (null !== $input->getArgument('username') && null !== $input->getArgument('password') && null !== $input->getArgument('email')) {
@@ -163,11 +153,12 @@ class AddUserCommand extends ContainerAwareCommand
             $output->writeln(' > <info>Email</info>: '.$email);
         }
     }
-
-    /**
-     * This method is executed after interact() and initialize(). It usually
-     * contains the logic to execute to complete this command task.
-     */
+	
+	/**
+	 * @param \Symfony\Component\Console\Input\InputInterface   $input
+	 * @param \Symfony\Component\Console\Output\OutputInterface $output
+	 * @return void
+	 */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $startTime = microtime(true);
@@ -208,13 +199,16 @@ class AddUserCommand extends ContainerAwareCommand
             $output->writeln(sprintf('[INFO] New user database id: %d / Elapsed time: %.2f ms', $user->getId(), $elapsedTime * 1000));
         }
     }
-
-    /**
-     * This internal method should be private, but it's declared as public to
-     * maintain PHP 5.3 compatibility when using it in a callback.
-     *
-     * @internal
-     */
+	
+	/**
+	 * This internal method should be private, but it's declared as public to
+	 * maintain PHP 5.3 compatibility when using it in a callback.
+	 *
+	 * @internal
+	 * @param $plainPassword
+	 * @return mixed
+	 * @throws \Exception
+	 */
     public function passwordValidator($plainPassword)
     {
         if (empty($plainPassword)) {
@@ -227,13 +221,16 @@ class AddUserCommand extends ContainerAwareCommand
 
         return $plainPassword;
     }
-
-    /**
-     * This internal method should be private, but it's declared as public to
-     * maintain PHP 5.3 compatibility when using it in a callback.
-     *
-     * @internal
-     */
+	
+	/**
+	 * This internal method should be private, but it's declared as public to
+	 * maintain PHP 5.3 compatibility when using it in a callback.
+	 *
+	 * @internal
+	 * @param $email
+	 * @return mixed
+	 * @throws \Exception
+	 */
     public function emailValidator($email)
     {
         if (empty($email)) {

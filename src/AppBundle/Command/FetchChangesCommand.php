@@ -56,15 +56,11 @@ class FetchChangesCommand extends ContainerAwareCommand {
             ->addArgument('project', InputArgument::OPTIONAL, 'ID of the project you want to fetch changes')
         ;
     }
-
-    /**
-     * This method is executed before the interact() and the execute() methods.
-     * It's main purpose is to initialize the variables used in the rest of the
-     * command methods.
-     *
-     * Beware that the input options and arguments are validated after executing
-     * the interact() method, so you can't blindly trust their values in this method.
-     */
+	
+	/**
+	 * @param \Symfony\Component\Console\Input\InputInterface   $input
+	 * @param \Symfony\Component\Console\Output\OutputInterface $output
+	 */
     protected function initialize(InputInterface $input, OutputInterface $output) {
         $this->entityManager = $this->getContainer()->get('doctrine')->getManager();
     }
@@ -77,12 +73,11 @@ class FetchChangesCommand extends ContainerAwareCommand {
 		));
 		$startTime = microtime(true);
 		$changeRepo = $this->entityManager->getRepository(Change::class);
-		
 		$sourceRepo = $this->entityManager->getRepository(AbstractSource::class);
 		/** @var AbstractSource $source */
 		$source = $sourceRepo->find($project->getSource());
 	
-		$changes = $source->getChangelogs($project->getExternalId());
+		$changes = $source->getChangeLogs($project);
 		foreach($changes AS $changeData) {
 			// Enable on PHP 7.1 instead...
 			// ['id' => $externalId, 'title' => $title, 'author' => $author, 'date' => $date] = $changeData;
@@ -113,7 +108,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
 			if(!$changeRepo->findBy(['project' => $project, 'externalId' => $externalId])) {
 				$this->entityManager->persist($change);
 				$this->entityManager->flush();
-				$contents = $source->getChangeContent($project->getExternalId(), $change->getExternalId());
+				$contents = $source->getChangeContent($project, $change->getExternalId());
 				foreach($contents AS $content) {
 					$changeContent = new ChangeContent();
 					$changeContent->setFilename($content['filename']);
@@ -146,11 +141,12 @@ class FetchChangesCommand extends ContainerAwareCommand {
 			}
 		}
 	}
-    
-    /**
-     * This method is executed after interact() and initialize(). It usually
-     * contains the logic to execute to complete this command task.
-     */
+	
+	/**
+	 * @param \Symfony\Component\Console\Input\InputInterface   $input
+	 * @param \Symfony\Component\Console\Output\OutputInterface $output
+	 * @return void
+	 */
     protected function execute(InputInterface $input, OutputInterface $output) {
         $projectId = $input->getArgument('project');
 

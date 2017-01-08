@@ -112,7 +112,7 @@ HELP
 
         $repository = $this->entityManager->getRepository(User::class);
         /** @var User $user */
-        $user = $repository->findOneByUsername($username);
+        $user = $repository->findOneBy(['username' => $username]);
 
         if (null === $user) {
             throw new \RuntimeException(sprintf('User with username "%s" not found.', $username));
@@ -129,13 +129,16 @@ HELP
         $output->writeln('');
         $output->writeln(sprintf('[OK] User "%s" (ID: %d, email: %s) was successfully deleted.', $user->getUsername(), $userId, $user->getEmail()));
     }
-
-    /**
-     * This internal method should be private, but it's declared public to
-     * maintain PHP 5.3 compatibility when using it in a callback.
-     *
-     * @internal
-     */
+	
+	/**
+	 * This internal method should be private, but it's declared public to
+	 * maintain PHP 5.3 compatibility when using it in a callback.
+	 *
+	 * @param $username
+	 * @return mixed
+	 * @throws \Exception
+	 * @internal
+	 */
     public function usernameValidator($username)
     {
         if (empty($username)) {
