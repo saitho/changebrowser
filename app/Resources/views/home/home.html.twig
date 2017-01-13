@@ -31,82 +31,8 @@
 
 {% block javascripts %}
     {{ parent() }}
+    <script src="{{ asset('js/tableobject.js') }}"></script>
     <script type="text/javascript">
-        function createHead(table, array, bodyArray) {
-            var tr = document.createElement('tr');
-            $(array).each(function(key, name) {
-                var titleText = document.createTextNode(name);
-                var titleTd = document.createElement('th');
-                titleTd.appendChild(titleText);
-                tr.appendChild(titleTd);
-            });
-            table.appendChild(tr);
-        }
-
-        /**
-         * Returns true if it is a DOM element
-         * http://stackoverflow.com/questions/384286/javascript-isdom-how-do-you-check-if-a-javascript-object-is-a-dom-object
-         * @param o object
-         * @returns bool
-         */
-        function isElement(o){
-            return (
-                typeof HTMLElement === 'object' ? o instanceof HTMLElement : //DOM2
-                    o && typeof o === 'object' && o !== null && o.nodeType === 1 && typeof o.nodeName==='string'
-            );
-        }
-
-        function addValueToTd(td, value) {
-            if(isElement(value)) {
-                td.appendChild(value);
-            }else{
-                var text = document.createTextNode(value);
-                td.appendChild(text);
-            }
-        }
-
-        function createBody(table, headArray, bodyArray, noResultsMessage) {
-            if(bodyArray.length === 0) {
-                if(noResultsMessage !== null) {
-                    var tr = document.createElement('tr');
-                    var td = document.createElement('td');
-                    td.colSpan = headArray.length;
-                    td.className = 'no-results';
-                    var text = document.createTextNode(noResultsMessage);
-                    td.appendChild(text);
-                    tr.appendChild(td);
-                    table.appendChild(tr);
-                }
-                return;
-            }
-            $(bodyArray).each(function(key, element) {
-                var tr = document.createElement('tr');
-                $(element).each(function(k, v) {
-                    var td = document.createElement('td');
-                    if(v === null) {
-                        tr.appendChild(td);
-                    }else if(v.constructor === Array) {
-                        // Concatinate values...
-                        $(v).each(function(aK, aV) {
-                            addValueToTd(td, aV);
-                        });
-                        tr.appendChild(td);
-                    }else{
-                        addValueToTd(td, v);
-                        tr.appendChild(td);
-                    }
-                });
-                table.appendChild(tr);
-            });
-        }
-        function createTable(tableId, headArray, bodyArray, noResultsMessage) {
-            var table = document.createElement('table');
-            table.id = tableId;
-            createHead(table, headArray, bodyArray);
-            createBody(table, headArray, bodyArray, noResultsMessage);
-            return table;
-        }
-
         function loadProject(projectId) {
             var $body = $('body div#body');
             $.ajax({
@@ -123,7 +49,6 @@
                         if(change.type) {
                             span = document.createElement('span');
                             span.className = 'label label-info';
-                            console.log(change.type);
                             var text = document.createTextNode(change.type);
                             span.appendChild(text);
                             titleArray.push(span);
@@ -132,7 +57,7 @@
                         changeData.push([span, change.title, change.author, new Date(change.date.date).toLocaleString()]);
                     });
 
-                    var table = createTable(
+                    var table = createTableObject(
                         'changeTable',
                         ['', '{{ 'label.title'|trans }}', '{{ 'label.author'|trans }}', '{{ 'label.date'|trans }}'],
                         changeData,
