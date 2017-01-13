@@ -16,13 +16,23 @@ class Project extends AbstractEntity {
 	 * @ORM\Column(type="string")
 	 */
 	private $title;
-		
+	
 	/**
 	 * Many Projects have One Source.
 	 * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Source\AbstractSource")
 	 * @ORM\JoinColumn(name="source", referencedColumnName="id")
 	 */
 	private $source;
+	
+	/**
+	 * One Project has Many Changes.
+	 * @ORM\OneToMany(targetEntity="Change", mappedBy="project")
+	 */
+	private $changes;
+	
+	public function getChanges() {
+		return $this->changes;
+	}
 	
 	/**
 	 * @var array

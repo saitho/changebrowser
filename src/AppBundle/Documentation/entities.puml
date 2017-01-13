@@ -82,7 +82,7 @@ namespace AppBundle\Entity {
         + eraseCredentials()
     }
 
-    Change "1" --> "0..*" Asset
+    Change "1" <--> "0..*" Asset
     Project "1" <--> "0..*" Change
 }
 

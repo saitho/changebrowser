@@ -28,8 +28,7 @@ class Change extends AbstractEntity {
 	 * @var Project
 	 *
 	 * Many Changes have One Project.
-	 * @ORM\ManyToOne(targetEntity="Project")
-	 * @ORM\JoinColumn(referencedColumnName="id")
+	 * @ORM\ManyToOne(targetEntity="Project", inversedBy="changes")
 	 */
 	private $project;
 		

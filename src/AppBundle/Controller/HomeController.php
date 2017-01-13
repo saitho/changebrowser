@@ -2,6 +2,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\ChangeContent;
+use AppBundle\Entity\Project;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -75,6 +76,8 @@ class HomeController extends Controller {
 	 * @Security("has_role('ROLE_ADMIN')")
      */
     public function indexAction() {
-        return $this->render('home/home.html.twig');
+		$entityManager = $this->getDoctrine()->getManager();
+		$projects = $entityManager->getRepository(Project::class)->findBy([], ['title' => 'ASC']);
+        return $this->render('home/home.html.twig', ['projects' => $projects]);
     }
 }

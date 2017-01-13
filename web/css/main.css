@@ -1,3 +1,16 @@
+label.control-label {
+    line-height: 45px;
+    vertical-align: middle;
+}
+
+div#body > table#changeTable {
+    width: 100%;
+}
+
+div#body > table#changeTable td.no-results {
+    text-align: center;
+}
+
 /*
  *  Symfony Demo Application by @symfony
  *  License: MIT License

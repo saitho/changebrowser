@@ -3,5 +3,155 @@
 {% block body_id 'home' %}
 
 {% block body %}
-    Home Text
+    <div class="form-group row">
+        <label for="projectList" class="control-label col-xs-1">Project</label>
+        <div class="col-xs-11 input-group">
+            <span class="input-group-btn">
+                <a class="btn btn-primary" href="">
+                    <i class="fa fa-plus"></i>
+                </a>
+            </span>
+            <select name="projectList" id="projectList" class="form-control">
+                {% for project in projects %}
+                    <option value="{{ project.id }}">{{ project.title }}</option>
+                {% endfor %}
+            </select>
+            <span class="input-group-btn">
+                <a class="btn btn-default" href="">
+                    <i class="fa fa-pencil"></i>
+                </a>
+            </span>
+        </div>
+    </div>
+    <hr />
+    <div id="body">
+        Loading data...
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript">
+        function createHead(table, array, bodyArray) {
+            var tr = document.createElement('tr');
+            $(array).each(function(key, name) {
+                var titleText = document.createTextNode(name);
+                var titleTd = document.createElement('th');
+                titleTd.appendChild(titleText);
+                tr.appendChild(titleTd);
+            });
+            table.appendChild(tr);
+        }
+
+        /**
+         * Returns true if it is a DOM element
+         * http://stackoverflow.com/questions/384286/javascript-isdom-how-do-you-check-if-a-javascript-object-is-a-dom-object
+         * @param o object
+         * @returns bool
+         */
+        function isElement(o){
+            return (
+                typeof HTMLElement === 'object' ? o instanceof HTMLElement : //DOM2
+                    o && typeof o === 'object' && o !== null && o.nodeType === 1 && typeof o.nodeName==='string'
+            );
+        }
+
+        function addValueToTd(td, value) {
+            if(isElement(value)) {
+                td.appendChild(value);
+            }else{
+                var text = document.createTextNode(value);
+                td.appendChild(text);
+            }
+        }
+
+        function createBody(table, headArray, bodyArray, noResultsMessage) {
+            if(bodyArray.length === 0) {
+                if(noResultsMessage !== null) {
+                    var tr = document.createElement('tr');
+                    var td = document.createElement('td');
+                    td.colSpan = headArray.length;
+                    td.className = 'no-results';
+                    var text = document.createTextNode(noResultsMessage);
+                    td.appendChild(text);
+                    tr.appendChild(td);
+                    table.appendChild(tr);
+                }
+                return;
+            }
+            $(bodyArray).each(function(key, element) {
+                var tr = document.createElement('tr');
+                $(element).each(function(k, v) {
+                    var td = document.createElement('td');
+                    if(v === null) {
+                        tr.appendChild(td);
+                    }else if(v.constructor === Array) {
+                        // Concatinate values...
+                        $(v).each(function(aK, aV) {
+                            addValueToTd(td, aV);
+                        });
+                        tr.appendChild(td);
+                    }else{
+                        addValueToTd(td, v);
+                        tr.appendChild(td);
+                    }
+                });
+                table.appendChild(tr);
+            });
+        }
+        function createTable(tableId, headArray, bodyArray, noResultsMessage) {
+            var table = document.createElement('table');
+            table.id = tableId;
+            createHead(table, headArray, bodyArray);
+            createBody(table, headArray, bodyArray, noResultsMessage);
+            return table;
+        }
+
+        function loadProject(projectId) {
+            var $body = $('body div#body');
+            $.ajax({
+                method: 'POST',
+                url: '{{path("ajax_loadProject")}}',
+                data: { project_id: projectId },
+                dataType: 'json'
+            }).done(function( response ) {
+                if(response.status) {
+                    var changeData = [];
+                    $(response.changes).each(function(key, change) {
+                        var titleArray = [];
+                        var span = null;
+                        if(change.type) {
+                            span = document.createElement('span');
+                            span.className = 'label label-info';
+                            console.log(change.type);
+                            var text = document.createTextNode(change.type);
+                            span.appendChild(text);
+                            titleArray.push(span);
+                        }
+                        titleArray.push(change.title);
+                        changeData.push([span, change.title, change.author, new Date(change.date.date).toLocaleString()]);
+                    });
+
+                    var table = createTable(
+                        'changeTable',
+                        ['', '{{ 'label.title'|trans }}', '{{ 'label.author'|trans }}', '{{ 'label.date'|trans }}'],
+                        changeData,
+                        '{{ 'no_entries_found'|trans }}'
+                    );
+                    $body.html(table);
+                }
+            });
+        }
+        $(document).ready(function() {
+            // todo: Abrufen der Versionen!
+            // todo: Changelog Export (Markdown) nach Version
+            // z.B. https://raw.githubusercontent.com/brave/browser-laptop/master/CHANGELOG.md
+
+            var $projectSelect = $('select#projectList');
+            loadProject($projectSelect.val());
+            $projectSelect.change(function () {
+                loadProject($( this ).val());
+            });
+        });
+    </script>
 {% endblock %}
