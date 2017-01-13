@@ -11,7 +11,7 @@
         "psr-4": { "Tests\\": "tests/" }
     },
     "require": {
-        "php"                                  : ">=5.5.9",
+        "php"                                  : ">=7.0.0",
         "ext-pdo_sqlite"                       : "*",
         "doctrine/doctrine-bundle"             : "^1.6",
         "doctrine/doctrine-fixtures-bundle"    : "^2.2",
@@ -26,7 +26,8 @@
         "symfony/symfony"                      : "^3.2",
         "twig/extensions"                      : "^1.3",
         "twig/twig"                            : "^1.28",
-        "white-october/pagerfanta-bundle"      : "^1.0"
+        "white-october/pagerfanta-bundle"      : "^1.0",
+        "Zolli/Phabricator-PHP-API"            : "^2.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer"            : "^1.12",
@@ -54,7 +55,7 @@
     },
     "config": {
         "platform": {
-            "php": "5.5.9"
+            "php": "7.0.9"
         }
     },
     "extra": {
