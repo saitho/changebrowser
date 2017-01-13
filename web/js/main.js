@@ -1,33 +1,39 @@
-/*
- * This file is part of the Symfony package.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+function loadProject(projectId) {
+    var $body = $('body div#body');
+    $.ajax({
+        method: 'POST',
+        url: paths.ajax_loadProject,
+        data: { project_id: projectId },
+        dataType: 'json'
+    }).done(function( response ) {
+        if(response.status) {
+            var changeData = [];
+            $(response.changes).each(function(key, change) {
+                var titleArray = [];
+                var span = null;
+                if(change.type) {
+                    span = document.createElement('span');
+                    span.className = 'label label-info';
+                    var text = document.createTextNode(change.type);
+                    span.appendChild(text);
+                    titleArray.push(span);
+                }
+                titleArray.push(change.title);
+                changeData.push([span, change.title, change.author, new Date(change.date.date).toLocaleString()]);
+            });
+
+            var table = createTableObject(
+                'changeTable',
+                ['', translations.label.title, translations.label.author, translations.label.date],
+                changeData,
+                translations.no_entries_found
+        );
+            $body.html(table);
+        }
+    });
+}
 
 (function ($) {
-    $(document).ready(function () {
-        hljs.initHighlightingOnLoad();
-
-        // Datetime picker initialization.
-        // See http://eonasdan.github.io/bootstrap-datetimepicker/
-        $('[data-toggle="datetimepicker"]').datetimepicker({
-            icons: {
-                time: 'fa fa-clock-o',
-                date: 'fa fa-calendar',
-                up: 'fa fa-chevron-up',
-                down: 'fa fa-chevron-down',
-                previous: 'fa fa-chevron-left',
-                next: 'fa fa-chevron-right',
-                today: 'fa fa-check-circle-o',
-                clear: 'fa fa-trash',
-                close: 'fa fa-remove'
-            }
-        });
-    });
-
     // Handling the modal confirmation message.
     $(document).on('submit', 'form[data-confirmation]', function (event) {
         var $form = $(this),

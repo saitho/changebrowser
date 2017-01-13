@@ -30,44 +30,25 @@
 {% endblock %}
 
 {% block javascripts %}
+    <script type="text/javascript">
+        var paths = {
+            'ajax_loadProject' : '{{path("ajax_loadProject")}}'
+        };
+        var translations = {
+            // ...
+            'no_entries_found' : '{{ 'no_entries_found' | trans }}',
+            'label': {
+                'date' : '{{ 'label.date' | trans }}',
+                'author' : '{{ 'label.author' | trans }}',
+                'title' : '{{ 'label.title' | trans }}'
+            }
+            // ...
+        }
+    </script>
     {{ parent() }}
     <script src="{{ asset('js/tableobject.js') }}"></script>
     <script type="text/javascript">
-        function loadProject(projectId) {
-            var $body = $('body div#body');
-            $.ajax({
-                method: 'POST',
-                url: '{{path("ajax_loadProject")}}',
-                data: { project_id: projectId },
-                dataType: 'json'
-            }).done(function( response ) {
-                if(response.status) {
-                    var changeData = [];
-                    $(response.changes).each(function(key, change) {
-                        var titleArray = [];
-                        var span = null;
-                        if(change.type) {
-                            span = document.createElement('span');
-                            span.className = 'label label-info';
-                            var text = document.createTextNode(change.type);
-                            span.appendChild(text);
-                            titleArray.push(span);
-                        }
-                        titleArray.push(change.title);
-                        changeData.push([span, change.title, change.author, new Date(change.date.date).toLocaleString()]);
-                    });
-
-                    var table = createTableObject(
-                        'changeTable',
-                        ['', '{{ 'label.title'|trans }}', '{{ 'label.author'|trans }}', '{{ 'label.date'|trans }}'],
-                        changeData,
-                        '{{ 'no_entries_found'|trans }}'
-                    );
-                    $body.html(table);
-                }
-            });
-        }
-        $(document).ready(function() {
+        $(document).ready(function () {
             // todo: Abrufen der Versionen!
             // todo: Changelog Export (Markdown) nach Version
             // z.B. https://raw.githubusercontent.com/brave/browser-laptop/master/CHANGELOG.md

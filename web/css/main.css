@@ -6,6 +6,9 @@ label.control-label {
 div#body > table#changeTable {
     width: 100%;
 }
+div#body > table#changeTable td {
+    line-height: 28px;
+}
 
 div#body > table#changeTable td.no-results {
     text-align: center;
