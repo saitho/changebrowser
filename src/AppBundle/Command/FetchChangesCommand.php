@@ -93,6 +93,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
 			$change->setDate(new \DateTime($date));
 			$change->setExternalId($externalId);
 			$change->setProject($project);
+			$change->setVersion('0');
 			
 			$allowedTypes = EnumChangeTypeType::$values;
 			foreach($allowedTypes AS $allowedType) {
@@ -107,7 +108,6 @@ class FetchChangesCommand extends ContainerAwareCommand {
 			
 			if(!$changeRepo->findBy(['project' => $project, 'externalId' => $externalId])) {
 				$this->entityManager->persist($change);
-				$this->entityManager->flush();
 				$contents = $source->getChangeContent($project, $change->getExternalId());
 				foreach($contents AS $content) {
 					$changeContent = new ChangeContent();

@@ -31,7 +31,14 @@ class Change extends AbstractEntity {
 	 * @ORM\ManyToOne(targetEntity="Project", inversedBy="changes")
 	 */
 	private $project;
-		
+	
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(type="string")
+	 */
+	private $version;
+	
 	/**
 	 * @var string
 	 *
@@ -130,7 +137,21 @@ class Change extends AbstractEntity {
 	public function getTitle() {
 		return $this->title;
 	}
-		
+	
+	/**
+	 * @param string $version
+	 */
+	public function setVersion($version) {
+		$this->version = $version;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getVersion() {
+		return $this->version;
+	}
+	
 	/**
 	 * @return \AppBundle\Entity\Project
 	 */
