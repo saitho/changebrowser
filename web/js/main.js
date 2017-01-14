@@ -13,7 +13,7 @@ function loadProject(projectId) {
                 var span = null;
                 if(change.type) {
                     span = document.createElement('span');
-                    span.className = 'label label-info';
+                    span.className = 'label '+change.CSSClassForType;
                     var text = document.createTextNode(change.type);
                     span.appendChild(text);
                     titleArray.push(span);
@@ -32,6 +32,13 @@ function loadProject(projectId) {
         }
     });
 }
+
+$(document).ready(function() {
+
+    // Enable tooltips
+    $('[data-toggle="tooltip"]').tooltip();
+
+});
 
 (function ($) {
     // Handling the modal confirmation message.

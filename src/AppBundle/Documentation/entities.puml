@@ -47,6 +47,7 @@ namespace AppBundle\Entity {
         - author : string
         + getTitle() : string
         + getType() : string
+        + getCSSClassForType() : string
         + getAuthor() : string
         + getExternalId() : string
         + setTitle(title : string)

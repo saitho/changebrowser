@@ -41,6 +41,7 @@ class AjaxController extends Controller {
 				'date' => $change->getDate(),
 				'title' => $change->getTitle(),
 				'type' => $change->getType(),
+				'CSSClassForType' => $change->getCSSClassForType(),
 			];
 		}
 		$response = ['status' => true, 'changes' => $changes];

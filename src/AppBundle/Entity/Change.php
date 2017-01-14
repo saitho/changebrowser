@@ -40,6 +40,26 @@ class Change extends AbstractEntity {
 	private $type;
 	
 	/**
+	 * @return string
+	 */
+	public function getCSSClassForType() {
+		switch($this->type) {
+			case 'cleanup':
+				return 'btn-warning';
+				break;
+			case 'bugfix':
+				return 'btn-danger';
+				break;
+			case 'task':
+				return 'btn-default';
+				break;
+			default:
+				return 'btn-info';
+				break;
+		}
+	}
+	
+	/**
 	 * @var string
 	 *
 	 * @ORM\Column(type="string")
