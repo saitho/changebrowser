@@ -1,0 +1,11 @@
+<h4>{{ 'label.source'|trans }}: {{ project.source.id }}</h4>
+<p>
+    {% for sourceOption in project.source.options %}
+        {{ 'label.source_$1.$2'|replace({'$1': project.source.id, '$2': sourceOption})|trans }}:
+        {% if project.options.source[sourceOption] is defined %}
+            {{ project.options.source[sourceOption] }}
+        {% else %}
+            -
+        {% endif %}<br />
+    {% endfor %}
+</p>

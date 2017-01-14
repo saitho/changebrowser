@@ -12,6 +12,55 @@ function toggleDetails(changeId) {
     }
 }
 
+var currently_loaded_project = null;
+function currentProjectDetails(keepModalHidden) {
+    $.ajax({
+        method: 'POST',
+        url: paths.ajax_project_details,
+        data: { project_id: currently_loaded_project },
+        dataType: 'json'
+    }).done(function( response ) {
+        if(response.status) {
+            var modalConfig = {
+                header: response.modal.header,
+                content: response.modal.content,
+                footer: {
+                    showSaveButton: true
+                }
+            };
+            var modalId = 'myModal';
+            createModal(modalId, modalConfig);
+            if(!keepModalHidden) {
+                $('div#'+modalId).modal('show');
+            }
+        }
+    });
+}
+
+function addProject(keepModalHidden) {
+    $.ajax({
+        method: 'GET',
+        url: paths.ajax_project_add,
+        data: {  },
+        dataType: 'json'
+    }).done(function( response ) {
+        if(response.status) {
+            var modalConfig = {
+                header: response.modal.header,
+                content: response.modal.content,
+                footer: {
+                    showSaveButton: true
+                }
+            };
+            var modalId = 'myModal';
+            createModal(modalId, modalConfig);
+            if(!keepModalHidden) {
+                $('div#'+modalId).modal('show');
+            }
+        }
+    });
+}
+
 function loadProject(projectId) {
     var $body = $('body div#body');
     $.ajax({
@@ -21,6 +70,7 @@ function loadProject(projectId) {
         dataType: 'json'
     }).done(function( response ) {
         if(response.status) {
+            currently_loaded_project = projectId;
             var changeData = [];
             $(response.changes).each(function(key, change) {
                 var span = null;
@@ -44,7 +94,7 @@ function loadProject(projectId) {
                         span, change.title, change.author, new Date(change.date.date).toLocaleString(), detailLink
                     ],
                     additionalFullWidthRow: {
-                        text: 'Ich war versteckt...',
+                        html: change.detailHTML,
                         id: change.id
                     }
                 });
@@ -52,9 +102,15 @@ function loadProject(projectId) {
 
             var table = createTableObject(
                 'changeTable',
-                ['', translations.label.title, translations.label.author, translations.label.date, ''],
+                [
+                    '',
+                    Translator.trans('label.title'),
+                    Translator.trans('label.author'),
+                    Translator.trans('label.date'),
+                    ''
+                ],
                 changeData,
-                translations.no_entries_found
+                Translator.trans('no_entries_found')
         );
             $body.html(table);
         }
@@ -62,30 +118,6 @@ function loadProject(projectId) {
 }
 
 $(document).ready(function() {
-
     // Enable tooltips
     $('[data-toggle="tooltip"]').tooltip();
-
 });
-
-(function ($) {
-    // Handling the modal confirmation message.
-    $(document).on('submit', 'form[data-confirmation]', function (event) {
-        var $form = $(this),
-            $confirm = $('#confirmationModal');
-
-        if ($confirm.data('result') !== 'yes') {
-            //cancel submit event
-            event.preventDefault();
-
-            $confirm
-                .off('click', '#btnYes')
-                .on('click', '#btnYes', function () {
-                    $confirm.data('result', 'yes');
-                    $form.find('input[type="submit"]').attr('disabled', 'disabled');
-                    $form.submit();
-                })
-                .modal('show');
-        }
-    });
-})(window.jQuery);

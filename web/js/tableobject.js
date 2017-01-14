@@ -72,8 +72,15 @@ function createTableObject(tableId, headArray, bodyArray, noResultsMessage) {
                 tr.style.display = 'none';
                 var td = document.createElement('td');
                 td.colSpan = headArray.length;
-                var text = document.createTextNode(element.additionalFullWidthRow.text);
-                td.appendChild(text);
+                if(element.additionalFullWidthRow.html) {
+                    var div = document.createElement('div');
+                    div.innerHTML = element.additionalFullWidthRow.html;
+                    var elementsFromHtml = div.firstChild.cloneNode(true);
+                    td.appendChild(elementsFromHtml);
+                }else{
+                    var text = document.createTextNode(element.additionalFullWidthRow.text);
+                    td.appendChild(text);
+                }
                 tr.appendChild(td);
                 table.appendChild(tr);
             }

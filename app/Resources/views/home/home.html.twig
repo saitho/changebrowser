@@ -7,7 +7,7 @@
         <label for="projectList" class="control-label col-xs-1">Project</label>
         <div class="col-xs-11 input-group">
             <span class="input-group-btn">
-                <a class="btn btn-primary" href="#" data-toggle="tooltip" data-placement="top" title="{{ 'action.create_project'|trans }}">
+                <a class="btn btn-primary" href="javascript:addProject();" data-toggle="tooltip" data-placement="top" title="{{ 'action.create_project'|trans }}">
                     <i class="fa fa-plus"></i>
                 </a>
             </span>
@@ -17,7 +17,7 @@
                 {% endfor %}
             </select>
             <span class="input-group-btn">
-                <a class="btn btn-default" href="#" data-toggle="tooltip" data-placement="top" title="{{ 'action.edit_project'|trans }}">
+                <a class="btn btn-default" href="javascript:currentProjectDetails();" data-toggle="tooltip" data-placement="top" title="{{ 'action.edit_project'|trans }}">
                     <i class="fa fa-pencil"></i>
                 </a>
             </span>
@@ -25,28 +25,23 @@
     </div>
     <hr />
     <div id="body">
-        Loading data...
+        {{ 'home_loading'|trans }}
     </div>
+
+    <div id="myModal" class="modal fade" tabindex="-1" role="dialog"></div>
 {% endblock %}
 
 {% block javascripts %}
     <script type="text/javascript">
         var paths = {
-            'ajax_loadProject' : '{{path("ajax_loadProject")}}'
+            'ajax_loadProject' : '{{path("ajax_loadProject")}}',
+            'ajax_project_details' : '{{path("ajax_project_details")}}',
+            'ajax_project_add' : '{{path("ajax_project_add")}}'
         };
-        var translations = {
-            // ...
-            'no_entries_found' : '{{ 'no_entries_found' | trans }}',
-            'label': {
-                'date' : '{{ 'label.date' | trans }}',
-                'author' : '{{ 'label.author' | trans }}',
-                'title' : '{{ 'label.title' | trans }}'
-            }
-            // ...
-        }
     </script>
     {{ parent() }}
     <script src="{{ asset('js/tableobject.js') }}"></script>
+    <script src="{{ asset('js/modal.js') }}"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             // todo: Abrufen der Versionen!

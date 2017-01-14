@@ -153,21 +153,57 @@
         <source>title.project_new</source>
         <target>Projekt anlegen</target>
       </trans-unit>
-      <trans-unit id="label.source">
+      <trans-unit id="421336c7ef0694032ea5827d0878a47c" resname="label.source">
         <source>label.source</source>
         <target>Quelle</target>
       </trans-unit>
-      <trans-unit id="label.source_Github.accessToken">
+      <trans-unit id="076ded3bf15349cea56c64b743ccbee1" resname="label.source_Github.accessToken">
         <source>label.source_Github.accessToken</source>
         <target>GitHub Access Token</target>
       </trans-unit>
-      <trans-unit id="label.source_Github.vendor">
+      <trans-unit id="9ffd4e7f08e266ed265d2da43d1c90f1" resname="label.source_Github.vendor">
         <source>label.source_Github.vendor</source>
         <target>GitHub Vendor-Name</target>
       </trans-unit>
-      <trans-unit id="label.source_Github.repository">
+      <trans-unit id="d1a9257eb07a540058430a3cf1fc4af8" resname="label.source_Github.repository">
         <source>label.source_Github.repository</source>
         <target>GitHub Repository-Name</target>
+      </trans-unit>
+      <trans-unit id="label.source_Phabricator.conduitApiToken" resname="label.source_Phabricator.conduitApiToken">
+        <source>label.source_Phabricator.conduitApiToken</source>
+        <target>Phabricator API-Token</target>
+      </trans-unit>
+      <trans-unit id="label.source_Phabricator.repository" resname="label.source_Phabricator.repository">
+        <source>label.source_Phabricator.repository</source>
+        <target>Phabricator Repository</target>
+      </trans-unit>
+      <trans-unit id="label.source_Phabricator.phabricatorURL" resname="label.source_Phabricator.phabricatorURL">
+        <source>label.source_Phabricator.phabricatorURL</source>
+        <target>Phabricator URL</target>
+      </trans-unit>
+      <trans-unit id="d3c22be2fd84fa53409fd8c9679c5b19" resname="title.changes_list">
+        <source>title.changes_list</source>
+        <target>__title.changes_list</target>
+      </trans-unit>
+      <trans-unit id="ecff238df6bef2fb0d887c0d7cc54c45" resname="label.author">
+        <source>label.author</source>
+        <target>Autor</target>
+      </trans-unit>
+      <trans-unit id="9efb0adb15e7f5c6217f1a79bd50b394" resname="label.date">
+        <source>label.date</source>
+        <target>Datum</target>
+      </trans-unit>
+      <trans-unit id="217cbcecb74db4490b474ded0043112d" resname="action.export">
+        <source>action.export</source>
+        <target>Exportieren</target>
+      </trans-unit>
+      <trans-unit id="159a98c410d50cbe9afa5d0d97c94a27" resname="action.show_changes">
+        <source>action.show_changes</source>
+        <target>Änderungen zeigen</target>
+      </trans-unit>
+      <trans-unit id="home_loading" resname="home_loading">
+        <source>home_loading</source>
+        <target>Daten werden geladen...</target>
       </trans-unit>
     </body>
   </file>

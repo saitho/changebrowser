@@ -53,11 +53,6 @@
                                     </li>
 
                                     {% if is_granted('ROLE_ADMIN') %}
-                                        <li>
-                                            <a href="{{ path('project_index') }}">
-                                                <i class="fa fa-list-alt" aria-hidden="true"></i> {{ 'menu.project_list'|trans }}
-                                            </a>
-                                        </li>
                                     {% endif %}
                                 {% endblock %}
 
