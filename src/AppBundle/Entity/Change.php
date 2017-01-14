@@ -52,16 +52,16 @@ class Change extends AbstractEntity {
 	public function getCSSClassForType() {
 		switch($this->type) {
 			case 'cleanup':
-				return 'btn-warning';
+				return 'label-warning';
 				break;
 			case 'bugfix':
-				return 'btn-danger';
+				return 'label-danger';
 				break;
 			case 'task':
-				return 'btn-default';
+				return 'label-default';
 				break;
 			default:
-				return 'btn-info';
+				return 'label-info';
 				break;
 		}
 	}

@@ -27,6 +27,7 @@ class Project extends AbstractEntity {
 	/**
 	 * One Project has Many Changes.
 	 * @ORM\OneToMany(targetEntity="Change", mappedBy="project")
+	 * @ORM\OrderBy({"date" = "DESC"})
 	 */
 	private $changes;
 	
