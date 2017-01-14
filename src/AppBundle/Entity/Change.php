@@ -52,16 +52,16 @@ class Change extends AbstractEntity {
 	public function getCSSClassForType() {
 		switch($this->type) {
 			case 'cleanup':
-				return 'label-warning';
+				return 'warning';
 				break;
 			case 'bugfix':
-				return 'label-danger';
+				return 'danger';
 				break;
 			case 'task':
-				return 'label-default';
+				return 'default';
 				break;
 			default:
-				return 'label-info';
+				return 'info';
 				break;
 		}
 	}
@@ -206,5 +206,12 @@ class Change extends AbstractEntity {
 	 */
 	public function getAuthor() {
 		return $this->author;
+	}
+	
+	/**
+	 * @return \Doctrine\Common\Collections\ArrayCollection
+	 */
+	public function getChangeContents() {
+		return $this->changeContents;
 	}
 }

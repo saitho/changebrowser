@@ -2,6 +2,11 @@
 
 {% block body_id 'diff' %}
 
+{% block header %}
+{% endblock %}
+{% block footer %}
+{% endblock %}
+
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/parsediff.css') }}">
@@ -10,49 +15,21 @@
 {% block body %}
     <h3>{{ content.filename }}</h3>
     <h4>{{ content.status }} in change <a href="">{{ content.change.title }}</a></h4>
-    <table class="parseDiff">
+    <table class="table-responsive parseDiff">
         {% if newLines_left|length > newLines_right|length %}
-            {% for line, fileLine in newLines_left %}
-                {% if line in newLines_spacers %}
-                    <tr>
-                        <td class="line-number line-number-left">...</td>
-                        <td class="line-code line-type-spacer">...</td>
-                        <td class="line-number line-number-right">...</td>
-                        <td class="line-code line-type-spacer">...</td>
-                    </tr>
-                {% endif %}
-                <tr>
-                    <td class="line-number line-number-left">{{ line }}</td>
-                    <td class="line-code line-type-{{ fileLine.type }}">{{ fileLine.content }}</td>
-                    <td class="line-number line-number-right">{{ line }}</td>
-                    {% if newLines_right[line] is defined %}
-                        <td class="line-code line-type-{{ newLines_right[line].type }}">{{ newLines_right[line].content }}</td>
-                    {% else %}
-                        <td class="line-code line-type-neutral"></td>
-                    {% endif %}
-                </tr>
-            {% endfor %}
+            {{ include(':home:_diffRows.html.twig', {
+                left: newLines_left,
+                right: newLines_right,
+                spacers: newLines_spacers,
+                loopSource: newLines_left,
+            }, with_context = false) }}
         {% else %}
-            {% for line, fileLine in newLines_right %}
-                {% if line in newLines_spacers %}
-                    <tr>
-                        <td class="line-number line-number-left">...</td>
-                        <td class="line-code line-type-spacer">...</td>
-                        <td class="line-number line-number-right">...</td>
-                        <td class="line-code line-type-spacer">...</td>
-                    </tr>
-                {% endif %}
-                <tr>
-                    <td class="line-number line-number-left">{{ line }}</td>
-                    {% if newLines_left[line] is defined %}
-                        <td class="line-code line-type-{{ newLines_left[line].type }}">{{ newLines_left[line].content }}</td>
-                    {% else %}
-                        <td class="line-code line-type-neutral"></td>
-                    {% endif %}
-                    <td class="line-number line-number-right">{{ line }}</td>
-                    <td class="line-code line-type-{{ fileLine.type }}">{{ fileLine.content }}</td>
-                </tr>
-            {% endfor %}
+            {{ include(':home:_diffRows.html.twig', {
+                left: newLines_left,
+                right: newLines_right,
+                spacers: newLines_spacers,
+                loopSource: newLines_right,
+            }, with_context = false) }}
         {% endif %}
     </table>
 {% endblock %}

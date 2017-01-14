@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Change;
+use AppBundle\Entity\ChangeContent;
 use AppBundle\Entity\Project;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -35,12 +36,12 @@ class ChangeController extends Controller {
 	}
 	/**
 	 * @Route("/list", name="ajax_loadProject")
-	 * @Method("POST")
+	 * @Method("GET")
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
 	public function showForProjectAction(Request $request) {
 		$response = ['status' => false, 'message' => ''];
-		$project_id = $request->request->get('project_id');
+		$project_id = $request->get('project_id');
 		
 		$project = null;
 		try {
@@ -50,9 +51,27 @@ class ChangeController extends Controller {
 			$response = ['status' => false, 'message' => $e->getMessage()];
 		}
 		if($response['status']) {
+			$translator = $this->get('translator');
 			$changes = [];
 			/** @var Change $change */
 			foreach($project->getChanges() AS $change) {
+				$changeContents = [];
+				/** @var ChangeContent $content */
+				foreach($change->getChangeContents() AS $content) {
+					$std = new \stdClass();
+					$std->columns = [
+						$content->getFilename(),
+						['content' => $content->getStatus(), 'class' => 'text-center '.$content->getCssStatus()],
+						['content' => $content->getAdditions(), 'class' => 'text-center'],
+						['content' => $content->getChanges(), 'class' => 'text-center'],
+						['content' => $content->getDeletions(), 'class' => 'text-center'],
+						[
+							'content' => '<a target="_blank" href="'.$this->generateUrl('ajax_changecontent_diff', ['id' => $content->getId()]).'" class="btn btn-primary btn-sm">'.$translator->trans('label.details').'</a>',
+							'class' => 'text-right'
+						],
+					];
+					$changeContents[] = $std;
+				}
 				$changes[] = [
 					'id' => $change->getId(),
 					'author' => $change->getAuthor(),
@@ -60,7 +79,35 @@ class ChangeController extends Controller {
 					'title' => $change->getTitle(),
 					'type' => $change->getType(),
 					'CSSClassForType' => $change->getCSSClassForType(),
-					'detailHTML' => 'Details...'
+					'changeContents_head' => [
+						$translator->trans('label.filename'),
+						[
+							'content' => $translator->trans('label.status'),
+							'width' => '10%',
+							'class' => 'text-center'
+						],
+						[
+							'content' => $translator->trans('label.changecontent.additions'),
+							'width' => '5%',
+							'class' => 'text-center'
+						],
+						[
+							'content' => $translator->trans('label.changecontent.deletions'),
+							'width' => '5%',
+							'class' => 'text-center'
+						],
+						[
+							'content' => $translator->trans('label.changecontent.changes'),
+							'width' => '5%',
+							'class' => 'text-center'
+						],
+						[
+							'content' => $translator->trans('label.actions'),
+							'width' => '20%',
+							'class' => 'text-right'
+						]
+					],
+					'changeContents_content' => $changeContents
 				];
 			}
 			$response['changes'] = $changes;

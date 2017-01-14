@@ -1,0 +1,23 @@
+{% for line, fileLine in loopSource %}
+    {% if line in spacers %}
+        <tr>
+            <td class="line-number line-number-left">...</td>
+            <td class="line-code line-type-spacer">...</td>
+            <td class="line-number line-number-right">...</td>
+            <td class="line-code line-type-spacer">...</td>
+        </tr>
+    {% endif %}
+    <tr>
+        <td class="line-number line-number-left">{{ line }}</td>
+        {% if left[line] is defined %}
+            <td class="line-code line-type-{{ left[line].type }}">{{ left[line].content }}</td>
+        {% else %}
+            <td class="line-code line-type-neutral"></td>
+        {% endif %}
+        {% if right[line] is defined %}
+            <td class="line-code line-type-{{ right[line].type }}">{{ right[line].content }}</td>
+        {% else %}
+            <td class="line-code line-type-neutral"></td>
+        {% endif %}
+    </tr>
+{% endfor %}

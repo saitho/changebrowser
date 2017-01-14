@@ -1,14 +1,33 @@
-function createTableObject(tableId, headArray, bodyArray, noResultsMessage) {
+function createTableObject(tableOptions, headArray, bodyArray, noResultsMessage) {
     var $this = this;
+    var tableId = tableOptions.id;
+    if(!tableId) {
+        return;
+    }
+    var tableClass = tableOptions.class;
     $this.createHead = function(table, array, bodyArray) {
+        var thead = document.createElement('thead');
         var tr = document.createElement('tr');
         $(array).each(function(key, name) {
-            var titleText = document.createTextNode(name);
-            var titleTd = document.createElement('th');
-            titleTd.appendChild(titleText);
-            tr.appendChild(titleTd);
+            var titleTh = document.createElement('th');
+            var thValue = name;
+            if(name.constructor === Object) {
+                thValue = name.content;
+                if(name.id) {
+                    titleTh.id = name.id;
+                }
+                if(name.class) {
+                    titleTh.className = name.class;
+                }
+                if(name.width) {
+                    titleTh.width = name.width;
+                }
+            }
+            titleTh.innerText = thValue;
+            tr.appendChild(titleTh);
         });
-        table.appendChild(tr);
+        thead.appendChild(tr);
+        table.appendChild(thead);
     };
 
     /**
@@ -27,11 +46,21 @@ function createTableObject(tableId, headArray, bodyArray, noResultsMessage) {
         if(isElement(value)) {
             td.appendChild(value);
         }else{
-            var text = document.createTextNode(value);
-            td.appendChild(text);
+            var tdValue = value;
+            if(value.constructor === Object) {
+                tdValue = value.content;
+                if(value.id) {
+                    td.id = value.id;
+                }
+                if(value.class) {
+                    td.className = value.class;
+                }
+            }
+            td.innerHTML = tdValue;
         }
     };
     $this.createBody = function(table, headArray, bodyArray, noResultsMessage) {
+        var tbody = document.createElement('tbody');
         if(bodyArray.length === 0) {
             if(noResultsMessage !== null) {
                 var tr = document.createElement('tr');
@@ -51,18 +80,12 @@ function createTableObject(tableId, headArray, bodyArray, noResultsMessage) {
                 var td = document.createElement('td');
                 if(v == null) {
                     tr.appendChild(td);
-                }else if(v.constructor === Array) {
-                    // Concatinate values...
-                    $(v).each(function(aK, aV) {
-                        $this.addValueToTd(td, aV);
-                    });
-                    tr.appendChild(td);
-                }else{
+                }else {
                     $this.addValueToTd(td, v);
                     tr.appendChild(td);
                 }
             });
-            table.appendChild(tr);
+            tbody.appendChild(tr);
             if(element.additionalFullWidthRow != null) {
                 tr = document.createElement('tr');
                 if(!element.additionalFullWidthRow.id) {
@@ -73,22 +96,28 @@ function createTableObject(tableId, headArray, bodyArray, noResultsMessage) {
                 var td = document.createElement('td');
                 td.colSpan = headArray.length;
                 if(element.additionalFullWidthRow.html) {
-                    var div = document.createElement('div');
-                    div.innerHTML = element.additionalFullWidthRow.html;
-                    var elementsFromHtml = div.firstChild.cloneNode(true);
+                    if($this.isElement(element.additionalFullWidthRow.html)) {
+                        elementsFromHtml = element.additionalFullWidthRow.html;
+                    }else{
+                        var div = document.createElement('div');
+                        div.innerHTML = element.additionalFullWidthRow.html;
+                        var elementsFromHtml = div.firstChild.cloneNode(true);
+                    }
                     td.appendChild(elementsFromHtml);
                 }else{
                     var text = document.createTextNode(element.additionalFullWidthRow.text);
                     td.appendChild(text);
                 }
                 tr.appendChild(td);
-                table.appendChild(tr);
+                tbody.appendChild(tr);
             }
         });
+        table.appendChild(tbody);
     };
 
     var table = document.createElement('table');
     table.id = tableId;
+    table.className = tableClass;
     $this.createHead(table, headArray, bodyArray);
     $this.createBody(table, headArray, bodyArray, noResultsMessage);
     return table;

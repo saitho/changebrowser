@@ -12,10 +12,12 @@ function toggleDetails(changeId) {
     }
 }
 
+var modalId = 'universalModal';
+
 var currently_loaded_project = null;
 function currentProjectDetails(keepModalHidden) {
     $.ajax({
-        method: 'POST',
+        method: 'GET',
         url: paths.ajax_project_details,
         data: { project_id: currently_loaded_project },
         dataType: 'json'
@@ -28,7 +30,6 @@ function currentProjectDetails(keepModalHidden) {
                     showSaveButton: true
                 }
             };
-            var modalId = 'myModal';
             createModal(modalId, modalConfig);
             if(!keepModalHidden) {
                 $('div#'+modalId).modal('show');
@@ -37,10 +38,24 @@ function currentProjectDetails(keepModalHidden) {
     });
 }
 
+function submitForm(url, form) {
+    console.log(url);
+    console.log(form);
+    $.ajax({
+        method: form.attr('method'),
+        url: url,
+        data: { formData: form.serialize() },
+        dataType: 'json'
+    }).done(function( response ) {
+
+    });
+}
+
 function addProject(keepModalHidden) {
+    var url = paths.ajax_project_add;
     $.ajax({
         method: 'GET',
-        url: paths.ajax_project_add,
+        url: url,
         data: {  },
         dataType: 'json'
     }).done(function( response ) {
@@ -52,11 +67,17 @@ function addProject(keepModalHidden) {
                     showSaveButton: true
                 }
             };
-            var modalId = 'myModal';
             createModal(modalId, modalConfig);
+            var $modal = $('div#'+modalId);
             if(!keepModalHidden) {
-                $('div#'+modalId).modal('show');
+                $modal.modal('show');
             }
+
+            var saveButton = $modal.find('div.modal-footer > button#saveButton');
+            saveButton.click(function() {
+                console.log('clicked save button');
+                submitForm(url, $modal.find('form[name=projectForm]'));
+            });
         }
     });
 }
@@ -64,7 +85,7 @@ function addProject(keepModalHidden) {
 function loadProject(projectId) {
     var $body = $('body div#body');
     $.ajax({
-        method: 'POST',
+        method: 'GET',
         url: paths.ajax_loadProject,
         data: { project_id: projectId },
         dataType: 'json'
@@ -76,7 +97,7 @@ function loadProject(projectId) {
                 var span = null;
                 if(change.type) {
                     span = document.createElement('span');
-                    span.className = 'label '+change.CSSClassForType;
+                    span.className = 'label label-'+change.CSSClassForType;
                     var text = document.createTextNode(change.type);
                     span.appendChild(text);
                 }
@@ -89,19 +110,26 @@ function loadProject(projectId) {
                 detailLink.setAttribute('href', 'javascript:toggleDetails(\''+change.id+'\');');
                 detailLink.className = 'pull-right btn btn-xs btn-primary';
 
+                var subTable = createTableObject(
+                    {id: 'subtable-'+change.id, class: 'table table-responsive table-bordered changecontent-table'},
+                    change.changeContents_head,
+                    change.changeContents_content
+                );
+
+
                 changeData.push({
                     columns: [
                         span, change.title, change.author, new Date(change.date.date).toLocaleString(), detailLink
                     ],
                     additionalFullWidthRow: {
-                        html: change.detailHTML,
+                        html: subTable,
                         id: change.id
                     }
                 });
             });
 
             var table = createTableObject(
-                'changeTable',
+                {id: 'changeTable'},
                 [
                     '',
                     Translator.trans('label.title'),

@@ -152,4 +152,27 @@ class ChangeContent extends AbstractEntity {
 	public function setChange(\AppBundle\Entity\Change $change) {
 		$this->change = $change;
 	}
+	
+	/**
+	 * @return string
+	 */
+	public function getCssStatus() {
+		switch($this->status) {
+			case 'renamed':
+				return 'info';
+				break;
+			case 'added':
+				return 'success';
+				break;
+			case 'removed':
+				return 'danger';
+				break;
+			case 'modified':
+				return 'warning';
+				break;
+			default:
+				return 'default';
+				break;
+		}
+	}
 }

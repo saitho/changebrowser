@@ -205,6 +205,30 @@
         <source>home_loading</source>
         <target>Loading data...</target>
       </trans-unit>
+      <trans-unit id="label.filename">
+        <source>label.filename</source>
+        <target>File name</target>
+      </trans-unit>
+      <trans-unit id="label.status">
+        <source>label.status</source>
+        <target>Status</target>
+      </trans-unit>
+      <trans-unit id="label.changecontent.additions">
+        <source>label.changecontent.additions</source>
+        <target>+</target>
+      </trans-unit>
+      <trans-unit id="label.changecontent.deletions">
+        <source>label.changecontent.deletions</source>
+        <target>-</target>
+      </trans-unit>
+      <trans-unit id="label.changecontent.changes">
+        <source>label.changecontent.changes</source>
+        <target>~</target>
+      </trans-unit>
+      <trans-unit id="label.details">
+        <source>label.details</source>
+        <target>Details</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

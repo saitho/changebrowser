@@ -49,6 +49,7 @@ function createModal(id, modalConfig) {
         if(!hideCloseButton) {
             var closeButton = document.createElement('button');
             closeButton.type = 'button';
+            closeButton.id = 'closeButton';
             closeButton.className = 'btn btn-default';
             closeButton.dataset.dismiss = 'modal';
             var closeButtonText = document.createTextNode('Close');
@@ -59,6 +60,7 @@ function createModal(id, modalConfig) {
         if(showSaveButton) {
             var saveButton = document.createElement('button');
             saveButton.type = 'button';
+            saveButton.id = 'saveButton';
             saveButton.className = 'btn btn-primary';
             var saveButtonText = document.createTextNode('Save changes');
             saveButton.appendChild(saveButtonText);
@@ -73,7 +75,7 @@ function createModal(id, modalConfig) {
 
     // Create dialog
     var dialogDiv = document.createElement('div');
-    dialogDiv.className = 'modal-dialog';
+    dialogDiv.className = 'modal-dialog modal-lg';
     dialogDiv.displayRole = 'document';
 
     // Create content
