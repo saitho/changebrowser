@@ -1,3 +1,17 @@
+function toggleDetails(changeId) {
+    var $targetRow = $('tr.hidden-row-'+changeId);
+    var $togglerIcon = $('i#dropDown-activator-'+changeId);
+    if($targetRow.css('display') === 'none') {
+        $targetRow.show();
+        $togglerIcon.removeClass('fa-angle-down');
+        $togglerIcon.addClass('fa-angle-up');
+    }else{
+        $targetRow.hide();
+        $togglerIcon.removeClass('fa-angle-up');
+        $togglerIcon.addClass('fa-angle-down');
+    }
+}
+
 function loadProject(projectId) {
     var $body = $('body div#body');
     $.ajax({
@@ -9,22 +23,36 @@ function loadProject(projectId) {
         if(response.status) {
             var changeData = [];
             $(response.changes).each(function(key, change) {
-                var titleArray = [];
                 var span = null;
                 if(change.type) {
                     span = document.createElement('span');
                     span.className = 'label '+change.CSSClassForType;
                     var text = document.createTextNode(change.type);
                     span.appendChild(text);
-                    titleArray.push(span);
                 }
-                titleArray.push(change.title);
-                changeData.push([span, change.title, change.author, new Date(change.date.date).toLocaleString()]);
+
+                var detailLink = document.createElement('a');
+                var iElement = document.createElement('i');
+                iElement.id = 'dropDown-activator-'+change.id;
+                iElement.className = 'fa fa-angle-down';
+                detailLink.appendChild(iElement);
+                detailLink.setAttribute('href', 'javascript:toggleDetails(\''+change.id+'\');');
+                detailLink.className = 'pull-right btn btn-xs btn-primary';
+
+                changeData.push({
+                    columns: [
+                        span, change.title, change.author, new Date(change.date.date).toLocaleString(), detailLink
+                    ],
+                    additionalFullWidthRow: {
+                        text: 'Ich war versteckt...',
+                        id: change.id
+                    }
+                });
             });
 
             var table = createTableObject(
                 'changeTable',
-                ['', translations.label.title, translations.label.author, translations.label.date],
+                ['', translations.label.title, translations.label.author, translations.label.date, ''],
                 changeData,
                 translations.no_entries_found
         );

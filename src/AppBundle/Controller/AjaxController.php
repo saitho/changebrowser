@@ -37,6 +37,7 @@ class AjaxController extends Controller {
 		/** @var Change $change */
 		foreach($project->getChanges() AS $change) {
 			$changes[] = [
+				'id' => $change->getId(),
 				'author' => $change->getAuthor(),
 				'date' => $change->getDate(),
 				'title' => $change->getTitle(),

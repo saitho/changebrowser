@@ -47,9 +47,9 @@ function createTableObject(tableId, headArray, bodyArray, noResultsMessage) {
         }
         $(bodyArray).each(function(key, element) {
             var tr = document.createElement('tr');
-            $(element).each(function(k, v) {
+            $(element.columns).each(function(k, v) {
                 var td = document.createElement('td');
-                if(v === null) {
+                if(v == null) {
                     tr.appendChild(td);
                 }else if(v.constructor === Array) {
                     // Concatinate values...
@@ -63,6 +63,20 @@ function createTableObject(tableId, headArray, bodyArray, noResultsMessage) {
                 }
             });
             table.appendChild(tr);
+            if(element.additionalFullWidthRow != null) {
+                tr = document.createElement('tr');
+                if(!element.additionalFullWidthRow.id) {
+                    element.additionalFullWidthRow.id = '';
+                }
+                tr.className = 'hidden-row hidden-row-'+element.additionalFullWidthRow.id;
+                tr.style.display = 'none';
+                var td = document.createElement('td');
+                td.colSpan = headArray.length;
+                var text = document.createTextNode(element.additionalFullWidthRow.text);
+                td.appendChild(text);
+                tr.appendChild(td);
+                table.appendChild(tr);
+            }
         });
     };
 
