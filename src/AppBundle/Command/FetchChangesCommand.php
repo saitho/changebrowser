@@ -81,34 +81,44 @@ class FetchChangesCommand extends ContainerAwareCommand {
 		/** @var AbstractSource $source */
 		$source = $sourceRepo->find($project->getSource());
 		$source->setProject($project);
-				
+		$changeRepo = $this->entityManager->getRepository(Change::class);
+	
+		$version = '';
 		if($this->complete) {
-			$changeRepo = $this->entityManager->getRepository(Change::class);
 			$earliestChange = $changeRepo->findOneBy(['project' => $project], ['date' => 'ASC']);
-			$startId = $earliestChange->getExternalId();
-		}else{
-			$startId = $source->getFirstChangeExternalId();
+			if(!empty($earliestChange)) {
+				$startId = $earliestChange->getExternalId();
+				$version = $earliestChange->getVersion();
+			}
 		}
 		
-		$this->fetchChangesByParents($source, $output, [$startId]);
+		if(!$this->complete || empty($startId)) {
+			$startId = $source->getFirstChangeExternalId();
+			$firstChangeLocal = $changeRepo->findOneBy(['externalId' => $startId]);
+			if(!empty($firstChangeLocal)) {
+				$version = $firstChangeLocal->getVersion();
+			}
+		}
+		
+		$this->fetchChangesByParents($source, $output, [$startId], $version);
 	}
 	
-	private function fetchChangesByParents(AbstractSource $source, OutputInterface $output, $parents) {
+	private function fetchChangesByParents(AbstractSource $source, OutputInterface $output, $parents, $version='') {
     	if(empty($parents)) {
     		return;
 		}
     	$newParents = [];
 		foreach($parents AS $externalId) {
-			$thisParents = $this->loadDataForExternalId($source, $output, $externalId);
+			$thisParents = $this->loadDataForExternalId($source, $output, $externalId, $version);
 			$newParents = array_merge($newParents, $thisParents);
 		}
-		$this->fetchChangesByParents($source, $output, $newParents);
+		$this->fetchChangesByParents($source, $output, $newParents, $version);
 	}
 		
-	private function loadDataForExternalId(AbstractSource $source, OutputInterface $output, $externalId) {
+	private function loadDataForExternalId(AbstractSource $source, OutputInterface $output, $externalId, &$_version='') {
 		$project = $source->getProject();
 		$newEntry = false;
-		$changeDetails = $source->getChangeDetails($externalId);
+		$changeDetails = $source->getChangeDetails($externalId, $_version);
 		$changeRepo = $this->entityManager->getRepository(Change::class);
 				
 		// ['id' => $externalId, 'title' => $title, 'author' => $author, 'date' => $date, 'version' => $version] = $changeDetails['change'];
@@ -117,9 +127,10 @@ class FetchChangesCommand extends ContainerAwareCommand {
 		$author = $changeDetails['change']['author'];
 		$date = $changeDetails['change']['date'];
 		$version = $changeDetails['change']['version'];
+		$_version = $version;
 		
 		// only get first line to avoid very long commit messages (e.g. TYPO3 CMS)
-		$title = strstr($title, "\n", true);
+		$title = strstr($title."\n", "\n", true);
 		
 		$change = $changeRepo->findOneBy(['project' => $project, 'externalId' => $externalId]);
 		if(!$change) {

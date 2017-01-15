@@ -39,7 +39,7 @@ abstract class AbstractSource {
 	
 	abstract public function create();
 	abstract public function getFirstChangeExternalId() : string;
-	abstract public function getChangeDetails($changeLogId) : array;
+	abstract public function getChangeDetails($changeLogId, $version='') : array;
 	
 	/**
 	 * @return string

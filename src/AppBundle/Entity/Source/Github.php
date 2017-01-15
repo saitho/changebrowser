@@ -58,15 +58,14 @@ class Github extends AbstractSource {
 		}
 		
 		$url .= '?'.implode('&', $urlParams);
-		
-		$context = stream_context_create([
-			'http'=> [
-				'method'=>"GET",
-				'header'=>"User-Agent: Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Version/4.0.4 Mobile/7B334b Safari/531.21.102011-10-16 20:23:10\r\n" // i.e. An iPad
-			]
-		]);
 		try {
-			$content = file_get_contents($url, false, $context);
+			$curl_handle=curl_init();
+			curl_setopt($curl_handle, CURLOPT_URL, $url);
+			curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
+			curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($curl_handle, CURLOPT_USERAGENT, 'Changelog Browser');
+			$content = curl_exec($curl_handle);
+			curl_close($curl_handle);
 		} catch(\Throwable $e) {
 			$response_header = [];
 			if(empty($http_response_header)) {
@@ -110,9 +109,10 @@ class Github extends AbstractSource {
 	
 	/**
 	 * @param $changeLogId
+	 * @param $version
 	 * @return array
 	 */
-	public function getChangeDetails($changeLogId) : array {
+	public function getChangeDetails($changeLogId, $version='') : array {
 		$array = [];
 		$commit = $this->getFromURL('changelogDetails', ['commitId' => $changeLogId]);
 				
@@ -137,7 +137,6 @@ class Github extends AbstractSource {
 		$date = $commit->commit->committer->date;
 		
 		$versions = $this->getVersions();
-		$version = '';
 		// works under the assumption that $commits is ordered by commit date DESC (newest commit on top)
 		if(array_key_exists($id, $versions)) {
 			$version = $versions[$id];

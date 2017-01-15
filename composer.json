@@ -12,7 +12,9 @@
     },
     "require": {
         "php"                                  : ">=7.0.0",
-        "ext-pdo_sqlite"                       : "*",
+        "ext-pdo_mysql"                        : "*",
+        "ext-openssl"                          : "*",
+        "ext-curl"                             : "*",
         "doctrine/doctrine-bundle"             : "^1.6",
         "doctrine/doctrine-fixtures-bundle"    : "^2.2",
         "doctrine/orm"                         : "^2.5",

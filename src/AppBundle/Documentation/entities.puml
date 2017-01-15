@@ -21,7 +21,7 @@ namespace AppBundle\Entity\Source {
         + setProject(project : Project)
         {abstract} + create()
         {abstract} + getFirstChangeExternalId()
-        {abstract} + getChangeDetails(changeLogId : int) : array
+        {abstract} + getChangeDetails(changeLogId : int, version : string) : array
     }
     class Github extends AbstractSource {
         + changelogUrl : string = 'https://api.github.com/repos/{vendor}/{repository}/commits';
