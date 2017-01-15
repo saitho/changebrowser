@@ -76,7 +76,7 @@ class ChangeController extends Controller {
 					'id' => $change->getId(),
 					'author' => $change->getAuthor(),
 					'date' => $change->getDate(),
-					'title' => $change->getTitle(),
+					'title' => htmlentities($change->getTitle()),
 					'type' => $change->getType(),
 					'CSSClassForType' => $change->getCSSClassForType(),
 					'changeContents_head' => [

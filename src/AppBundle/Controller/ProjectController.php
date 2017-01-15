@@ -46,11 +46,11 @@ class ProjectController extends Controller {
 	}
 	/**
 	 * @Route("/details", name="ajax_project_details")
-	 * @Method("POST")
+	 * @Method("GET")
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
 	public function detailsAction(Request $request) {
-		$project_id = $request->request->get('project_id');
+		$project_id = $request->get('project_id');
 		try {
 			$project = $this->getProjectFromId($project_id);
 			
@@ -71,41 +71,60 @@ class ProjectController extends Controller {
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
 	public function createAction(Request $request) {
-		$project = new Project();
-		// See http://symfony.com/doc/current/book/forms.html#submitting-forms-with-multiple-buttons
-		$form = $this->createForm(ProjectType::class, $project);
-		
-		$form->handleRequest($request);
-		
-		if ($form->isSubmitted()) {
-			if($form->isValid()) {
-				$entityManager = $this->getDoctrine()->getManager();
-				$entityManager->persist($project);
-				$entityManager->flush();
-				$response = ['status' => true];
+		try {
+			$project = new Project();
+			// See http://symfony.com/doc/current/book/forms.html#submitting-forms-with-multiple-buttons
+			$form = $this->createForm(ProjectType::class, $project);
+			
+			if ($request->getMethod() === 'POST') {
+				parse_str($request->request->get('formData'), $formData);
+				$submittedData = $formData['project'];
+				
+				// Set options separately
+				$project->setOptions($submittedData['options']);
+				unset($submittedData['options']);
+				
+				// Check if mandatory fields were posted (should be done by Symfony?!)
+				if(empty($submittedData['title']) || empty($submittedData['source'])) {
+					throw new \Exception('missing_fields');
+				}
+				
+				$form->submit($submittedData);
+				if($form->isValid()) {
+					$entityManager = $this->getDoctrine()->getManager();
+					$entityManager->persist($project);
+					$entityManager->flush();
+					$response = ['status' => true];
+				}else{
+					throw new \Exception('invalid_form');
+				}
+				
 			}else{
-				$response = ['status' => false, 'message' => 'invalid_form'];
+				$additionalFields = [];
+				$sourceRepo = $this->getDoctrine()->getRepository(AbstractSource::class);
+				$sources = $sourceRepo->findAll();
+				foreach($sources AS $source) {
+					$additionalFields[$source->getId()] = $source->getOptions();
+				}
+				$content = $this->get('twig')->render(
+					':project:create.html.twig',
+					[
+						'form' => $form->createView(),
+						'additionalFields' => $additionalFields
+					]
+				);
+				$response = [
+					'status' => true,
+					'modal' => [
+						'header' => $this->get('translator')->trans('title.project_new'),
+						'content' => $content
+					]
+				];
 			}
-		}else{
-			$additionalFields = [];
-			$sourceRepo = $this->getDoctrine()->getRepository(AbstractSource::class);
-			$sources = $sourceRepo->findAll();
-			foreach($sources AS $source) {
-				$additionalFields[$source->getId()] = $source->getOptions();
-			}
-			$content = $this->get('twig')->render(
-				':project:create.html.twig',
-				[
-					'form' => $form->createView(),
-					'additionalFields' => $additionalFields
-				]
-			);
+		} catch(\Throwable $e) {
 			$response = [
-				'status' => true,
-				'modal' => [
-					'header' => $this->get('translator')->trans('title.project_new'),
-					'content' => $content
-				]
+				'status' => false,
+				'message' => $e->getMessage()
 			];
 		}
 		

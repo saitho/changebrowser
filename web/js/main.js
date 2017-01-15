@@ -39,12 +39,10 @@ function currentProjectDetails(keepModalHidden) {
 }
 
 function submitForm(url, form) {
-    console.log(url);
-    console.log(form);
     $.ajax({
-        method: form.attr('method'),
+        method: $(form).attr('method'),
         url: url,
-        data: { formData: form.serialize() },
+        data: { formData: $(form).serialize() },
         dataType: 'json'
     }).done(function( response ) {
 
@@ -64,7 +62,19 @@ function addProject(keepModalHidden) {
                 header: response.modal.header,
                 content: response.modal.content,
                 footer: {
-                    showSaveButton: true
+                    buttons: {
+                        closeButton: {
+                            type: 'close',
+                            class: 'btn btn-default',
+                            text: 'Close'
+                        },
+                        saveButton: {
+                            type: 'submit',
+                            submitForm: 'projectForm',
+                            class: 'btn btn-primary',
+                            text: 'Save changes'
+                        }
+                    }
                 }
             };
             createModal(modalId, modalConfig);
@@ -73,11 +83,16 @@ function addProject(keepModalHidden) {
                 $modal.modal('show');
             }
 
-            var saveButton = $modal.find('div.modal-footer > button#saveButton');
-            saveButton.click(function() {
-                console.log('clicked save button');
-                submitForm(url, $modal.find('form[name=projectForm]'));
+            $('form#projectForm').submit(function( event ) {
+                event.preventDefault();
+                submitForm(url, this);
             });
+
+           // var saveButton = $modal.find('div.modal-footer > button#saveButton');
+           // saveButton.click(function() {
+           //     console.log('clicked save button');
+           //     submitForm(url, $modal.find('form[name=projectForm]'));
+           // });
         }
     });
 }

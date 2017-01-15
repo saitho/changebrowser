@@ -3,9 +3,8 @@
     {{ include('project/_delete_confirmation.html.twig') }}
 {% endif %}
 
-{{ form_start(form, { 'name': 'projectForm', attr: attr|default({}) }) }}
+{{ form_start(form, { 'name': 'projectForm', attr: attr|default({'id': 'projectForm'}) }) }}
     {{ form_widget(form) }}
-
 {% if not ajax_mode %}
     <input type="submit" value="{{ button_label|default('label.create_project'|trans) }}"
            class="{{ button_css|default("btn btn-primary") }}" />

@@ -14,10 +14,12 @@ class ProjectType extends AbstractType {
     public function buildForm(FormBuilderInterface $builder, array $options = array()) {
         $builder
 			->add('title', null, [
+				'required' => true,
 				'attr' => ['autofocus' => true],
 				'label' => 'label.title',
 			])
 			->add('source', EntityType::class, [
+				'required' => true,
 				'class' => 'AppBundle:Source\AbstractSource',
 				'choice_label' => 'id',
 			])

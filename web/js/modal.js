@@ -37,34 +37,33 @@ function createModal(id, modalConfig) {
         var footerDiv = document.createElement('div');
         footerDiv.className = 'modal-footer';
 
-        var hideCloseButton = false;
-        var showSaveButton = false;
         if(modalConfig.footer) {
-            if(modalConfig.footer.hideCloseButton) {
-                hideCloseButton = true;
+            if(modalConfig.footer.buttons) {
+                $.each(modalConfig.footer.buttons, function(buttonId, buttonOptions) {
+                    var button = document.createElement('button');
+                    button.type = 'button';
+                    button.id = buttonId;
+
+                    switch(buttonOptions.type) {
+                        case 'close':
+                            button.dataset.dismiss = 'modal';
+                            break;
+                        case 'submit':
+                            button.setAttribute('type', 'submit');
+                            button.setAttribute('form', buttonOptions.submitForm);
+                            break;
+                        default:
+                            // submit
+                            break;
+                    }
+
+                    if(buttonOptions.class) {
+                        button.className = buttonOptions.class;
+                    }
+                    button.innerText = buttonOptions.text;
+                    footerDiv.appendChild(button);
+                });
             }
-            showSaveButton = modalConfig.footer.showSaveButton;
-        }
-
-        if(!hideCloseButton) {
-            var closeButton = document.createElement('button');
-            closeButton.type = 'button';
-            closeButton.id = 'closeButton';
-            closeButton.className = 'btn btn-default';
-            closeButton.dataset.dismiss = 'modal';
-            var closeButtonText = document.createTextNode('Close');
-            closeButton.appendChild(closeButtonText);
-            footerDiv.appendChild(closeButton);
-        }
-
-        if(showSaveButton) {
-            var saveButton = document.createElement('button');
-            saveButton.type = 'button';
-            saveButton.id = 'saveButton';
-            saveButton.className = 'btn btn-primary';
-            var saveButtonText = document.createTextNode('Save changes');
-            saveButton.appendChild(saveButtonText);
-            footerDiv.appendChild(saveButton);
         }
 
         contentDiv.appendChild(footerDiv);
