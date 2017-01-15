@@ -13,7 +13,7 @@ class Change extends AbstractEntity {
 	/**
 	 * @var string
 	 *
-	 * @ORM\Column(type="string", options={"comment":"Version, e.g. commit hash"})
+	 * @ORM\Column(type="string", options={"comment":"e.g. commit hash"})
 	 */
 	private $externalId;
 	

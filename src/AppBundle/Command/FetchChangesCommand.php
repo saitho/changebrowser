@@ -16,7 +16,7 @@ use AppBundle\Entity\Change;
 use AppBundle\Entity\ChangeContent;
 use AppBundle\Entity\Project;
 use AppBundle\Entity\Source\AbstractSource;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,7 +38,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
     const MAX_ATTEMPTS = 5;
 
     /**
-     * @var ObjectManager
+     * @var EntityManager
      */
     private $entityManager;
 
@@ -86,14 +86,27 @@ class FetchChangesCommand extends ContainerAwareCommand {
 			$title = $changeData['title'];
 			$author = $changeData['author'];
 			$date = $changeData['date'];
-						
-			$change = new Change();
+			$version = $changeData['version'];
+			
+			$msg = '';
+			$newEntry = false;
+			
+			$change = $changeRepo->findOneBy(['project' => $project, 'externalId' => $externalId]);
+			if(!$change) {
+				$change = new Change();
+				$newEntry = true;
+			}
 			$change->setTitle($title);
 			$change->setAuthor($author);
-			$change->setDate(new \DateTime($date));
 			$change->setExternalId($externalId);
 			$change->setProject($project);
-			$change->setVersion('0');
+			$change->setVersion($version);
+			
+			$dateObject = new \DateTime($date);
+			$dateObject->setTimezone(new \DateTimeZone('UTC'));
+			if($change->getDate() != $dateObject) {
+				$change->setDate($dateObject);
+			}
 			
 			$allowedTypes = EnumChangeTypeType::$values;
 			foreach($allowedTypes AS $allowedType) {
@@ -106,8 +119,9 @@ class FetchChangesCommand extends ContainerAwareCommand {
 				}
 			}
 			
-			if(!$changeRepo->findBy(['project' => $project, 'externalId' => $externalId])) {
-				$this->entityManager->persist($change);
+			$this->entityManager->persist($change);
+			
+			if($newEntry) {
 				$contents = $source->getChangeContent($project, $change->getExternalId());
 				foreach($contents AS $content) {
 					$changeContent = new ChangeContent();
@@ -120,24 +134,42 @@ class FetchChangesCommand extends ContainerAwareCommand {
 					$changeContent->setChange($change);
 					$this->entityManager->persist($changeContent);
 				}
-				
-				$this->entityManager->flush();
-				$output->writeln(sprintf('[OK] Change %s with %s ChangeContents was successfully created: %s', $externalId, count($contents), $title));
-				
-				if ($output->isVerbose()) {
-					$finishTime = microtime(true);
-					$elapsedTime = $finishTime - $startTime;
-					
-					$output->writeln(sprintf(
-						'[INFO] New change: %d / Elapsed time: %.2f ms',
-						$change->getId(),
-						$elapsedTime * 1000
-					));
-				}
+				$msg = sprintf('[OK] Change %s with %s ChangeContents was successfully created: %s', $externalId, count($contents), $title);
 			}else{
-				if($output->isVerbose()) {
-					$output->writeln(sprintf('[INFO] Change %s skipped as it already exists.', $externalId));
+				// computeChangeSets is used internally and we want to avoid errors there
+				// that's why we unfortunately have to clone the UnitOfWork... :(
+				$uow = clone $this->entityManager->getUnitOfWork();
+				$uow->computeChangeSets();
+				if(count($uow->getEntityChangeSet($change))) {
+					$msg = sprintf('[OK] Change %s was successfully updated: %s', $externalId, $title);
+				}else{
+					if ($output->isVerbose()) {
+						$finishTime = microtime(true);
+						$elapsedTime = $finishTime - $startTime;
+						
+						$output->writeln(sprintf(
+							'[INFO] No updates for Change id: %d / Elapsed time: %.2f ms',
+							$change->getId(),
+							$elapsedTime * 1000
+						));
+					}
 				}
+			}
+				
+			$this->entityManager->flush();
+			if(!empty($msg)) {
+				$output->writeln($msg);
+			}
+				
+			if ($output->isVerbose()) {
+				$finishTime = microtime(true);
+				$elapsedTime = $finishTime - $startTime;
+				
+				$output->writeln(sprintf(
+					'[INFO] Change id: %d / Elapsed time: %.2f ms',
+					$change->getId(),
+					$elapsedTime * 1000
+				));
 			}
 		}
 	}

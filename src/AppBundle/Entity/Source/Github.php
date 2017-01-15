@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Github extends AbstractSource {
 	const changelogUrl = 'https://api.github.com/repos/{vendor}/{repository}/commits';
+	const tagsUrl = 'https://api.github.com/repos/{vendor}/{repository}/tags';
 	const changelogDetailsUrl = 'https://api.github.com/repos/{vendor}/{repository}/commits/{commitId}';
 	
 	public function create() {
@@ -47,15 +48,37 @@ class Github extends AbstractSource {
 	
 	public function getChangeLogs(Project $project) {
 		$array = [];
+		$versions = [];
+		$versionResult = $this->getFromURL('tags', $project);
+		$tags = json_decode($versionResult);
+		foreach($tags AS $tag) {
+			// Only semantic versioning accepted!
+			// see: http://semver.org/
+			if(preg_match('/^v?(\d+\.)?(\d+\.)?(\d+)(-.*)?$/', $tag->name)) {
+				$versions[$tag->commit->sha] = $tag->name;
+			}
+		}
+		
 		$result = $this->getFromURL('changelog', $project);
 		$commits = json_decode($result);
 		
+		$version = '';
 		foreach($commits AS $commit) {
 			$id = $commit->sha;
 			$author = $commit->commit->committer->name;
 			$message = $commit->commit->message;
 			$date = $commit->commit->committer->date;
-			$array[] = ['id' => $id, 'author' => $author, 'title' => $message, 'date' => $date];
+			// works under the assumption that $commits is ordered by commit date DESC (newest commit on top)
+			if(array_key_exists($id, $versions)) {
+				$version = $versions[$id];
+			}
+			$array[] = [
+				'id' => $id,
+				'author' => $author,
+				'title' => $message,
+				'date' => $date,
+				'version' => $version
+			];
 		}
 		
 		return $array;
