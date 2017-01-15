@@ -14,12 +14,14 @@ namespace AppBundle\Entity\Source {
     abstract class AbstractSource {
         # id : string
         # options : array
+        # settings : array
         # project : Project
         + getId() : string
         + getOptions() : array
+        + getSettings() : array
         + getProject() : Project
         + setProject(project : Project)
-        {abstract} + create()
+        {abstract} + create([settings : array])
         {abstract} + getFirstChangeExternalId()
         {abstract} + getChangeDetails(changeLogId : int, version : string) : array
     }
@@ -28,7 +30,7 @@ namespace AppBundle\Entity\Source {
 	    + tagsUrl : string = 'https://api.github.com/repos/{vendor}/{repository}/tags';
 	    + changelogDetailsUrl : string = 'https://api.github.com/repos/{vendor}/{repository}/commits/{commitId}';
 
-        + create()
+        + create([settings : array])
         + getFirstChangeExternalId() : string
         + getChangeDetails(changeLogId : int) : array
         - getFromURL(action : string[, options : array]) : Object

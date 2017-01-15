@@ -13,13 +13,14 @@ class Github extends AbstractSource {
 	const changelogDetailsUrl = 'https://api.github.com/repos/{vendor}/{repository}/commits/{commitId}';
 	private $versions = [];
 	
-	public function create($options = []) {
+	public function create($settings = []) {
 		$this->id = 'Github';
-		$this->options = ['accessToken', 'vendor', 'repository', 'clientId', 'clientSecret'];
-		if(!empty($options)) {
-			foreach($options AS $option => $value) {
-				if(in_array($option, $this->options)) {
-					$this->options[$option] = $value;
+		$this->options = ['accessToken', 'vendor', 'repository'];
+		$this->settings = ['clientId'=>'', 'clientSecret'=>''];
+		if(!empty($settings)) {
+			foreach($settings AS $key => $value) {
+				if(array_key_exists($key, $this->settings)) {
+					$this->settings[$key] = $value;
 				}
 			}
 		}
@@ -52,14 +53,14 @@ class Github extends AbstractSource {
 			$urlParams[] = 'access_token='.$projectOptions['source']['accessToken'];
 		}
 		
-		if(!empty($this->options['clientId']) && !empty($this->options['clientSecret'])) {
-			$urlParams[] = 'client_id='.$this->options['clientId'];
-			$urlParams[] = 'client_secret='.$this->options['clientSecret'];
+		if(!empty($this->settings['clientId']) && !empty($this->settings['clientSecret'])) {
+			$urlParams[] = 'client_id='.$this->settings['clientId'];
+			$urlParams[] = 'client_secret='.$this->settings['clientSecret'];
 		}
 		
 		$url .= '?'.implode('&', $urlParams);
 		try {
-			$curl_handle=curl_init();
+			$curl_handle = curl_init();
 			curl_setopt($curl_handle, CURLOPT_URL, $url);
 			curl_setopt($curl_handle, CURLOPT_CONNECTTIMEOUT, 2);
 			curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);

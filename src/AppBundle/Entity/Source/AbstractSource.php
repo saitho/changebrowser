@@ -28,6 +28,13 @@ abstract class AbstractSource {
 	 */
 	protected $options = [];
 	
+	/**
+	 * @var array
+	 *
+	 * @ORM\Column(type="array")
+	 */
+	protected $settings = [];
+	
 	/** @var Project $project */
 	protected $project = null;
 	public function setProject(Project $project) {
@@ -37,7 +44,7 @@ abstract class AbstractSource {
 		return $this->project;
 	}
 	
-	abstract public function create();
+	abstract public function create($settings = []);
 	abstract public function getFirstChangeExternalId() : string;
 	abstract public function getChangeDetails($changeLogId, $version='') : array;
 	
@@ -53,5 +60,11 @@ abstract class AbstractSource {
 	 */
 	public function getOptions(): array {
 		return $this->options;
+	}
+	/**
+	 * @return array
+	 */
+	public function getSettings(): array {
+		return $this->settings;
 	}
 }
