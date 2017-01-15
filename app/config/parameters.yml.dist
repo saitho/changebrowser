@@ -20,6 +20,8 @@ parameters:
     database_password: "symfony"
 
     github_accesstoken: ""
+    github_clientId: ""
+    github_clientSecret: ""
 
     # Uncomment this line to use a MySQL database instead of SQLite (and remove
     # the "doctrine" section from config_dev.yml regarding SQLite):

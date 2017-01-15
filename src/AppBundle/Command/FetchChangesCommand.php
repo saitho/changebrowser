@@ -41,6 +41,8 @@ class FetchChangesCommand extends ContainerAwareCommand {
      * @var EntityManager
      */
     private $entityManager;
+    
+    private $complete = false;
 
     /**
      * {@inheritdoc}
@@ -54,6 +56,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
             // commands can optionally define arguments and/or options (mandatory and optional)
             // see http://symfony.com/doc/current/components/console/console_arguments.html
             ->addArgument('project', InputArgument::OPTIONAL, 'ID of the project you want to fetch changes')
+			->addOption('complete', 'c')
         ;
     }
 	
@@ -63,6 +66,9 @@ class FetchChangesCommand extends ContainerAwareCommand {
 	 */
     protected function initialize(InputInterface $input, OutputInterface $output) {
         $this->entityManager = $this->getContainer()->get('doctrine')->getManager();
+        if($input->getOption('complete')) {
+        	$this->complete = true;
+		}
     }
 	
     private function fetchChangesForProject(Project $project, OutputInterface $output) {
@@ -71,107 +77,112 @@ class FetchChangesCommand extends ContainerAwareCommand {
 			$project->getTitle(),
 			$project->getId()
 		));
-		$startTime = microtime(true);
-		$changeRepo = $this->entityManager->getRepository(Change::class);
 		$sourceRepo = $this->entityManager->getRepository(AbstractSource::class);
 		/** @var AbstractSource $source */
 		$source = $sourceRepo->find($project->getSource());
+		$source->setProject($project);
+				
+		if($this->complete) {
+			$changeRepo = $this->entityManager->getRepository(Change::class);
+			$earliestChange = $changeRepo->findOneBy(['project' => $project], ['date' => 'ASC']);
+			$startId = $earliestChange->getExternalId();
+		}else{
+			$startId = $source->getFirstChangeExternalId();
+		}
+		
+		$this->fetchChangesByParents($source, $output, [$startId]);
+	}
 	
-		$changes = $source->getChangeLogs($project);
-		foreach($changes AS $changeData) {
-			// Enable on PHP 7.1 instead...
-			// ['id' => $externalId, 'title' => $title, 'author' => $author, 'date' => $date] = $changeData;
-			
-			$externalId = $changeData['id'];
-			$title = $changeData['title'];
-			$author = $changeData['author'];
-			$date = $changeData['date'];
-			$version = $changeData['version'];
-			
-			$msg = '';
-			$newEntry = false;
-			
-			$change = $changeRepo->findOneBy(['project' => $project, 'externalId' => $externalId]);
-			if(!$change) {
-				$change = new Change();
-				$newEntry = true;
-			}
-			$change->setTitle($title);
-			$change->setAuthor($author);
-			$change->setExternalId($externalId);
-			$change->setProject($project);
-			$change->setVersion($version);
-			
-			$dateObject = new \DateTime($date);
-			$dateObject->setTimezone(new \DateTimeZone('UTC'));
-			if($change->getDate() != $dateObject) {
-				$change->setDate($dateObject);
-			}
-			
-			$allowedTypes = EnumChangeTypeType::$values;
-			foreach($allowedTypes AS $allowedType) {
-				if($allowedType === null) {
-					continue;
-				}
-				if(preg_match('/^(('.$allowedType.'|\['.$allowedType.'\])(.*:)?)/i', $title)) {
-					$change->setType($allowedType);
-					break;
-				}
-			}
-			
-			$this->entityManager->persist($change);
-			
-			if($newEntry) {
-				$contents = $source->getChangeContent($project, $change->getExternalId());
-				foreach($contents AS $content) {
-					$changeContent = new ChangeContent();
-					$changeContent->setFilename($content['filename']);
-					$changeContent->setStatus($content['status']);
-					$changeContent->setAdditions($content['additions']);
-					$changeContent->setDeletions($content['deletions']);
-					$changeContent->setChanges($content['changes']);
-					$changeContent->setPatch($content['patch']);
-					$changeContent->setChange($change);
-					$this->entityManager->persist($changeContent);
-				}
-				$msg = sprintf('[OK] Change %s with %s ChangeContents was successfully created: %s', $externalId, count($contents), $title);
-			}else{
-				// computeChangeSets is used internally and we want to avoid errors there
-				// that's why we unfortunately have to clone the UnitOfWork... :(
-				$uow = clone $this->entityManager->getUnitOfWork();
-				$uow->computeChangeSets();
-				if(count($uow->getEntityChangeSet($change))) {
-					$msg = sprintf('[OK] Change %s was successfully updated: %s', $externalId, $title);
-				}else{
-					if ($output->isVerbose()) {
-						$finishTime = microtime(true);
-						$elapsedTime = $finishTime - $startTime;
-						
-						$output->writeln(sprintf(
-							'[INFO] No updates for Change id: %d / Elapsed time: %.2f ms',
-							$change->getId(),
-							$elapsedTime * 1000
-						));
-					}
-				}
-			}
+	private function fetchChangesByParents(AbstractSource $source, OutputInterface $output, $parents) {
+    	if(empty($parents)) {
+    		return;
+		}
+    	$newParents = [];
+		foreach($parents AS $externalId) {
+			$thisParents = $this->loadDataForExternalId($source, $output, $externalId);
+			$newParents = array_merge($newParents, $thisParents);
+		}
+		$this->fetchChangesByParents($source, $output, $newParents);
+	}
+		
+	private function loadDataForExternalId(AbstractSource $source, OutputInterface $output, $externalId) {
+		$project = $source->getProject();
+		$newEntry = false;
+		$changeDetails = $source->getChangeDetails($externalId);
+		$changeRepo = $this->entityManager->getRepository(Change::class);
 				
-			$this->entityManager->flush();
-			if(!empty($msg)) {
-				$output->writeln($msg);
+		// ['id' => $externalId, 'title' => $title, 'author' => $author, 'date' => $date, 'version' => $version] = $changeDetails['change'];
+		$externalId = $changeDetails['change']['id'];
+		$title = $changeDetails['change']['title'];
+		$author = $changeDetails['change']['author'];
+		$date = $changeDetails['change']['date'];
+		$version = $changeDetails['change']['version'];
+		
+		// only get first line to avoid very long commit messages (e.g. TYPO3 CMS)
+		$title = strstr($title, "\n", true);
+		
+		$change = $changeRepo->findOneBy(['project' => $project, 'externalId' => $externalId]);
+		if(!$change) {
+			$change = new Change();
+			$newEntry = true;
+		}
+		$change->setTitle($title);
+		$change->setAuthor($author);
+		$change->setExternalId($externalId);
+		$change->setProject($project);
+		$change->setVersion($version);
+		
+		$dateObject = new \DateTime($date);
+		$dateObject->setTimezone(new \DateTimeZone('UTC'));
+		if($change->getDate() != $dateObject) {
+			$change->setDate($dateObject);
+		}
+		
+		$allowedTypes = EnumChangeTypeType::$values;
+		foreach($allowedTypes AS $allowedType) {
+			if($allowedType === null) {
+				continue;
 			}
-				
-			if ($output->isVerbose()) {
-				$finishTime = microtime(true);
-				$elapsedTime = $finishTime - $startTime;
-				
-				$output->writeln(sprintf(
-					'[INFO] Change id: %d / Elapsed time: %.2f ms',
-					$change->getId(),
-					$elapsedTime * 1000
-				));
+			if(preg_match('/^(('.$allowedType.'|\['.$allowedType.'\])(.*:)?)/i', $title)) {
+				$change->setType($allowedType);
+				break;
 			}
 		}
+		$this->entityManager->persist($change);
+		
+		if($newEntry) {
+			foreach($changeDetails['contents'] AS $content) {
+				$changeContent = new ChangeContent();
+				$changeContent->setFilename($content['filename']);
+				$changeContent->setStatus($content['status']);
+				$changeContent->setAdditions($content['additions']);
+				$changeContent->setDeletions($content['deletions']);
+				$changeContent->setChanges($content['changes']);
+				$changeContent->setPatch($content['patch']);
+				$changeContent->setChange($change);
+				$this->entityManager->persist($changeContent);
+			}
+			$msg = sprintf('[OK] Change %s was successfully created: %s', $externalId, $title);
+		}else{
+			// computeChangeSets is used internally and we want to avoid errors there
+			// that's why we unfortunately have to clone the UnitOfWork... :(
+			$uow = clone $this->entityManager->getUnitOfWork();
+			$uow->computeChangeSets();
+			if(count($uow->getEntityChangeSet($change))) {
+				$msg = sprintf('[OK] Change %s was successfully updated: %s', $externalId, $title);
+			}else if($output->isVerbose()) {
+				$msg = sprintf('[INFO] No updates for Change id %s: %s', $change->getId(), $change->getTitle());
+			}
+		}
+		$this->entityManager->flush();
+		if(!empty($msg)) {
+			$output->writeln($msg);
+		}
+		
+		if(empty($changeDetails['change']['parents'])) {
+			$changeDetails['change']['parents'] = [];
+		}
+		return $changeDetails['change']['parents'];
 	}
 	
 	/**

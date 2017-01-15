@@ -28,10 +28,18 @@ abstract class AbstractSource {
 	 */
 	protected $options = [];
 	
+	/** @var Project $project */
+	protected $project = null;
+	public function setProject(Project $project) {
+		$this->project = $project;
+	}
+	public function getProject() {
+		return $this->project;
+	}
 	
 	abstract public function create();
-	abstract public function getChangeLogs(Project $project);
-	abstract public function getChangeContent(Project $project, $changeLogId);
+	abstract public function getFirstChangeExternalId() : string;
+	abstract public function getChangeDetails($changeLogId) : array;
 	
 	/**
 	 * @return string
