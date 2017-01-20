@@ -69,6 +69,33 @@ namespace AppBundle\Entity {
         + setAuthor(author : string)
         + setExternalId(externalId : string)
     }
+    class ChangeContent extends AbstractEntity {
+    	- externalId : string
+    	+ getExternalId() : string
+    	+ setExternalId(externalId : string)
+    	- filename : string
+    	+ getFilename() : string
+    	+ setFilename(filename : string)
+    	- status : string
+    	+ setStatus(status : string)
+    	+ getStatus() : string
+    	- additions : int
+    	+ getAdditions() : int
+    	+ setAdditions(additions : int)
+    	- deletions : int
+    	+ getDeletions() : int
+    	+ setDeletions(deletions : int)
+    	- changes : int
+    	+ getChanges() : int
+    	+ setChanges(changes : int)
+    	- patch : string
+    	+ setPatch(patch : string
+    	+ getPatch() : string
+    	+ getChange(getCssStatus) : string
+    }
+
+    ChangeContent "0..*" <--> "1" Change
+
     class Project extends AbstractEntity {
         - title : string
         - source : string

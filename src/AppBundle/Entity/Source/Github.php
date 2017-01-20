@@ -32,7 +32,7 @@ class Github extends AbstractSource {
 	 * @return Object
 	 * @throws \Exception
 	 */
-	private function getFromURL($action, $options=[]) {
+	private function getFromURL($action, $options=[], $params=[]) {
 		// '{commitId}' => $changeLogId
 		$url = constant('self::'.$action.'Url');
 		
@@ -56,6 +56,9 @@ class Github extends AbstractSource {
 		if(!empty($this->settings['clientId']) && !empty($this->settings['clientSecret'])) {
 			$urlParams[] = 'client_id='.$this->settings['clientId'];
 			$urlParams[] = 'client_secret='.$this->settings['clientSecret'];
+		}
+		foreach($params AS $param => $paramVal) {
+			$urlParams[] = $param.'='.$paramVal;
 		}
 		
 		$url .= '?'.implode('&', $urlParams);
@@ -96,13 +99,30 @@ class Github extends AbstractSource {
 	
 	private function getVersions() : array {
 		if(empty($this->versions)) {
-			$tags = $this->getFromURL('tags');
-			foreach($tags AS $tag) {
-				// Only semantic versioning accepted!
-				// see: http://semver.org/
-				if(preg_match('/^v?(\d+\.)?(\d+\.)?(\d+)(-.*)?$/', $tag->name)) {
-					$this->versions[$tag->commit->sha] = $tag->name;
+			$pageCount = 1;
+			while(true) {
+				$tags = $this->getFromURL('tags', [], ['per_page' => 100, 'page' => $pageCount]);
+				if(empty($tags)) {
+					break;
 				}
+				foreach($tags AS $tag) {
+					// semantic versioning - http://semver.org/
+					$regex = '^v?(\d+)?\.?(\d+)?\.?(\d+)(-.*)?$';
+					$projectOptions = $this->project->getOptions();
+					if(!empty($projectOptions['alternativeVersionRegEx'])) {
+						// use custom RegEx expression if version tag is not in "v1.2.3-dev" format (but still semantic!)
+						// e.g. ^TYPO3_(\d)-(\d)-(\d)$ will match TYPO3_8-4-0 and turn it into 8.4.0
+						$regex = $projectOptions['alternativeVersionRegEx'];
+					}
+					if(preg_match('/'.$regex.'/', $tag->name, $matches)) {
+						$saveVersion = implode('.', [ $matches[1], $matches[2], $matches[3] ]);
+						if(!empty($matches[4])) {
+							$saveVersion .= $matches[4];
+						}
+						$this->versions[$tag->commit->sha] = $saveVersion;
+					}
+				}
+				$pageCount++;
 			}
 		}
 		return $this->versions;
@@ -123,7 +143,7 @@ class Github extends AbstractSource {
 				$patch = $file->patch;
 			}
 			$array[] = [
-				'externalId' => $file->sha,
+				'id' => $file->sha,
 				'filename' => $file->filename,
 				'status' => $file->status,
 				'additions' => $file->additions,

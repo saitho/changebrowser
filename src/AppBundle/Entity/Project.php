@@ -40,7 +40,9 @@ class Project extends AbstractEntity {
 	 *
 	 * @ORM\Column(type="array")
 	 */
-	protected $options = [];
+	protected $options = [
+		'alternativeVersionRegEx' => ''
+	];
 	
 	/**
 	 * @var array

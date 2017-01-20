@@ -22,6 +22,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+class FetchChangesCommandOutput extends \Exception {
+}
+
 /**
  * A command console that fetches changes and stores them in the database.
  *
@@ -43,6 +46,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
     private $entityManager;
     
     private $complete = false;
+    private $update = false;
 
     /**
      * {@inheritdoc}
@@ -57,6 +61,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
             // see http://symfony.com/doc/current/components/console/console_arguments.html
             ->addArgument('project', InputArgument::OPTIONAL, 'ID of the project you want to fetch changes')
 			->addOption('complete', 'c')
+			->addOption('update', 'u')
         ;
     }
 	
@@ -69,6 +74,9 @@ class FetchChangesCommand extends ContainerAwareCommand {
         if($input->getOption('complete')) {
         	$this->complete = true;
 		}
+        if($input->getOption('update')) {
+        	$this->update = true;
+		}
     }
 	
     private function fetchChangesForProject(Project $project, OutputInterface $output) {
@@ -77,34 +85,45 @@ class FetchChangesCommand extends ContainerAwareCommand {
 			$project->getTitle(),
 			$project->getId()
 		));
-		$sourceRepo = $this->entityManager->getRepository(AbstractSource::class);
-		/** @var AbstractSource $source */
-		$source = $sourceRepo->find($project->getSource());
-		$source->setProject($project);
-		$changeRepo = $this->entityManager->getRepository(Change::class);
-	
-		$version = '';
-		if($this->complete) {
-			$earliestChange = $changeRepo->findOneBy(['project' => $project], ['date' => 'ASC']);
-			if(!empty($earliestChange)) {
-				$startId = $earliestChange->getExternalId();
-				$version = $earliestChange->getVersion();
+		try {
+			$sourceRepo = $this->entityManager->getRepository(AbstractSource::class);
+			/** @var AbstractSource $source */
+			$source = $sourceRepo->find($project->getSource());
+			$source->setProject($project);
+			$changeRepo = $this->entityManager->getRepository(Change::class);
+			
+			$version = '';
+			if($this->complete) {
+				// if complete: start at the last inserted change
+				$lastPersistedChange = $changeRepo->findOneBy(['project' => $project], ['date' => 'ASC']);
+				if(empty($lastPersistedChange)) {
+					throw new FetchChangesCommandOutput('No entries found to complete. Please run command without --complete option.');
+				}
+				$startId = $lastPersistedChange->getExternalId();
+				$version = $lastPersistedChange->getVersion();
+			}else{
+				// if regular fetch: start with the first change from change list
+				$startId = $source->getFirstChangeExternalId();
+				$firstChangeLocal = $changeRepo->findOneBy(['externalId' => $startId]);
+				if(!empty($firstChangeLocal) && !$this->update) {
+					throw new FetchChangesCommandOutput('No new changes.');
+				}
+				if(!empty($firstChangeLocal)) {
+					$version = $firstChangeLocal->getVersion();
+				}
 			}
+			
+			$this->fetchChangesByParents($source, $output, [$startId], $version);
+		} catch (FetchChangesCommandOutput $e) {
+			$output->writeln($e->getMessage());
 		}
-		
-		if(!$this->complete || empty($startId)) {
-			$startId = $source->getFirstChangeExternalId();
-			$firstChangeLocal = $changeRepo->findOneBy(['externalId' => $startId]);
-			if(!empty($firstChangeLocal)) {
-				$version = $firstChangeLocal->getVersion();
-			}
-		}
-		
-		$this->fetchChangesByParents($source, $output, [$startId], $version);
 	}
 	
 	private function fetchChangesByParents(AbstractSource $source, OutputInterface $output, $parents, $version='') {
     	if(empty($parents)) {
+    		if($output->isVerbose()) {
+    			$output->writeln('[INFO] Finished.');
+			}
     		return;
 		}
     	$newParents = [];
@@ -164,6 +183,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
 		if($newEntry) {
 			foreach($changeDetails['contents'] AS $content) {
 				$changeContent = new ChangeContent();
+				$changeContent->setExternalId($content['id']);
 				$changeContent->setFilename($content['filename']);
 				$changeContent->setStatus($content['status']);
 				$changeContent->setAdditions($content['additions']);
@@ -174,7 +194,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
 				$this->entityManager->persist($changeContent);
 			}
 			$msg = sprintf('[OK] Change %s was successfully created: %s', $externalId, $title);
-		}else{
+		}elseif($this->update) {
 			// computeChangeSets is used internally and we want to avoid errors there
 			// that's why we unfortunately have to clone the UnitOfWork... :(
 			$uow = clone $this->entityManager->getUnitOfWork();
