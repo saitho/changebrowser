@@ -30,6 +30,27 @@ class ChangeContent extends AbstractEntity {
 	 *
 	 * @ORM\Column(type="string")
 	 */
+	private $externalId;
+	
+	/**
+	 * @return string
+	 */
+	public function getExternalId(): string {
+		return $this->externalId;
+	}
+	
+	/**
+	 * @param string $externalId
+	 */
+	public function setExternalId(string $externalId) {
+		$this->externalId = $externalId;
+	}
+	
+	/**
+	 * @var string
+	 *
+	 * @ORM\Column(type="string")
+	 */
 	private $filename;
 	/**
 	 * @var string
