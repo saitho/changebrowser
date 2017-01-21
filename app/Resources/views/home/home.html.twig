@@ -49,7 +49,7 @@
             // z.B. https://raw.githubusercontent.com/brave/browser-laptop/master/CHANGELOG.md
 
             var $projectSelect = $('select#projectList');
-            loadProject($projectSelect.val());
+            loadProject($projectSelect.val(), true);
             $projectSelect.change(function () {
                 loadProject($( this ).val());
             });

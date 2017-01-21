@@ -99,43 +99,75 @@ function addProject(keepModalHidden) {
 
 function loadProject(projectId) {
     var $body = $('body div#body');
+    currently_loaded_project = projectId;
+    $body.rewatajax({id: 'changeTable', ajax_connector: paths.ajax_loadProject}, { project_id: projectId }, 'body div#body');
+    return;
+
+
     $.ajax({
         method: 'GET',
         url: paths.ajax_loadProject,
         data: { project_id: projectId },
         dataType: 'json'
     }).done(function( response ) {
+        var headerData = response.header;
+
         if(response.status) {
             currently_loaded_project = projectId;
             var changeData = [];
+            var responseOptions = response.options;
             $(response.changes).each(function(key, change) {
-                var span = null;
-                if(change.type) {
-                    span = document.createElement('span');
-                    span.className = 'label label-'+change.CSSClassForType;
-                    var text = document.createTextNode(change.type);
-                    span.appendChild(text);
-                }
-
-                var detailLink = document.createElement('a');
-                var iElement = document.createElement('i');
-                iElement.id = 'dropDown-activator-'+change.id;
-                iElement.className = 'fa fa-angle-down';
-                detailLink.appendChild(iElement);
-                detailLink.setAttribute('href', 'javascript:toggleDetails(\''+change.id+'\');');
-                detailLink.className = 'pull-right btn btn-xs btn-primary';
-
                 var subTable = createTableObject(
                     {id: 'subtable-'+change.id, class: 'table table-responsive table-bordered changecontent-table'},
                     change.changeContents_head,
                     change.changeContents_content
                 );
 
+                var fieldIndex = [];
+                for(var changeKey in change) {
+                    if(headerData[changeKey]) {
+                        if(change[changeKey] == '' || change[changeKey] == undefined) {
+                            continue;
+                        }
+                    }
+                    fieldIndex[changeKey] = change[changeKey];
+                }
+
+                var columns = [];
+                for(headerKey in headerData) {
+                    var headerValueTransform = headerData[headerKey].transform;
+                    var originalFieldValue = fieldIndex[headerKey];
+
+                    if(headerValueTransform != '' && headerValueTransform != undefined) {
+                        var transformedText = '';
+                        switch(headerValueTransform) {
+                            case 'date':
+                                transformedText = new Date(originalFieldValue.date).toLocaleString();
+                                break;
+                            default:
+                                transformedText = headerValueTransform;
+                                if(transformedText.match('!_self')) {
+                                    if(originalFieldValue == undefined || !originalFieldValue) {
+                                        break;
+                                    }else{
+                                        transformedText = transformedText.replace('!_self', originalFieldValue);
+                                    }
+                                }
+                                if(transformedText != '') {
+                                    for(var replaceKey in fieldIndex) {
+                                        transformedText = transformedText.replace('!'+replaceKey, fieldIndex[replaceKey]);
+                                    }
+                                }
+                                break;
+                        }
+                        columns.push(transformedText);
+                    }else{
+                        columns.push(change[headerKey]);
+                    }
+                }
 
                 changeData.push({
-                    columns: [
-                        span, change.title, change.author, new Date(change.date.date).toLocaleString(), detailLink
-                    ],
+                    columns: columns,
                     additionalFullWidthRow: {
                         html: subTable,
                         id: change.id
@@ -145,15 +177,10 @@ function loadProject(projectId) {
 
             var table = createTableObject(
                 {id: 'changeTable'},
-                [
-                    '',
-                    Translator.trans('label.title'),
-                    Translator.trans('label.author'),
-                    Translator.trans('label.date'),
-                    ''
-                ],
+                headerData,
                 changeData,
-                Translator.trans('no_entries_found')
+                Translator.trans('no_entries_found'),
+                responseOptions
         );
             $body.html(table);
         }
