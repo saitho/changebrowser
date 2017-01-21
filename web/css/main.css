@@ -1,3 +1,30 @@
+ul.dropdown-menu.locales {
+    left: -100px;
+}
+
+.divider-vertical {
+    height: 100%;                   /* any height */
+    border-left: 1px solid gray;     /* right or left is the same */
+    float: left;                     /* so BS grid doesn't break */
+    opacity: 0.5;                    /* optional */
+    margin: 0 15px;                  /* optional */
+}
+
+table#changeTable > thead > tr > th[data-sort-mode] > span {
+    cursor: pointer;
+    padding-right: 20px;
+}
+
+table#changeTable > thead > tr > th[data-sort-mode] > span{
+    background: url(../images/sorting-inactive.png) no-repeat 99%;
+}
+table#changeTable > thead > tr > th[data-sort-mode="desc"] > span{
+    background: url(../images/sorting-down.png) no-repeat 99% !important;
+}
+table#changeTable > thead > tr > th[data-sort-mode="asc"] > span {
+    background: url(../images/sorting-up.png) no-repeat 99% !important;;
+}
+
 label.control-label {
     line-height: 45px;
     vertical-align: middle;
