@@ -71,9 +71,10 @@ class ChangeController extends Controller {
 					'width' => '15%'
 				],
 				'date' => [
-					'transform' => 'date',
-					'content' => $translator->trans('label.date'),
+					'type' => 'date',
 					'sortable' => true,
+					'filterable' => true,
+					'content' => $translator->trans('label.date'),
 					'width' => '15%'
 				],
 				'version' => [

@@ -6,14 +6,19 @@
                 sort_by: '',
                 sort_mode: '',
                 current_page: 1,
-                per_page: 10,
+                per_page: 30,
                 pager_max_buttons: 5,
                 ajax_connector: '/ajax.php',
                 search: '',
                 search_timeout: 300,
-                search_text: "Search...",
-                search_results: "%1 results found.",
-                no_entries_message: Translator.trans('no_entries_found')
+                language: {
+                    filter: 'Filter',
+                    search_text: 'Search...',
+                    search_results: '%1 results found.',
+                    no_entries_message: 'No results found.',
+                    dateFilter_start: 'Start date',
+                    dateFilter_end: 'End date'
+                }
             };
             options = $.extend(defaults, options);
 
@@ -30,6 +35,7 @@
                 return;
             }
             var allSortableSelector = 'table#'+tableId+' > thead > tr > th[data-sort-by]';
+            var allFilterableSelector = 'table#'+tableId+' > thead > tr > th[data-filterable]';
             var tableClass = options.table_class;
 
             $this.callConnector = function(callWhenFinished) {
@@ -68,18 +74,19 @@
 
                             var columns = [];
                             for(headerKey in header_data) {
+                                var headerValueType = header_data[headerKey].type;
                                 var headerValueTransform = header_data[headerKey].transform;
                                 var originalFieldValue = fieldIndex[headerKey];
 
-                                if(headerValueTransform != '' && headerValueTransform != undefined) {
+                                //if(headerValueTransform != '' && headerValueTransform != undefined) {
                                     var transformedText = '';
-                                    switch(headerValueTransform) {
+                                    switch(headerValueType) {
                                         case 'date':
                                             transformedText = new Date(originalFieldValue.date).toLocaleString();
                                             break;
                                         default:
                                             transformedText = headerValueTransform;
-                                            if(transformedText.match('!_self')) {
+                                            if(transformedText && transformedText.match('!_self')) {
                                                 if(originalFieldValue == undefined || !originalFieldValue) {
                                                     transformedText = '';
                                                     break;
@@ -87,17 +94,19 @@
                                                     transformedText = transformedText.replace('!_self', originalFieldValue);
                                                 }
                                             }
-                                            if(transformedText != '') {
+                                            if(transformedText && transformedText != '') {
                                                 for(var replaceKey in fieldIndex) {
                                                     transformedText = transformedText.replace('!'+replaceKey, fieldIndex[replaceKey]);
                                                 }
+                                            }else{
+                                                transformedText = change[headerKey];
                                             }
                                             break;
                                     }
                                     columns.push(transformedText);
-                                }else{
-                                    columns.push(change[headerKey]);
-                                }
+                                //}else{
+                                //    columns.push(change[headerKey]);
+                               // }
                             }
 
                             changeData.push({
@@ -128,6 +137,30 @@
                 options.current_page = 1;
                 options.search = string;
                 $this.callConnector(function() { $this.updateContent(); });
+            };
+
+            $this.getFilterForm = function(key) {
+                var type = header_data[key].type;
+                var form = '';
+                switch(type) {
+                    case 'date':
+                        var datePickerStart = +type+"-datepicker-start";
+                        var datePickerEnd = +type+"-datepicker-end";
+                        form = "<div class='form-group'>";
+                            form += "<div class='input-group date datepicker' id='"+datePickerStart+"'>";
+                                form += "<label for='"+key+"-dateFilter-start'>"+options.language.dateFilter_start+"</label>";
+                                form += "<input class='form-control' name='"+key+"-dateFilter-start' id='"+key+"-dateFilter-start' />";
+                                form += "<span class='input-group-addon' data-action='showDatepicker' data-id='"+key+"-dateFilter-start'><span class='fa fa-calendar'></span></span>";
+                            form += "</div>";
+                            form += "<div class='input-group date datepicker' id='"+datePickerEnd+"'>";
+                                form += "<label for='"+key+"-dateFilter-start'>"+options.language.dateFilter_end+"</label>";
+                                form += "<input class='form-control' name='"+key+"-dateFilter-end' id='"+key+"-dateFilter-end' />";
+                                form += "<span class='input-group-addon' data-action='showDatepicker' data-id='"+key+"-dateFilter-end'><span class='fa fa-calendar'></span></span>";
+                            form += "</div>";
+                        form += "</div>";
+                        break;
+                }
+                return form;
             };
 
             $this.getHead = function() {
@@ -166,7 +199,12 @@
                             titleTh.className = thClass.trim();
                         }
                     }
-                    titleTh.innerHTML = '<span>'+thValue+'</span>';
+                    var innerHTML = '<label>'+thValue+'</label>';
+                    if(name.filterable) {
+                        titleTh.dataset.filterable = '';
+                        innerHTML += '<a class="rewatajax-filter" tabindex="0" role="button" data-html="true" data-toggle="popover" data-placement="bottom" data-trigger="click" title="'+options.language.filter+'" data-content="'+$this.getFilterForm(key)+'"><i class="fa fa-filter"></i></a>';
+                    }
+                    titleTh.innerHTML = innerHTML;
                     tr.appendChild(titleTh);
                 }
 
@@ -176,15 +214,13 @@
             $this.getBody = function() {
                 var tbody = document.createElement('tbody');
                 if(content_data.length === 0) {
-                    if(options.no_entries_message !== null) {
-                        var tr = document.createElement('tr');
-                        var td = document.createElement('td');
-                        td.colSpan = Object.keys(header_data).length;
-                        td.className = 'no-results';
-                        td.innerText = options.no_entries_message;
-                        tr.appendChild(td);
-                        tbody.appendChild(tr);
-                    }
+                    var tr = document.createElement('tr');
+                    var td = document.createElement('td');
+                    td.colSpan = Object.keys(header_data).length;
+                    td.className = 'no-results';
+                    td.innerText = options.language.no_entries_message;
+                    tr.appendChild(td);
+                    tbody.appendChild(tr);
                     return tbody;
                 }
                 $(content_data).each(function(key, element) {
@@ -234,15 +270,15 @@
 
                 var _this = this;
                 var result_counter = document.createElement('span');
-                result_counter.style.cssText = "float: right";
+                result_counter.style.cssText = 'float: right';
                 result_counter.className = 'rewatajax_resultcounter';
                 search.append(result_counter);
 
                 var search_input = document.createElement('input');
-                search_input.type = "text";
-                search_input.className = "rewatajax_search_input";
-                search_input.style.cssText = "float: left";
-                search_input.placeholder = options.search_text;
+                search_input.type = 'text';
+                search_input.className = 'rewatajax_search_input';
+                search_input.style.cssText = 'float: left';
+                search_input.placeholder = options.language.search_text;
                 $(search_input).keyup(function () {
                     _this.searchKeyUp($(this).val());
                 });
@@ -263,28 +299,33 @@
                 $this.callConnector(function() { $this.updateContent(); });
             };
             this.updatePager = function () {
-                $(this).find('span.rewatajax_resultcounter').text(this.format(options.search_results, [response_options.total_results]));
+                $(this).find('span.rewatajax_resultcounter').text(this.format(options.language.search_results, [response_options.total_results]));
 
                 var _this = this;
-                var $pagination = $(this).find("nav.pagination_container");
+                var $pagination = $(this).find('nav.pagination_container');
                 $pagination.empty(); // Empty pager first
                 if (response_options.total_pages > 1) {
-                    var pagination_container = document.createElement("ul");
-                    pagination_container.className = "pagination";
+                    var pagination_container = document.createElement('ul');
+                    pagination_container.className = 'pagination';
 
                     /**
                      * Check if we need to show the first page button
                      */
                     if (options.current_page >= options.pager_max_buttons) {
-                        var pagination_element = document.createElement("li");
-                        pagination_element.innerHTML = 1;
-                        pagination_element.className = "page_button";
+                        var pagination_element = document.createElement('li');
+                        pagination_element.className = 'page-item';
+                        a_element = document.createElement('a');
+                        a_element.className = 'page-link';
+                        a_element.setAttribute('href', 'javascript:;');
+                        a_element.innerText = '1';
+                        pagination_element.appendChild(a_element);
+
                         $(pagination_element).click(function () { _this.gotoPage(1);});
                         pagination_container.appendChild(pagination_element);
 
-                        pagination_element = document.createElement("li");
-                        pagination_element.innerHTML = "...";
-                        pagination_element.className = "page_button page_dots";
+                        pagination_element = document.createElement('li');
+                        pagination_element.className = 'page-item page-dots';
+                        pagination_element.innerHTML = '...';
                         pagination_container.appendChild(pagination_element);
                     }
 
@@ -298,10 +339,10 @@
                     i_start = (i_start < 0) ? 0 : i_start;
 
                     for(var i=i_start; i<i_end; i++) {
-                        pagination_element = document.createElement("li");
-                        pagination_element.className = "page-item";
+                        pagination_element = document.createElement('li');
+                        pagination_element.className = 'page-item';
                         if (options.current_page == (i+1)) {
-                            pagination_element.className = "page-item active";
+                            pagination_element.className = 'page-item active';
                         }
 
                         var a_element = document.createElement('a');
@@ -309,10 +350,7 @@
                         a_element.setAttribute('href', 'javascript:;');
                         a_element.innerText = (i+1);
                         pagination_element.appendChild(a_element);
-                        $(pagination_element).click(function () {
-                            var page_ref = $(this).find('a').text();
-                            _this.gotoPage(page_ref);
-                        });
+                        $(pagination_element).click(function () { _this.gotoPage( $(this).find('a').text() ); });
                         pagination_container.appendChild(pagination_element);
                     }
 
@@ -320,14 +358,18 @@
                      * Check if we need to show the last page button
                      */
                     if (response_options.total_results <= Math.floor(response_options.total_pages-options.pager_max_buttons/2)) {
-                        pagination_element = document.createElement("li");
-                        pagination_element.innerHTML = "...";
-                        pagination_element.className = "page_button page_dots";
+                        pagination_element = document.createElement('li');
+                        pagination_element.innerHTML = '...';
+                        pagination_element.className = 'page_button page_dots';
                         pagination_container.appendChild(pagination_element);
 
-                        pagination_element = document.createElement("li");
-                        pagination_element.innerHTML = response_options.total_pages;
-                        pagination_element.className = "page_button";
+                        pagination_element = document.createElement('li');
+                        pagination_element.className = 'page-item';
+                        a_element = document.createElement('a');
+                        a_element.className = 'page-link';
+                        a_element.setAttribute('href', 'javascript:;');
+                        a_element.innerText = (response_options.total_pages);
+                        pagination_element.appendChild(a_element);
                         $(pagination_element).click(function () { _this.gotoPage(response_options.total_pages);});
                         pagination_container.appendChild(pagination_element);
                     }
@@ -368,6 +410,7 @@
             $this.updateHead = function() {
                 var thead = $this.getHead().children;
                 $(outputToDiv).find('table#'+tableId+' > thead').html(thead);
+                $("[data-toggle=popover]").popover();
             };
             $this.updateContent = function() {
                 var tbody = $this.getBody().children;
@@ -406,7 +449,6 @@
                 tbody.id = tableId+'_tbody';
                 table.appendChild(tbody);
 
-
                 var ajaxLoading = document.createElement('div');
                 ajaxLoading.className = 'ajax_loading';
                 table.insertBefore(ajaxLoading, table.firstChild);
@@ -422,7 +464,7 @@
                 $this.callConnector(function() { $this.updateHead(); $this.updateContent(); });
                 tableContainer.find('div.ajax_loading').hide();
 
-                tableContainer.on('click', allSortableSelector+' > span', function() {
+                tableContainer.on('click', allSortableSelector+' > label', function() {
                     var parent = $(this).parent('th');
                     var direction = 'asc';
                     if($(parent).attr('data-sort-mode') == 'asc') {
@@ -435,9 +477,30 @@
 
                     $this.callConnector(function() { $this.updateContent(); });
                 });
+                tableContainer.on('click', allFilterableSelector+' > a', function() {
+                    var parent = $(this).parent('th');
+
+                    if($(this).hasClass('active')) {
+                        $(this).removeClass('active');
+                    }else{
+                        $(this).addClass('active');
+                    }
+
+                    //$this.callConnector(function() { $this.updateContent(); });
+                });
+
+                //$('div.datepicker > input').datepicker({
+                //    showOn: ""
+                //});
+                tableContainer.on('click', 'span[data-action="showDatepicker"] > span', function() {
+                    var id = $(this).data('id');
+                    console.log($(this));
+                    //$('#'+id).datepicker("show");
+                });
+
                 $(document).keydown(function( event ) {
                     var tag = event.target.tagName.toLowerCase();
-                    if(tag != "input") {
+                    if(tag != 'input' && tag != 'select') {
                         if(event.which == 37) { //37 - back
                             if(options.current_page > 1) {
                                 $this.gotoPage(Number(options.current_page)-1);
@@ -457,8 +520,8 @@
                     tableContainer.unbind('click');
                 }
             };
-
             $this.init();
+            return this;
         }
     });
 })(jQuery);

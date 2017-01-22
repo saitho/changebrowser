@@ -1,3 +1,4 @@
+var $body = $('body div#body');
 function toggleDetails(changeId) {
     var $targetRow = $('tr.hidden-row-'+changeId);
     var $togglerIcon = $('i#dropDown-activator-'+changeId);
@@ -13,176 +14,106 @@ function toggleDetails(changeId) {
 }
 
 var modalId = 'universalModal';
-
 var currently_loaded_project = null;
-function currentProjectDetails(keepModalHidden) {
-    $.ajax({
-        method: 'GET',
-        url: paths.ajax_project_details,
-        data: { project_id: currently_loaded_project },
-        dataType: 'json'
-    }).done(function( response ) {
-        if(response.status) {
-            var modalConfig = {
-                header: response.modal.header,
-                content: response.modal.content,
-                footer: {
-                    showSaveButton: true
-                }
-            };
-            createModal(modalId, modalConfig);
-            if(!keepModalHidden) {
-                $('div#'+modalId).modal('show');
-            }
-        }
-    });
-}
 
-function submitForm(url, form) {
+function submitForm(url, form, modal) {
     $.ajax({
         method: $(form).attr('method'),
         url: url,
         data: { formData: $(form).serialize() },
         dataType: 'json'
     }).done(function( response ) {
-
-    });
-}
-
-function addProject(keepModalHidden) {
-    var url = paths.ajax_project_add;
-    $.ajax({
-        method: 'GET',
-        url: url,
-        data: {  },
-        dataType: 'json'
-    }).done(function( response ) {
         if(response.status) {
-            var modalConfig = {
-                header: response.modal.header,
-                content: response.modal.content,
-                footer: {
-                    buttons: {
-                        closeButton: {
-                            type: 'close',
-                            class: 'btn btn-default',
-                            text: 'Close'
-                        },
-                        saveButton: {
-                            type: 'submit',
-                            submitForm: 'projectForm',
-                            class: 'btn btn-primary',
-                            text: 'Save changes'
-                        }
-                    }
-                }
-            };
-            createModal(modalId, modalConfig);
-            var $modal = $('div#'+modalId);
-            if(!keepModalHidden) {
-                $modal.modal('show');
+            if(modal) {
+                modal.modal('hide');
+                var option = document.createElement('option');
+                option.value = response.id;
+                option.innerText = response.title;
+                $('select#projectList').append(option);
             }
-
-            $('form#projectForm').submit(function( event ) {
-                event.preventDefault();
-                submitForm(url, this);
-            });
-
-           // var saveButton = $modal.find('div.modal-footer > button#saveButton');
-           // saveButton.click(function() {
-           //     console.log('clicked save button');
-           //     submitForm(url, $modal.find('form[name=projectForm]'));
-           // });
         }
     });
 }
 
+function flashMessage(message, type) {
+    if(type == undefined) {
+        type = 'info';
+    }
+    $.bootstrapGrowl(message, {
+        ele: 'body', // which element to append to
+        type: type, // (null, 'info', 'error', 'success')
+        offset: {from: 'top', amount: 10}, // 'top', or 'bottom'
+        align: 'center', // ('left', 'right', or 'center')
+        width: 'auto', // (integer, or 'auto')
+        delay: 4000,
+        allow_dismiss: false,
+        newest_on_top: true,
+        stackup_spacing: 10 // spacing between consecutively stacked growls.
+    });
+}
+
+function format(str, arr) {
+    return str.replace(/%(\d+)/g, function(_,m) {
+        return arr[--m];
+    });
+}
+
 function loadProject(projectId) {
-    var $body = $('body div#body');
     currently_loaded_project = projectId;
-    $body.rewatajax({id: 'changeTable', ajax_connector: paths.ajax_loadProject}, { project_id: projectId }, 'body div#body');
-    return;
+    var options = {
+        id: 'changeTable',
+        ajax_connector: paths.ajax_loadProject,
+        pager_max_buttons: 15,
+        language: {
+            dateFilter_start: Translator.trans('rewatajax.dateFilter_start'),
+            dateFilter_end: Translator.trans('rewatajax.dateFilter_end'),
+            filter: Translator.trans('rewatajax.filter'),
+            search_results: Translator.trans('rewatajax.search_results'),
+            search_text: Translator.trans('rewatajax.search_text'),
+            no_entries_message: Translator.trans('rewatajax.no_entries_message')
+        }
+    };
+    $body.rewatajax(options, { project_id: projectId }, 'body div#body');
 
+    $('button#fetchdata-button').unbind('click');
+    $('button#fetchdata-button').click(function() {
+        var projectId = currently_loaded_project;
+        var $projectBarButtons = $('div#projectBar button');
+        var $projectBarSelects = $('div#projectBar select');
+        if($projectBarButtons.hasClass('disabled')) {
+            console.log('Already working.');
+        }else{
+            $.ajax({
+                method: 'POST',
+                url: paths.ajax_cli_fetchData,
+                data: { project_id: projectId },
+                dataType: 'json',
+                beforeSend: function(xhr) {
+                    $projectBarButtons.addClass('disabled');
+                    $projectBarSelects.attr('disabled', true);
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    flashMessage(textStatus, 'error');
+                },
+                complete: function() {
+                    $projectBarButtons.removeClass('disabled');
+                    $projectBarSelects.attr('disabled', false);
+                }
+            }).done(function( response ) {
+                var type = 'error';
+                if(response.status) {
+                    type = 'success';
+                }
+                var changes_count = response.changes_count;
 
-    $.ajax({
-        method: 'GET',
-        url: paths.ajax_loadProject,
-        data: { project_id: projectId },
-        dataType: 'json'
-    }).done(function( response ) {
-        var headerData = response.header;
-
-        if(response.status) {
-            currently_loaded_project = projectId;
-            var changeData = [];
-            var responseOptions = response.options;
-            $(response.changes).each(function(key, change) {
-                var subTable = createTableObject(
-                    {id: 'subtable-'+change.id, class: 'table table-responsive table-bordered changecontent-table'},
-                    change.changeContents_head,
-                    change.changeContents_content
-                );
-
-                var fieldIndex = [];
-                for(var changeKey in change) {
-                    if(headerData[changeKey]) {
-                        if(change[changeKey] == '' || change[changeKey] == undefined) {
-                            continue;
-                        }
-                    }
-                    fieldIndex[changeKey] = change[changeKey];
+                var text = Translator.trans('cli.no_new_changes_found');
+                if(changes_count > 0) {
+                    text = format(Translator.trans('cli.changes_fetched'), [changes_count]);
+                    loadProject(projectId);
                 }
 
-                var columns = [];
-                for(headerKey in headerData) {
-                    var headerValueTransform = headerData[headerKey].transform;
-                    var originalFieldValue = fieldIndex[headerKey];
-
-                    if(headerValueTransform != '' && headerValueTransform != undefined) {
-                        var transformedText = '';
-                        switch(headerValueTransform) {
-                            case 'date':
-                                transformedText = new Date(originalFieldValue.date).toLocaleString();
-                                break;
-                            default:
-                                transformedText = headerValueTransform;
-                                if(transformedText.match('!_self')) {
-                                    if(originalFieldValue == undefined || !originalFieldValue) {
-                                        break;
-                                    }else{
-                                        transformedText = transformedText.replace('!_self', originalFieldValue);
-                                    }
-                                }
-                                if(transformedText != '') {
-                                    for(var replaceKey in fieldIndex) {
-                                        transformedText = transformedText.replace('!'+replaceKey, fieldIndex[replaceKey]);
-                                    }
-                                }
-                                break;
-                        }
-                        columns.push(transformedText);
-                    }else{
-                        columns.push(change[headerKey]);
-                    }
-                }
-
-                changeData.push({
-                    columns: columns,
-                    additionalFullWidthRow: {
-                        html: subTable,
-                        id: change.id
-                    }
-                });
+                flashMessage(text, type);
             });
-
-            var table = createTableObject(
-                {id: 'changeTable'},
-                headerData,
-                changeData,
-                Translator.trans('no_entries_found'),
-                responseOptions
-        );
-            $body.html(table);
         }
     });
 }
@@ -190,4 +121,63 @@ function loadProject(projectId) {
 $(document).ready(function() {
     // Enable tooltips
     $('[data-toggle="tooltip"]').tooltip();
+
+    $('button#button-project-add').click(function() {
+        $.ajax({
+            method: 'GET',
+            url: paths.ajax_project_add,
+            data: {  },
+            dataType: 'json'
+        }).done(function( response ) {
+            if(response.status) {
+                var modalConfig = {
+                    header: response.modal.header,
+                    content: response.modal.content,
+                    footer: {
+                        buttons: {
+                            closeButton: {
+                                type: 'close',
+                                class: 'btn btn-default',
+                                text: 'Close'
+                            },
+                            saveButton: {
+                                type: 'submit',
+                                submitForm: 'projectForm',
+                                class: 'btn btn-primary',
+                                text: 'Save changes'
+                            }
+                        }
+                    }
+                };
+                createModal(modalId, modalConfig);
+                var $modal = $('div#'+modalId);
+                $modal.modal('show');
+
+                $('form#projectForm').submit(function( event ) {
+                    event.preventDefault();
+                    submitForm(url, this, $modal);
+                });
+            }
+        });
+    });
+    $('button#button-project-details').click(function() {
+        $.ajax({
+            method: 'GET',
+            url: paths.ajax_project_details,
+            data: { project_id: currently_loaded_project },
+            dataType: 'json'
+        }).done(function( response ) {
+            if(response.status) {
+                var modalConfig = {
+                    header: response.modal.header,
+                    content: response.modal.content,
+                    footer: {
+                        showSaveButton: true
+                    }
+                };
+                createModal(modalId, modalConfig);
+                $('div#'+modalId).modal('show');
+            }
+        });
+    });
 });

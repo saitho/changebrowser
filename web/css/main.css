@@ -1,7 +1,15 @@
+.bootstrap-growl {
+    height: 50px;
+}
+
 ul.dropdown-menu.locales {
     left: -100px;
 }
 
+.vertical-align-middle {
+    margin-top: auto;
+    margin-bottom: auto;
+}
 .divider-vertical {
     height: 100%;                   /* any height */
     border-left: 1px solid gray;     /* right or left is the same */
@@ -10,19 +18,25 @@ ul.dropdown-menu.locales {
     margin: 0 15px;                  /* optional */
 }
 
-table#changeTable > thead > tr > th[data-sort-mode] > span {
+table#changeTable > thead > tr > th[data-sort-mode] > label {
     cursor: pointer;
     padding-right: 20px;
 }
 
-table#changeTable > thead > tr > th[data-sort-mode] > span{
+table#changeTable > thead > tr > th[data-sort-mode] > label {
     background: url(../images/sorting-inactive.png) no-repeat 99%;
 }
-table#changeTable > thead > tr > th[data-sort-mode="desc"] > span{
+table#changeTable > thead > tr > th[data-sort-mode="desc"] > label {
     background: url(../images/sorting-down.png) no-repeat 99% !important;
 }
-table#changeTable > thead > tr > th[data-sort-mode="asc"] > span {
-    background: url(../images/sorting-up.png) no-repeat 99% !important;;
+table#changeTable > thead > tr > th[data-sort-mode="asc"] > label {
+    background: url(../images/sorting-up.png) no-repeat 99% !important;
+}
+table#changeTable > thead > tr > th[data-filterable] > a.rewatajax-filter {
+    color: lightgrey;
+}
+table#changeTable > thead > tr > th[data-filterable] > a.rewatajax-filter.active {
+    color: #0275d8;
 }
 
 label.control-label {

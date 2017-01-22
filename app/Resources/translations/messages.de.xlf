@@ -17,6 +17,10 @@
         <source>label.password</source>
         <target>Passwort</target>
       </trans-unit>
+      <trans-unit id="label.version" resname="label.version">
+        <source>label.version</source>
+        <target>Version</target>
+      </trans-unit>
       <trans-unit id="4bfbf0db73df22d646d141f80acf1f4d" resname="action.sign_in">
         <source>action.sign_in</source>
         <target>Einloggen</target>
@@ -69,9 +73,9 @@
         <source>menu.homepage</source>
         <target>Home</target>
       </trans-unit>
-      <trans-unit id="ac83eba1ba0facdc40012f6f253e72d5" resname="menu.project_list">
-        <source>menu.project_list</source>
-        <target>Projekte</target>
+      <trans-unit id="label.project">
+        <source>label.project</source>
+        <target>Projekt</target>
       </trans-unit>
       <trans-unit id="40f177fc22066acbbf94d36495ccc7a9" resname="title.project_list">
         <source>title.project_list</source>
@@ -228,6 +232,40 @@
       <trans-unit id="label.details">
         <source>label.details</source>
         <target>Details</target>
+      </trans-unit>
+
+      <trans-unit id="rewatajax.search_results">
+        <source>rewatajax.search_results</source>
+        <target>%1 Ergebnisse gefunden.</target>
+      </trans-unit>
+      <trans-unit id="rewatajax.no_entries_message">
+        <source>rewatajax.no_entries_message</source>
+        <target>Keine Einträge gefunden.</target>
+      </trans-unit>
+      <trans-unit id="rewatajax.search_text">
+        <source>rewatajax.search_text</source>
+        <target>Suchen</target>
+      </trans-unit>
+      <trans-unit id="rewatajax.dateFilter_start">
+        <source>rewatajax.dateFilter_start</source>
+        <target>Startdatum</target>
+      </trans-unit>
+      <trans-unit id="rewatajax.dateFilter_end">
+        <source>rewatajax.dateFilter_end</source>
+        <target>Enddatum</target>
+      </trans-unit>
+      <trans-unit id="rewatajax.filter">
+        <source>rewatajax.filter</source>
+        <target>Filter</target>
+      </trans-unit>
+
+      <trans-unit id="cli.no_new_changes_found">
+        <source>cli.no_new_changes_found</source>
+        <target>Keine neuen Änderungen gefunden.</target>
+      </trans-unit>
+      <trans-unit id="cli.changes_fetched">
+        <source>cli.changes_fetched</source>
+        <target>%1 neue Änderungen gefunden.</target>
       </trans-unit>
     </body>
   </file>

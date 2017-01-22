@@ -3,24 +3,33 @@
 {% block body_id 'home' %}
 
 {% block body %}
-    <div class="form-group row">
-        <label for="projectList" class="control-label col-xs-1">Project</label>
-        <div class="col-xs-11 input-group">
-            <span class="input-group-btn">
-                <a class="btn btn-primary" href="javascript:addProject();" data-toggle="tooltip" data-placement="top" title="{{ 'action.create_project'|trans }}">
-                    <i class="fa fa-plus"></i>
-                </a>
-            </span>
-            <select name="projectList" id="projectList" class="form-control">
-                {% for project in projects %}
-                    <option value="{{ project.id }}">{{ project.title }}</option>
-                {% endfor %}
-            </select>
-            <span class="input-group-btn">
-                <a class="btn btn-default" href="javascript:currentProjectDetails();" data-toggle="tooltip" data-placement="top" title="{{ 'action.edit_project'|trans }}">
-                    <i class="fa fa-pencil"></i>
-                </a>
-            </span>
+    <div class="form-group row" id="projectBar">
+        <div class="col-sm-1">
+            <label for="projectList" class="control-label">{{ 'label.project'|trans }}</label>
+        </div>
+        <div class="col-sm-11 vertical-align-middle">
+            <div class="input-group">
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-primary" id="button-project-add" data-toggle="tooltip" data-placement="top" title="{{ 'action.create_project'|trans }}">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                </span>
+                <select name="projectList" id="projectList" class="form-control">
+                    {% for project in projects %}
+                        <option value="{{ project.id }}">{{ project.title }}</option>
+                    {% endfor %}
+                </select>
+                <span class="input-group-btn">
+                    <button type="button" class="btn btn-secondary" id="button-project-details" data-toggle="tooltip" data-placement="top" title="{{ 'action.edit_project'|trans }}">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                </span>
+                <span class="input-group-btn">
+                      <button type="button" id="fetchdata-button" class="btn btn-secondary" data-toggle="tooltip" aria-haspopup="true" aria-expanded="false" data-placement="top" title="{{ 'action.fetch_data'|trans }}">
+                        <i class="fa fa-refresh"></i>
+                      </button>
+                </span>
+            </div>
         </div>
     </div>
     <hr />
@@ -28,7 +37,7 @@
         {{ 'home_loading'|trans }}
     </div>
 
-    <div id="universalModal" class="modal fade" tabindex="-1" role="dialog"></div>
+    <div id="universalModal" class="modal" tabindex="-1" role="dialog"></div>
 {% endblock %}
 
 {% block javascripts %}
@@ -36,7 +45,8 @@
         var paths = {
             'ajax_loadProject' : '{{path("ajax_loadProject")}}',
             'ajax_project_details' : '{{path("ajax_project_details")}}',
-            'ajax_project_add' : '{{path("ajax_project_add")}}'
+            'ajax_project_add' : '{{path("ajax_project_add")}}',
+            'ajax_cli_fetchData' : '{{path("ajax_cli_fetchData")}}'
         };
     </script>
     {{ parent() }}
@@ -44,10 +54,6 @@
     <script src="{{ asset('js/modal.js') }}"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            // todo: Abrufen der Versionen!
-            // todo: Changelog Export (Markdown) nach Version
-            // z.B. https://raw.githubusercontent.com/brave/browser-laptop/master/CHANGELOG.md
-
             var $projectSelect = $('select#projectList');
             loadProject($projectSelect.val(), true);
             $projectSelect.change(function () {
