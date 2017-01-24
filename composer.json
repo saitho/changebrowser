@@ -30,7 +30,8 @@
         "twig/twig"                            : "^1.28",
         "white-october/pagerfanta-bundle"      : "^1.0",
         "Zolli/Phabricator-PHP-API"            : "^2.0",
-        "willdurand/js-translation-bundle"     : "^2.6"
+        "willdurand/js-translation-bundle"     : "^2.6",
+        "beberlei/DoctrineExtensions"          : "^1.0"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer"            : "^1.12",

@@ -1,6 +1,8 @@
+// todo: define public function rewatajaxParseBodyData for standalone release
+
 (function($) {
     $.fn.extend({
-        rewatajax: function(options, connectorData, outputToDiv) {
+        rewatajax: function(options, connectorData, outputToDiv, staticResult) {
             var defaults = {
                 table_class: '',
                 sort_by: '',
@@ -24,7 +26,7 @@
 
             var $this = this;
             var header_data = null;
-            var content_data = null;
+            var body_data = null;
             var response_options = null;
 
             var cached_header = null;
@@ -38,6 +40,12 @@
             var allFilterableSelector = 'table#'+tableId+' > thead > tr > th[data-filterable]';
             var tableClass = options.table_class;
 
+            $this.handleConnectorResponse = function(headerData, bodyData, responseOptions) {
+                header_data = headerData;
+                body_data = bodyData;
+                response_options = responseOptions;
+                $this.updatePager();
+            };
             $this.callConnector = function(callWhenFinished) {
                 connectorData['sort_by'] = options.sort_by;
                 connectorData['sort_mode'] = options.sort_mode;
@@ -45,85 +53,26 @@
                 connectorData['current_page'] = options.current_page;
                 connectorData['search'] = options.search;
 
-                $.ajax({
-                    method: 'GET',
-                    url: options.ajax_connector,
-                    data: connectorData,
-                    dataType: 'json'
-                }).done(function( response ) {
-                    header_data = response.header;
-                    if(response.status) {
-                        //currently_loaded_project = projectId;
-                        var changeData = [];
-                        $(response.changes).each(function(key, change) {
-                            var subTable = createTableObject(
-                                {id: 'subtable-'+change.id, class: 'table table-bordered changecontent-table'},
-                                change.changeContents_head,
-                                change.changeContents_content
-                            );
-
-                            var fieldIndex = [];
-                            for(var changeKey in change) {
-                                if(header_data[changeKey]) {
-                                    if(change[changeKey] == '' || change[changeKey] == undefined) {
-                                        continue;
-                                    }
-                                }
-                                fieldIndex[changeKey] = change[changeKey];
-                            }
-
-                            var columns = [];
-                            for(headerKey in header_data) {
-                                var headerValueType = header_data[headerKey].type;
-                                var headerValueTransform = header_data[headerKey].transform;
-                                var originalFieldValue = fieldIndex[headerKey];
-
-                                //if(headerValueTransform != '' && headerValueTransform != undefined) {
-                                    var transformedText = '';
-                                    switch(headerValueType) {
-                                        case 'date':
-                                            transformedText = new Date(originalFieldValue.date).toLocaleString();
-                                            break;
-                                        default:
-                                            transformedText = headerValueTransform;
-                                            if(transformedText && transformedText.match('!_self')) {
-                                                if(originalFieldValue == undefined || !originalFieldValue) {
-                                                    transformedText = '';
-                                                    break;
-                                                }else{
-                                                    transformedText = transformedText.replace('!_self', originalFieldValue);
-                                                }
-                                            }
-                                            if(transformedText && transformedText != '') {
-                                                for(var replaceKey in fieldIndex) {
-                                                    transformedText = transformedText.replace('!'+replaceKey, fieldIndex[replaceKey]);
-                                                }
-                                            }else{
-                                                transformedText = change[headerKey];
-                                            }
-                                            break;
-                                    }
-                                    columns.push(transformedText);
-                                //}else{
-                                //    columns.push(change[headerKey]);
-                               // }
-                            }
-
-                            changeData.push({
-                                columns: columns,
-                                additionalFullWidthRow: {
-                                    html: subTable,
-                                    id: change.id
-                                }
-                            });
-                        });
-
-                        content_data = changeData;
-                        response_options = response.options;
-                        $this.updatePager();
-                        callWhenFinished();
-                    }
-                });
+                if(staticResult != undefined) {
+                    header_data = staticResult.header_data;
+                    body_data = staticResult.body_data;
+                    response_options = staticResult.response_options;
+                    $this.handleConnectorResponse(header_data, body_data, response_options, callWhenFinished);
+                    callWhenFinished();
+                }else{
+                    $.ajax({
+                        method: 'GET',
+                        url: options.ajax_connector,
+                        data: connectorData,
+                        dataType: 'json'
+                    }).done(function( response ) {
+                        if(response.status) {
+                            var _body_data = rewatajaxParseBodyData(response.body_data, response.header);
+                            $this.handleConnectorResponse(response.header, _body_data, response.options, callWhenFinished);
+                            callWhenFinished();
+                        }
+                    });
+                }
             };
 
             $this.searchKeyUp = function (string) {
@@ -213,7 +162,7 @@
             };
             $this.getBody = function() {
                 var tbody = document.createElement('tbody');
-                if(content_data.length === 0) {
+                if(body_data.length === 0) {
                     var tr = document.createElement('tr');
                     var td = document.createElement('td');
                     td.colSpan = Object.keys(header_data).length;
@@ -223,7 +172,7 @@
                     tbody.appendChild(tr);
                     return tbody;
                 }
-                $(content_data).each(function(key, element) {
+                $(body_data).each(function(key, element) {
                     var tr = document.createElement('tr');
                     $(element.columns).each(function(k, v) {
                         var td = document.createElement('td');
@@ -421,7 +370,7 @@
                     console.log('Header data missing.');
                     return;
                 }
-                if(!content_data) {
+                if(!body_data) {
                     console.log('Content data missing.');
                     return;
                 }

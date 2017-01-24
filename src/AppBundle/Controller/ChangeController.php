@@ -7,6 +7,7 @@ use AppBundle\Entity\ChangeContent;
 use AppBundle\Entity\Project;
 use AppBundle\Helper\ReWatajaxDoctrine;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\QueryBuilder;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -122,7 +123,7 @@ class ChangeController extends Controller {
 			$rewatajax->setParams(['project' => $project]);
 			
 			$result = $rewatajax->findResults();
-			$changes = [];
+			$body_data = [];
 			/** @var Change $change */
 			foreach($result AS $change) {
 				$changeContents = [];
@@ -142,7 +143,7 @@ class ChangeController extends Controller {
 					];
 					$changeContents[] = $std;
 				}
-				$changes[] = [
+				$body_data[] = [
 					'id' => $change->getId(),
 					'author' => $change->getAuthor(),
 					'date' => $change->getDate(),
@@ -182,8 +183,89 @@ class ChangeController extends Controller {
 				];
 			}
 			
-			$response['changes'] = $changes;
+			$response['body_data'] = $body_data;
 			$response['options'] = $rewatajax->getOptions();
+			
+			// Statistics
+			/** @var QueryBuilder $qb */
+			$em = $this->getDoctrine()->getManager();
+			$qb = $em->createQueryBuilder();
+			$qb->select('count(a.id) AS results, YEAR(a.date) AS year, MONTH(a.date) AS month, DAY(a.date) AS day')
+				->from('AppBundle:Change', 'a')
+				->where('a.project = :project')
+				->andWhere('a.type = :type')
+				->groupBy('year')
+				->addGroupBy('month')
+				->addGroupBy('day');
+			$tags = ['feature', 'bugfix', 'cleanup', 'task', ''];
+			$statistics = [];
+			$statisticsByMonth = [];
+			foreach($tags AS $tag) {
+				$query = $em->createQuery($qb->getDQL());
+				$query->setParameter('project', $project);
+				$query->setParameter('type', $tag);
+				$results = $query->execute();
+				foreach($results AS $result) {
+					$year = $result['year'];
+					$month = $result['month'];
+					$day = $result['day'];
+					$_tag = $tag;
+					if(empty($tag)) {
+						$_tag = 'not specified';
+					}
+					$statistics[$_tag][$year.'-'.$month.'-'.$day] = $result['results'];
+					$statisticsByMonth[$_tag][$year.'-'.$month] = $result['results'];
+				}
+			}
+			
+			// Find array with the most elements
+			$largestArray = [];
+			foreach($statistics AS $statistic) {
+				if(count($statistic) > count($largestArray)) {
+					$largestArray = $statistic;
+				}
+			}
+			// based on that we can get the x-axis sections
+			$xAxisLabels = array_keys($largestArray);
+			// but we have to complete the other tags as they might be shorter
+			foreach($statistics AS &$statistic) {
+				if(count($statistic) == count($largestArray)) {
+					continue;
+				}
+				foreach($xAxisLabels AS $section) {
+					if(empty($statistic[$section])) {
+						$statistic[$section] = 0;
+					}
+				}
+			}
+			
+			/*
+			$largestArrayMonth = [];
+			foreach($statisticsByMonth AS $statistic) {
+				if(count($statistic) > count($largestArray)) {
+					$largestArrayMonth = $statistic;
+				}
+			}
+			// based on that we can get the x-axis sections
+			$xAxisLabels = array_keys($largestArrayMonth);
+			// but we have to complete the other tags as they might be shorter
+			foreach($statisticsByMonth AS &$statistic) {
+				if(count($statistic) == count($largestArray)) {
+					continue;
+				}
+				foreach($xAxisLabels AS $section) {
+					if(empty($statistic[$section])) {
+						$statistic[$section] = 0;
+					}
+				}
+			}
+			 */
+			
+			$response['statistics'] = [
+				'datasets' => $statistics,
+				'datasetByMonth' => $statisticsByMonth,
+				'xAxisLabels' => $xAxisLabels
+			];
 		}
 		//handle data
 		return new Response(json_encode($response));
