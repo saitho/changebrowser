@@ -15,7 +15,7 @@ class AppKernel extends Kernel
             new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
             new WhiteOctober\PagerfantaBundle\WhiteOctoberPagerfantaBundle(),
-			new Bazinga\Bundle\JsTranslationBundle\BazingaJsTranslationBundle(),	// php app/console assets:install --symlink web
+			new Bazinga\Bundle\JsTranslationBundle\BazingaJsTranslationBundle(),	// php bin/console assets:install --symlink web
             new AppBundle\AppBundle(),
             new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle(), // used for initial population of non-SQLite databases in production envs
         ];

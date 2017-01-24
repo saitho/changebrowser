@@ -1,0 +1,60 @@
+@startuml
+
+namespace modal.js {
+    class createModal {
+        + createModal(id : string, modalConfig : Object)
+        - header(contentDiv : HTMLDivElement)
+        - body(contentDiv : HTMLDivElement)
+        - footer(contentDiv : HTMLDivElement)
+    }
+}
+
+namespace tableobject.js {
+    class rewatajax {
+        + rewatajax(options : Object, connectorData : Object, outputToDiv : string[, staticResult : array])
+        - defaults : object
+        - $this : this
+        - header_data : object
+        - body_data : object
+        - response_options : object
+        - cached_header : string
+        - searchTimeout
+        - tableId : string
+        - allSortableSelector : string
+        - allFilterableSelector : string
+        - tableClass : string
+        
+        - handleConnectorResponse(headerData : Object, bodyData : Object, responseOptions : Object)
+        - callConnector(callWhenFinished : function)
+        - searchKeyUp (string : string)
+        - search(string : string)
+        - getFilterForm(key : string)
+        - getHead()
+        - getBody()
+        - createSearch (tableContainer : this)
+        - format(str : string, arr : array)
+        - gotoPage (page : string)
+        - updatePager ()
+        - isElement(o : Object) : bool
+        - addValueToTd(td : HTMLTdObject, value : string)
+        - updateHead()
+        - updateContent()
+        - drawTable()
+        - init()
+        - cleanup(tableContainer : this)
+    }
+    class createTableObject {
+        + createTableObject(tableOptions : Object, theadObject : Object, tbodyObject : Object, noResultsMessage : string, options : Object)
+        - $this : this
+        - tableId : string
+        - tableClass : string
+        - sortableSelector : string
+        - isElement(o : Object) : bool
+        - addValueToTd(td : HTMLTdObject, value : string)
+        - createHead(table : HTMLTableElement, theadObject : Object, tbodyObject : Object, noResultsMessage : string, options : Object)
+        - createBody = function(table : HTMLTableElement, theadObject : Object, tbodyObject : Object, noResultsMessage : string, options : Object)
+    }
+}
+
+
+@enduml

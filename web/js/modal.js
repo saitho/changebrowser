@@ -1,5 +1,5 @@
 function createModal(id, modalConfig) {
-    this.header = function(contentDiv, modalConfig) {
+    this.header = function(contentDiv) {
         var headerDiv = document.createElement('div');
         headerDiv.className = 'modal-header';
 
@@ -24,7 +24,7 @@ function createModal(id, modalConfig) {
 
         contentDiv.appendChild(headerDiv);
     };
-    this.body = function(contentDiv, modalConfig) {
+    this.body = function(contentDiv) {
         if(!modalConfig.content) {
             return;
         }
@@ -33,7 +33,7 @@ function createModal(id, modalConfig) {
         bodyDiv.innerHTML = modalConfig.content;
         contentDiv.appendChild(bodyDiv);
     };
-    this.footer = function(contentDiv, modalConfig) {
+    this.footer = function(contentDiv) {
         var footerDiv = document.createElement('div');
         footerDiv.className = 'modal-footer';
 
@@ -82,9 +82,9 @@ function createModal(id, modalConfig) {
     contentDiv.className = 'modal-content';
 
     // Modal contents:
-    this.header(contentDiv, modalConfig);
-    this.body(contentDiv, modalConfig);
-    this.footer(contentDiv, modalConfig);
+    this.header(contentDiv);
+    this.body(contentDiv);
+    this.footer(contentDiv);
 
     dialogDiv.appendChild(contentDiv);
     $modal.append(dialogDiv);
