@@ -5,6 +5,19 @@
       <tool tool-id="symfony" tool-name="Symfony"/>
     </header>
     <body>
+      <trans-unit id="lang.id" resname="lang.id">
+        <source>lang.id</source>
+        <target>de</target>
+      </trans-unit>
+      <trans-unit id="lang.date" resname="lang.date">
+        <source>lang.date</source>
+        <target>dd.mm.yyyy</target>
+      </trans-unit>
+      <trans-unit id="lang.dateISO" resname="lang.dateISO">
+        <source>lang.dateISO</source>
+        <target>DD.MM.YYYY</target>
+      </trans-unit>
+
       <trans-unit id="d7d0dc5d9eaeedc89b1c87bd4a21d1ec" resname="title.login">
         <source>title.login</source>
         <target>Login</target>
@@ -229,9 +242,9 @@
         <source>label.changecontent.changes</source>
         <target>~</target>
       </trans-unit>
-      <trans-unit id="label.details">
-        <source>label.details</source>
-        <target>Details</target>
+      <trans-unit id="label.diff">
+        <source>label.diff</source>
+        <target>Diff</target>
       </trans-unit>
 
       <trans-unit id="rewatajax.search_results">
@@ -246,13 +259,9 @@
         <source>rewatajax.search_text</source>
         <target>Suchen</target>
       </trans-unit>
-      <trans-unit id="rewatajax.dateFilter_start">
-        <source>rewatajax.dateFilter_start</source>
-        <target>Startdatum</target>
-      </trans-unit>
-      <trans-unit id="rewatajax.dateFilter_end">
-        <source>rewatajax.dateFilter_end</source>
-        <target>Enddatum</target>
+      <trans-unit id="rewatajax.dateFilter_range">
+        <source>rewatajax.dateFilter_range</source>
+        <target>Zeitraum</target>
       </trans-unit>
       <trans-unit id="rewatajax.filter">
         <source>rewatajax.filter</source>

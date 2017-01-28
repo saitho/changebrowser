@@ -1,4 +1,60 @@
-// todo: define public function rewatajaxParseBodyData for standalone release
+// todo: rename change* fields for standalone release
+// todo: remove additionalFullWidthRow for standalone release
+// todo: remove createTableObject or make better use of it for standalone release
+
+function rewatajaxParseBodyData(response, header_data) {
+    var changeData = [];
+    $(response).each(function(key, change) {
+        var fieldIndex = [];
+        for(var changeKey in change) {
+            if(header_data[changeKey]) {
+                if(change[changeKey] == '' || change[changeKey] == undefined) {
+                    continue;
+                }
+            }
+            fieldIndex[changeKey] = change[changeKey];
+        }
+
+        var columns = [];
+        for(var headerKey in header_data) {
+            var headerValueType = header_data[headerKey].type;
+            var headerValueTransform = header_data[headerKey].transform;
+            var originalFieldValue = fieldIndex[headerKey];
+
+            //if(headerValueTransform != '' && headerValueTransform != undefined) {
+            var transformedText = '';
+            switch(headerValueType) {
+                case 'date':
+                    transformedText = new Date(originalFieldValue.date).toLocaleString();
+                    break;
+                default:
+                    transformedText = headerValueTransform;
+                    if(transformedText && transformedText.match('!_self')) {
+                        if(originalFieldValue == undefined || !originalFieldValue) {
+                            transformedText = '';
+                            break;
+                        }else{
+                            transformedText = transformedText.replace('!_self', originalFieldValue);
+                        }
+                    }
+                    if(transformedText && transformedText != '') {
+                        for(var replaceKey in fieldIndex) {
+                            transformedText = transformedText.replace('!'+replaceKey, fieldIndex[replaceKey]);
+                        }
+                    }else{
+                        transformedText = change[headerKey];
+                    }
+                    break;
+            }
+            columns.push(transformedText);
+        }
+
+        changeData.push({
+            columns: columns
+        });
+    });
+    return changeData;
+}
 
 (function($) {
     $.fn.extend({
@@ -18,13 +74,32 @@
                     search_text: 'Search...',
                     search_results: '%1 results found.',
                     no_entries_message: 'No results found.',
-                    dateFilter_start: 'Start date',
-                    dateFilter_end: 'End date'
-                }
+                    dateFilter_range: 'Date range'
+                },
+                daterangepicker: {
+                    opens: 'left',
+                    autoUpdateInput: false,
+                    locale: {
+                        format: 'DD/MM/YYYY',
+                        cancelLabel: 'Clear'
+                    },
+                    ranges: {
+                        'Today': [moment(), moment()],
+                        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                        'This Month': [moment().startOf('month'), moment().endOf('month')],
+                        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                    }
+                },
+                format: {
+                    dateISO: 'DD/MM/YYYY'
+                },
+                filter: []
             };
             options = $.extend(defaults, options);
 
-            var $this = this;
+            var _this = this;
             var header_data = null;
             var body_data = null;
             var response_options = null;
@@ -40,24 +115,26 @@
             var allFilterableSelector = 'table#'+tableId+' > thead > tr > th[data-filterable]';
             var tableClass = options.table_class;
 
-            $this.handleConnectorResponse = function(headerData, bodyData, responseOptions) {
+            _this.handleConnectorResponse = function(headerData, bodyData, responseOptions) {
                 header_data = headerData;
                 body_data = bodyData;
                 response_options = responseOptions;
-                $this.updatePager();
+                _this.updatePager();
             };
-            $this.callConnector = function(callWhenFinished) {
+            _this.callConnector = function(callWhenFinished) {
                 connectorData['sort_by'] = options.sort_by;
                 connectorData['sort_mode'] = options.sort_mode;
                 connectorData['per_page'] = options.per_page;
                 connectorData['current_page'] = options.current_page;
                 connectorData['search'] = options.search;
+                connectorData['filter'] = options.filter;
 
                 if(staticResult != undefined) {
                     header_data = staticResult.header_data;
                     body_data = staticResult.body_data;
                     response_options = staticResult.response_options;
-                    $this.handleConnectorResponse(header_data, body_data, response_options, callWhenFinished);
+                    _this.handleConnectorResponse(header_data, body_data, response_options, callWhenFinished);
+                    _this.trigger('rewatajax.callConnector', [staticResult, 'static']);
                     callWhenFinished();
                 }else{
                     $.ajax({
@@ -68,14 +145,15 @@
                     }).done(function( response ) {
                         if(response.status) {
                             var _body_data = rewatajaxParseBodyData(response.body_data, response.header);
-                            $this.handleConnectorResponse(response.header, _body_data, response.options, callWhenFinished);
+                            _this.handleConnectorResponse(response.header, _body_data, response.options, callWhenFinished);
                             callWhenFinished();
                         }
+                        _this.trigger('rewatajax.callConnector', [response, 'ajax']);
                     });
                 }
             };
 
-            $this.searchKeyUp = function (string) {
+            _this.searchKeyUp = function (string) {
                 var _this = this;
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(function () {
@@ -85,34 +163,22 @@
             this.search = function (string) {
                 options.current_page = 1;
                 options.search = string;
-                $this.callConnector(function() { $this.updateContent(); });
+                _this.callConnector(function() { _this.updateContent('search'); });
             };
 
-            $this.getFilterForm = function(key) {
+            _this.getFilterForm = function(key) {
                 var type = header_data[key].type;
                 var form = '';
                 switch(type) {
                     case 'date':
-                        var datePickerStart = +type+"-datepicker-start";
-                        var datePickerEnd = +type+"-datepicker-end";
-                        form = "<div class='form-group'>";
-                            form += "<div class='input-group date datepicker' id='"+datePickerStart+"'>";
-                                form += "<label for='"+key+"-dateFilter-start'>"+options.language.dateFilter_start+"</label>";
-                                form += "<input class='form-control' name='"+key+"-dateFilter-start' id='"+key+"-dateFilter-start' />";
-                                form += "<span class='input-group-addon' data-action='showDatepicker' data-id='"+key+"-dateFilter-start'><span class='fa fa-calendar'></span></span>";
-                            form += "</div>";
-                            form += "<div class='input-group date datepicker' id='"+datePickerEnd+"'>";
-                                form += "<label for='"+key+"-dateFilter-start'>"+options.language.dateFilter_end+"</label>";
-                                form += "<input class='form-control' name='"+key+"-dateFilter-end' id='"+key+"-dateFilter-end' />";
-                                form += "<span class='input-group-addon' data-action='showDatepicker' data-id='"+key+"-dateFilter-end'><span class='fa fa-calendar'></span></span>";
-                            form += "</div>";
-                        form += "</div>";
+                        form += "<label for='"+key+"-dateFilter-range'>"+options.language.dateFilter_range+"</label>";
+                        form += "<input type='text' class='input-sm form-control daterange' value='' onkeydown='return false' data-key='"+key+"' id='"+key+"-dateFilter-range' />";
                         break;
                 }
                 return form;
             };
 
-            $this.getHead = function() {
+            _this.getHead = function() {
                 var thead = document.createElement('thead');
                 var tr = document.createElement('tr');
 
@@ -151,7 +217,11 @@
                     var innerHTML = '<label>'+thValue+'</label>';
                     if(name.filterable) {
                         titleTh.dataset.filterable = '';
-                        innerHTML += '<a class="rewatajax-filter" tabindex="0" role="button" data-html="true" data-toggle="popover" data-placement="bottom" data-trigger="click" title="'+options.language.filter+'" data-content="'+$this.getFilterForm(key)+'"><i class="fa fa-filter"></i></a>';
+                        var className = 'rewatajax-filter';
+                        if(_this.filterActive(key)) {
+                            className += ' active';
+                        }
+                        innerHTML += '<a class="'+className+'" id="filter-'+key+'" tabindex="0" role="button" data-html="true" data-toggle="popover" data-placement="top" data-trigger="click" title="'+options.language.filter+' <button class=\'close\'>&times;</button>" data-content="'+_this.getFilterForm(key)+'"><i class="fa fa-filter"></i></a>';
                     }
                     titleTh.innerHTML = innerHTML;
                     tr.appendChild(titleTh);
@@ -160,7 +230,7 @@
                 thead.appendChild(tr);
                 return thead;
             };
-            $this.getBody = function() {
+            _this.getBody = function() {
                 var tbody = document.createElement('tbody');
                 if(body_data.length === 0) {
                     var tr = document.createElement('tr');
@@ -179,7 +249,7 @@
                         if(v == null) {
                             tr.appendChild(td);
                         }else {
-                            $this.addValueToTd(td, v);
+                            _this.addValueToTd(td, v);
                             tr.appendChild(td);
                         }
                     });
@@ -194,7 +264,7 @@
                         var td = document.createElement('td');
                         td.colSpan = Object.keys(header_data).length;
                         if(element.additionalFullWidthRow.html) {
-                            if($this.isElement(element.additionalFullWidthRow.html)) {
+                            if(_this.isElement(element.additionalFullWidthRow.html)) {
                                 elementsFromHtml = element.additionalFullWidthRow.html;
                             }else{
                                 var div = document.createElement('div');
@@ -220,12 +290,12 @@
                 var _this = this;
                 var result_counter = document.createElement('span');
                 result_counter.style.cssText = 'float: right';
-                result_counter.className = 'rewatajax_resultcounter';
+                result_counter.className = 'rewatajax_resultcounter col-md-9 text-right';
                 search.append(result_counter);
 
                 var search_input = document.createElement('input');
                 search_input.type = 'text';
-                search_input.className = 'rewatajax_search_input';
+                search_input.className = 'rewatajax_search_input form-control col-md-3';
                 search_input.style.cssText = 'float: left';
                 search_input.placeholder = options.language.search_text;
                 $(search_input).keyup(function () {
@@ -245,7 +315,7 @@
             this.gotoPage = function (page) {
                 options.current_page = page;
                 this.updatePager();
-                $this.callConnector(function() { $this.updateContent(); });
+                _this.callConnector(function() { _this.updateContent('paginator'); });
             };
             this.updatePager = function () {
                 $(this).find('span.rewatajax_resultcounter').text(this.format(options.language.search_results, [response_options.total_results]));
@@ -332,13 +402,13 @@
              * @param o object
              * @returns bool
              */
-            $this.isElement = function(o){
+            _this.isElement = function(o){
                 return (
                     typeof HTMLElement === 'object' ? o instanceof HTMLElement : //DOM2
                         o && typeof o === 'object' && o !== null && o.nodeType === 1 && typeof o.nodeName==='string'
                 );
             };
-            $this.addValueToTd = function(td, value) {
+            _this.addValueToTd = function(td, value) {
                 if(isElement(value)) {
                     td.appendChild(value);
                 }else{
@@ -356,16 +426,85 @@
                 }
             };
 
-            $this.updateHead = function() {
-                var thead = $this.getHead().children;
+            _this.filterActive = function(filterKey) {
+                for(var k in options.filter) {
+                    for(var k2 in options.filter[k].filterOptions) {
+                        if(options.filter[k].filterOptions[k2].filterKey == filterKey) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            };
+
+            _this.hasFilter = function(filterName) {
+                $(options.filter).each(function(k, v) {
+                    if(v.filterType === filterName) {
+                        return true;
+                    }
+                });
+                return false;
+            };
+
+            _this.updateHead = function(type) {
+                var thead = _this.getHead().children;
                 $(outputToDiv).find('table#'+tableId+' > thead').html(thead);
-                $("[data-toggle=popover]").popover();
+
+                $('[data-toggle="popover"]').popover({
+                    html: true
+                }).on('shown.bs.popover', function (e) {
+                    var current_popover = '#' + $(e.target).attr('aria-describedby');
+                    $(current_popover).find('.close').click(function(){
+                        $('[data-toggle="popover"]').popover('hide');
+                    });
+
+                    if($('input.daterange').data('daterangepicker')) {
+                        $('input.daterange').data('daterangepicker').remove();
+                    }
+                    $('input.daterange').daterangepicker(options.daterangepicker)
+                        .on('apply.daterangepicker', function(ev, picker) {
+                            var formattedStart = picker.startDate.format(options.daterangepicker.locale.format);
+                            var formattedEnd = picker.endDate.format(options.daterangepicker.locale.format);
+                            var content = formattedStart + picker.locale.separator + formattedEnd;
+                            if(formattedStart == formattedEnd) {
+                                content = formattedStart;
+                            }
+                            $(this).val(content);
+                            var filterOption = {
+                                filterKey: $(ev.target).data('key'),
+                                filterValues: [picker.startDate.format('YYYY-MM-DD'), picker.endDate.format('YYYY-MM-DD')]
+                            };
+                            if(_this.hasFilter('datetime')) {
+                                options.filter[k].filterOptions.push(filterOption);
+                            }else{
+                                options.filter.push({
+                                    filterType: 'datetime',
+                                    filterOptions: [filterOption]
+                                });
+                            }
+                            $('a#filter-'+$(this).data('key')).addClass('active');
+                            _this.callConnector(function() { _this.updateContent('datepicker'); });
+                        })
+                        .on('cancel.daterangepicker', function(ev, picker) {
+                            console.log('cancel triggered');
+                            $(this).val('');
+                            $(options.filter).each(function(k, v) {
+                                if(v.filterType === 'datetime') {
+                                    options.filter.splice(k, 1);
+                                }
+                            });
+                            $('a#filter-'+$(this).data('key')).removeClass('active');
+                            _this.callConnector(function() { _this.updateContent('datepicker'); });
+                        });
+                });
+                _this.trigger('rewatajax.updateHead', [type]);
             };
-            $this.updateContent = function() {
-                var tbody = $this.getBody().children;
+            _this.updateContent = function(type) {
+                var tbody = _this.getBody().children;
                 $(outputToDiv).find('table#'+tableId+' > tbody').html(tbody);
+                _this.trigger('rewatajax.updateContent', [type]);
             };
-            $this.drawTable = function() {
+            _this.drawTable = function() {
                 if(!header_data) {
                     console.log('Header data missing.');
                     return;
@@ -377,16 +516,17 @@
                 var table = document.createElement('table');
                 table.id = tableId;
                 table.className = tableClass;
-                cached_header = $this.getHead();
+                cached_header = _this.getHead();
                 table.appendChild(cached_header);
-                var tbody = $this.getBody();
+                var tbody = _this.getBody();
                 table.appendChild(tbody);
                 $(outputToDiv).html(table);
+                _this.trigger('rewatajax.drawTable', [type]);
             };
 
-            $this.init = function() {
+            _this.init = function() {
                 var tableContainer = $(this);
-                $this.cleanup(tableContainer);
+                _this.cleanup(tableContainer);
                 tableContainer.innerHTML = '';
                 var table = document.createElement('table');
                 table.id = tableId;
@@ -404,13 +544,13 @@
 
                 tableContainer.html(table);
 
-                $this.createSearch(tableContainer);
+                _this.createSearch(tableContainer);
                 var paginator = document.createElement('nav');
                 paginator.setAttribute('aria-label', 'Page navigation');
                 paginator.className = 'pagination_container';
                 tableContainer.append(paginator);
 
-                $this.callConnector(function() { $this.updateHead(); $this.updateContent(); });
+                _this.callConnector(function() { _this.updateHead('paginator'); _this.updateContent('paginator'); });
                 tableContainer.find('div.ajax_loading').hide();
 
                 tableContainer.on('click', allSortableSelector+' > label', function() {
@@ -424,18 +564,7 @@
                     options.sort_by = $(parent).attr('data-sort-by');
                     options.sort_mode = direction;
 
-                    $this.callConnector(function() { $this.updateContent(); });
-                });
-                tableContainer.on('click', allFilterableSelector+' > a', function() {
-                    var parent = $(this).parent('th');
-
-                    if($(this).hasClass('active')) {
-                        $(this).removeClass('active');
-                    }else{
-                        $(this).addClass('active');
-                    }
-
-                    //$this.callConnector(function() { $this.updateContent(); });
+                    _this.callConnector(function() { _this.updateContent('sort'); });
                 });
 
                 //$('div.datepicker > input').datepicker({
@@ -452,38 +581,39 @@
                     if(tag != 'input' && tag != 'select') {
                         if(event.which == 37) { //37 - back
                             if(options.current_page > 1) {
-                                $this.gotoPage(Number(options.current_page)-1);
+                                _this.gotoPage(Number(options.current_page)-1);
                             }
                         }else if(event.which == 39) { // 39 - forward
                             if(options.current_page < response_options.total_pages) {
-                                $this.gotoPage(Number(options.current_page)+1);
+                                _this.gotoPage(Number(options.current_page)+1);
                             }
                         }
                     }
                 });
+                _this.trigger('rewatajax.init', []);
             };
 
-            $this.cleanup = function(tableContainer) {
+            _this.cleanup = function(tableContainer) {
                 $(document).unbind('keydown');
                 if(tableContainer) {
                     tableContainer.unbind('click');
                 }
             };
-            $this.init();
+            _this.init();
             return this;
         }
     });
 })(jQuery);
 
 function createTableObject(tableOptions, theadObject, tbodyObject, noResultsMessage, options) {
-    var $this = this;
+    var _this = this;
     var tableId = tableOptions.id;
     if(!tableId) {
         return;
     }
     var tableClass = tableOptions.class;
 
-    $this.createHead = function(table, theadObject, tbodyObject, noResultsMessage, options) {
+    _this.createHead = function(table, theadObject, tbodyObject, noResultsMessage, options) {
         var thead = document.createElement('thead');
         var tr = document.createElement('tr');
 
@@ -546,13 +676,13 @@ function createTableObject(tableOptions, theadObject, tbodyObject, noResultsMess
      * @param o object
      * @returns bool
      */
-    $this.isElement = function(o){
+    _this.isElement = function(o){
         return (
             typeof HTMLElement === 'object' ? o instanceof HTMLElement : //DOM2
                 o && typeof o === 'object' && o !== null && o.nodeType === 1 && typeof o.nodeName==='string'
         );
     };
-    $this.addValueToTd = function(td, value) {
+    _this.addValueToTd = function(td, value) {
         if(isElement(value)) {
             td.appendChild(value);
         }else{
@@ -569,7 +699,7 @@ function createTableObject(tableOptions, theadObject, tbodyObject, noResultsMess
             td.innerHTML = tdValue;
         }
     };
-    $this.createBody = function(table, theadObject, tbodyObject, noResultsMessage, options) {
+    _this.createBody = function(table, theadObject, tbodyObject, noResultsMessage, options) {
         var tbody = document.createElement('tbody');
         if(tbodyObject.length === 0) {
             if(noResultsMessage !== null) {
@@ -591,7 +721,7 @@ function createTableObject(tableOptions, theadObject, tbodyObject, noResultsMess
                 if(v == null) {
                     tr.appendChild(td);
                 }else {
-                    $this.addValueToTd(td, v);
+                    _this.addValueToTd(td, v);
                     tr.appendChild(td);
                 }
             });
@@ -606,7 +736,7 @@ function createTableObject(tableOptions, theadObject, tbodyObject, noResultsMess
                 var td = document.createElement('td');
                 td.colSpan = Object.keys(theadObject).length;
                 if(element.additionalFullWidthRow.html) {
-                    if($this.isElement(element.additionalFullWidthRow.html)) {
+                    if(_this.isElement(element.additionalFullWidthRow.html)) {
                         elementsFromHtml = element.additionalFullWidthRow.html;
                     }else{
                         var div = document.createElement('div');
@@ -628,7 +758,7 @@ function createTableObject(tableOptions, theadObject, tbodyObject, noResultsMess
     var table = document.createElement('table');
     table.id = tableId;
     table.className = tableClass;
-    $this.createHead(table, theadObject, tbodyObject, noResultsMessage, options);
-    $this.createBody(table, theadObject, tbodyObject, noResultsMessage, options);
+    _this.createHead(table, theadObject, tbodyObject, noResultsMessage, options);
+    _this.createBody(table, theadObject, tbodyObject, noResultsMessage, options);
     return table;
 }

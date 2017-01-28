@@ -116,6 +116,9 @@ class ChangeController extends Controller {
 			if($request->get('search')) {
 				$options['search'] = $request->get('search');
 			}
+			if($request->get('filter')) {
+				$options['filter'] = $request->get('filter');
+			}
 			$rewatajax->setOptions($options);
 			
 			$rewatajax->setTable('AppBundle:Change');
@@ -131,15 +134,13 @@ class ChangeController extends Controller {
 				foreach($change->getChangeContents() AS $content) {
 					$std = new \stdClass();
 					$std->columns = [
-						$content->getFilename(),
+						['content' => $content->getFilename().' <a target="_blank" href="'.
+							$this->generateUrl('ajax_changecontent_diff', ['id' => $content->getId()]).
+							'" class="btn btn-primary btn-sm">'.$translator->trans('label.diff').'</a>'],
 						['content' => $content->getStatus(), 'class' => 'text-center table-'.$content->getCssStatus()],
 						['content' => $content->getAdditions(), 'class' => 'text-center'],
 						['content' => $content->getChanges(), 'class' => 'text-center'],
-						['content' => $content->getDeletions(), 'class' => 'text-center'],
-						[
-							'content' => '<a target="_blank" href="'.$this->generateUrl('ajax_changecontent_diff', ['id' => $content->getId()]).'" class="btn btn-primary btn-sm">'.$translator->trans('label.details').'</a>',
-							'class' => 'text-right'
-						],
+						['content' => $content->getDeletions(), 'class' => 'text-center']
 					];
 					$changeContents[] = $std;
 				}
@@ -172,11 +173,6 @@ class ChangeController extends Controller {
 							'content' => $translator->trans('label.changecontent.changes'),
 							'width' => '5%',
 							'class' => 'text-center'
-						],
-						[
-							'content' => $translator->trans('label.actions'),
-							'width' => '20%',
-							'class' => 'text-right'
 						]
 					],
 					'changeContents_content' => $changeContents
@@ -187,34 +183,70 @@ class ChangeController extends Controller {
 			$response['options'] = $rewatajax->getOptions();
 			
 			// Statistics
+			// can't re-use QueryBuilder and Query from ReWatajax (does not return anything...!?)
+			// therefore set filter and search again here...
 			/** @var QueryBuilder $qb */
 			$em = $this->getDoctrine()->getManager();
 			$qb = $em->createQueryBuilder();
-			$qb->select('count(a.id) AS results, YEAR(a.date) AS year, MONTH(a.date) AS month, DAY(a.date) AS day')
+			$qb->select('count(a.id) AS results, YEAR(a.date) AS year, MONTH(a.date) AS month, DAY(a.date) AS day, a.date')
 				->from('AppBundle:Change', 'a')
 				->where('a.project = :project')
 				->andWhere('a.type = :type')
 				->groupBy('year')
 				->addGroupBy('month')
 				->addGroupBy('day');
+			
+			$query = $em->createQuery();
+			if(!empty($options['search'])) {
+				$orX = $qb->expr()->orX();
+				foreach($response['header'] AS $k => $v) {
+					if(!empty($v['virtual'])) {
+						continue;
+					}
+					$orX->add('a.'.$k.' LIKE :search');
+				}
+				$qb->andWhere($orX);
+				$query->setParameter('search', '%'.$options['search'].'%');
+			}
+			if(!empty($options['filter'])) {
+				foreach ($options['filter'] AS $filter) {
+					if($filter['filterType'] != 'datetime') {
+						continue;
+					}
+					foreach($filter['filterOptions'] AS $filterOption) {
+						$filterKey = $filterOption['filterKey'];
+						// 0 = start; 1 = end
+						if(count($filterOption['filterValues']) >= 1) {
+							$startDate = new \DateTime($filterOption['filterValues'][0]);
+							$startDate->setTime(0, 0, 0);
+							$qb->andWhere('a.'.$filterKey . ' >= :' . $filterKey . '_startDate');
+							$query->setParameter($filterKey . '_startDate', $startDate);
+						}
+						if(count($filterOption['filterValues']) >= 2) {
+							$endDate = new \DateTime($filterOption['filterValues'][1]);
+							$endDate->setTime(23, 59, 59);
+							$qb->andWhere('a.'.$filterKey.' <= :'.$filterKey.'_endDate');
+							$query->setParameter($filterKey.'_endDate', $endDate);
+						}
+					}
+				}
+			}
+			
 			$tags = ['feature', 'bugfix', 'cleanup', 'task', ''];
 			$statistics = [];
-			$statisticsByMonth = [];
 			foreach($tags AS $tag) {
-				$query = $em->createQuery($qb->getDQL());
+				$query->setDQL($qb->getDQL());
 				$query->setParameter('project', $project);
 				$query->setParameter('type', $tag);
 				$results = $query->execute();
 				foreach($results AS $result) {
-					$year = $result['year'];
-					$month = $result['month'];
-					$day = $result['day'];
+					/** @var \DateTime $date */
+					$date = $result['date'];
 					$_tag = $tag;
 					if(empty($tag)) {
 						$_tag = 'not specified';
 					}
-					$statistics[$_tag][$year.'-'.$month.'-'.$day] = $result['results'];
-					$statisticsByMonth[$_tag][$year.'-'.$month] = $result['results'];
+					$statistics[$_tag][$date->format('Y-m-d')] = $result['results'];
 				}
 			}
 			
@@ -239,35 +271,12 @@ class ChangeController extends Controller {
 				}
 			}
 			
-			/*
-			$largestArrayMonth = [];
-			foreach($statisticsByMonth AS $statistic) {
-				if(count($statistic) > count($largestArray)) {
-					$largestArrayMonth = $statistic;
-				}
-			}
-			// based on that we can get the x-axis sections
-			$xAxisLabels = array_keys($largestArrayMonth);
-			// but we have to complete the other tags as they might be shorter
-			foreach($statisticsByMonth AS &$statistic) {
-				if(count($statistic) == count($largestArray)) {
-					continue;
-				}
-				foreach($xAxisLabels AS $section) {
-					if(empty($statistic[$section])) {
-						$statistic[$section] = 0;
-					}
-				}
-			}
-			 */
-			
 			$response['statistics'] = [
 				'datasets' => $statistics,
-				'datasetByMonth' => $statisticsByMonth,
 				'xAxisLabels' => $xAxisLabels
 			];
 		}
 		//handle data
-		return new Response(json_encode($response));
+		return new Response(json_encode($response), 200, ['content-type' => 'text/json']);
 	}
 }

@@ -14,9 +14,9 @@
             <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
             <link rel="stylesheet" href="{{ asset('css/font-awesome-4.6.3.min.css') }}">
             <link rel="stylesheet" href="{{ asset('css/font-lato.css') }}">
-            <link rel="stylesheet" href="{{ asset('css/bootstrap-datetimepicker.min.css') }}">
             <link rel="stylesheet" href="{{ asset('css/highlight-solarized-light.css') }}">
             <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+            <link rel="stylesheet" href="{{ asset('css/daterangepicker.min.css') }}" />
         {% endblock %}
 
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
@@ -26,7 +26,6 @@
 
         {% block header %}
             <header>
-
                 <nav class="navbar navbar-toggleable-md navbar-light bg-faded">
                     <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
@@ -98,7 +97,7 @@
                 <div class="container">
                     <div class="row">
                         <div id="footer-copyright" class="col-md-6">
-                            <p>&copy; {{ 'now'|date('Y') }} Mario Lubenka - powered by Symfony 2</p>
+                            <p>&copy; {{ 'now'|date('Y') }} Mario Lubenka - powered by Symfony 3</p>
                         </div>
                         <div id="footer-resources" class="col-md-6">
                         </div>
@@ -111,14 +110,17 @@
            avoid errors when the 'intl' PHP extension is not available and the application
            is forced to use the limited "intl polyfill", which only supports UTC and GMT #}
         <!-- Page rendered on {{ 'now'|localizeddate('long', 'long', null, 'UTC') }} -->
+        <script src="{{ asset('js/jquery-3.1.1.min.js') }}"></script>
         {% block javascripts %}
-            <script src="{{ asset('js/jquery-2.2.4.min.js') }}"></script>
             <script src="{{ asset('js/tether.min.js') }}"></script>
             <script src="{{ asset('js/bootstrap.min.js') }}"></script>
+            <script src="{{ asset('js/jquery.bootstrap-growl.min.js') }}"></script>
+            <script src="{{ asset('js/moment.min.js') }}"></script>
+            <script src="{{ asset('js/daterangepicker.min.js') }}"></script>
             <script src="{{ asset('js/Chart.bundle.min.js') }}"></script>
             <script src="{{ asset('bundles/bazingajstranslation/js/translator.min.js') }}"></script>
             <script src="{{ url('bazinga_jstranslation_js') }}"></script>
-            <script src="{{ asset('js/main.js') }}"></script>
         {% endblock %}
+        <script src="{{ asset('js/main.js') }}"></script>
     </body>
 </html>

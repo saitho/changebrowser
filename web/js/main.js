@@ -123,47 +123,76 @@ function format(str, arr) {
     });
 }
 
-var graphMode = 'day';
-//graphMode = 'month';
 
 function loadProject(projectId) {
     currently_loaded_project = projectId;
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; //January is 0!
+    var yyyy = today.getFullYear();
     var options = {
         id: 'changeTable',
         ajax_connector: paths.ajax_loadProject,
         pager_max_buttons: 15,
         language: {
-            dateFilter_start: Translator.trans('rewatajax.dateFilter_start'),
-            dateFilter_end: Translator.trans('rewatajax.dateFilter_end'),
+            dateFilter_range: Translator.trans('rewatajax.dateFilter_range'),
             filter: Translator.trans('rewatajax.filter'),
             search_results: Translator.trans('rewatajax.search_results'),
             search_text: Translator.trans('rewatajax.search_text'),
             no_entries_message: Translator.trans('rewatajax.no_entries_message')
+        },
+        daterangepicker: {
+            maxDate: dd+'.'+mm+'.'+yyyy,
+            locale: {
+                format: Translator.trans('lang.dateISO'),
+                cancelLabel: 'Clear',
+                applyLabel: 'Apply',
+                fromLabel: 'From',
+                toLabel: 'To',
+                customRangeLabel: 'Custom',
+                weekLabel: 'W',
+                daysOfWeek: [
+                    'Su',
+                    'Mo',
+                    'Tu',
+                    'We',
+                    'Th',
+                    'Fr',
+                    'Sa'
+                ],
+                monthNames: [
+                    'January',
+                    'February',
+                    'March',
+                    'April',
+                    'May',
+                    'June',
+                    'July',
+                    'August',
+                    'September',
+                    'October',
+                    'November',
+                    'December'
+                ]
+            },
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        },
+        format: {
+            dateISO: Translator.trans('lang.dateISO')
         }
     };
 
-    $.ajax({
-        method: 'GET',
-        url: paths.ajax_loadProject,
-        data: { project_id: projectId },
-        dataType: 'json'
-    }).done(function( response ) {
-        if(response.status) {
-            var header_data = response.header;
-            var response_options = response.options;
-            var body_data = rewatajaxParseBodyData(response.body_data, header_data);
-            var staticResult = {header_data: header_data, body_data: body_data, response_options: response_options};
-            $body.rewatajax(options, { project_id: projectId }, 'body div#body', staticResult);
-
-            var statistic = response.statistics;
-            var datasets = statistic.datasets;
-            if(graphMode == 'month') {
-                datasets = statistic.datasetByMonth;
-            }
-            var xAxisLabels = statistic.xAxisLabels;
-            refreshGraph(xAxisLabels, datasets);
-        }
-    });
+    $body.rewatajax(options, { project_id: projectId }, 'body div#body')
+        .on('rewatajax.callConnector', function(e, response) {
+            refreshGraph(response.statistics.xAxisLabels, response.statistics.datasets);
+        });
 }
 
 function refreshGraph(monthLabels, datasets) {
@@ -196,8 +225,7 @@ function refreshGraph(monthLabels, datasets) {
             responsive: true,
             maintainAspectRatio: false,
             title:{
-                display: true,
-                text:"Chart.js Line Chart - Stacked Area"
+                display: false
             },
             tooltips: {
                 mode: 'index',
@@ -206,8 +234,17 @@ function refreshGraph(monthLabels, datasets) {
             hover: {
                 mode: 'index'
             },
+            legend: {
+                position: 'bottom'
+            },
             scales: {
                 xAxes: [{
+                    type: 'time',
+                    time: {
+                        displayFormats: {
+                            'day': Translator.trans('lang.dateISO')
+                        }
+                    },
                     gridLines: {
                         display: false
                     },
