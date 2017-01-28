@@ -33,6 +33,11 @@
         </div>
     </div>
     <hr />
+
+    <div class="chartArea">
+        <canvas id="canvas" style="width:auto; height: 350px"></canvas>
+    </div>
+
     <div id="body">
         {{ 'home_loading'|trans }}
     </div>
@@ -41,14 +46,7 @@
 {% endblock %}
 
 {% block javascripts %}
-    <script type="text/javascript">
-        var paths = {
-            'ajax_loadProject' : '{{path("ajax_loadProject")}}',
-            'ajax_project_details' : '{{path("ajax_project_details")}}',
-            'ajax_project_add' : '{{path("ajax_project_add")}}',
-            'ajax_cli_fetchData' : '{{path("ajax_cli_fetchData")}}'
-        };
-    </script>
+    <script src="{{ url('ajaxpaths') }}"></script>
     {{ parent() }}
     <script src="{{ asset('js/tableobject.js') }}"></script>
     <script src="{{ asset('js/modal.js') }}"></script>
