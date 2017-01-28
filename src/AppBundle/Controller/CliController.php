@@ -48,6 +48,6 @@ class CliController extends Controller {
 		}
 		
 		// return new Response(""), if you used NullOutput()
-		return new Response(json_encode(['status' => $status, 'log' => $content, 'changes_count' => $changes_count]));
+		return new Response(json_encode(['status' => $status, 'log' => $content, 'changes_count' => $changes_count]), 200, ['content-type' => 'text/json']);
 	}
 }

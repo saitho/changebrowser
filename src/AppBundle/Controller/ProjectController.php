@@ -63,7 +63,7 @@ class ProjectController extends Controller {
 			$response = ['status' => false, 'message' => $e->getMessage()];
 		}
 		
-		return new Response(json_encode($response));
+		return new Response(json_encode($response), 200, ['content-type' => 'text/json']);
 	}
 	/**
 	 * @Route("/add", name="ajax_project_add")
@@ -94,7 +94,7 @@ class ProjectController extends Controller {
 					$entityManager = $this->getDoctrine()->getManager();
 					$entityManager->persist($project);
 					$entityManager->flush();
-					$response = ['status' => true];
+					$response = ['status' => true, 'id' => $project->getId(), 'title' => $project->getTitle()];
 				}else{
 					throw new \Exception('invalid_form');
 				}
@@ -128,6 +128,6 @@ class ProjectController extends Controller {
 			];
 		}
 		
-		return new Response(json_encode($response));
+		return new Response(json_encode($response), 200, ['content-type' => 'text/json']);
 	}
 }
