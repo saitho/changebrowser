@@ -275,6 +275,36 @@
         <source>label.export_changelog</source>
         <target>Export changes</target>
       </trans-unit>
+      <trans-unit id="title.export_changes">
+        <source>title.export_changes</source>
+        <target>Changelog exporter</target>
+      </trans-unit>
+
+      <trans-unit id="tag.task">
+        <source>tag.task</source>
+        <target>Task</target>
+      </trans-unit>
+      <trans-unit id="tag.bugfix">
+        <source>tag.bugfix</source>
+        <target>Bugfix</target>
+      </trans-unit>
+      <trans-unit id="tag.feature">
+        <source>tag.feature</source>
+        <target>Feature</target>
+      </trans-unit>
+      <trans-unit id="tag.cleanup">
+        <source>tag.cleanup</source>
+        <target>Cleanup</target>
+      </trans-unit>
+      <trans-unit id="tag.undefined">
+        <source>tag.undefined</source>
+        <target>Misc</target>
+      </trans-unit>
+
+      <trans-unit id="label.unversioned">
+        <source>label.unversioned</source>
+        <target>No version</target>
+      </trans-unit>
 
       <trans-unit id="rewatajax.search_results">
         <source>rewatajax.search_results</source>

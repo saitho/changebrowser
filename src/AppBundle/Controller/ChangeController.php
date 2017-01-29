@@ -2,11 +2,14 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\DBAL\EnumChangeTypeType;
 use AppBundle\Entity\Change;
 use AppBundle\Entity\ChangeContent;
 use AppBundle\Entity\Project;
 use AppBundle\Helper\ReWatajaxDoctrine;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\QueryBuilder;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -59,7 +62,7 @@ class ChangeController extends Controller {
 			$response['header'] = [
 				'type' => [
 					'content' => '',
-					'transform' => '<span class="badge badge-!CSSClassForType">!_self</span>',
+					'transform' => '<span class="badge badge-tag-!plainType">!_self</span>',
 					'width' => '5%'
 				],
 				'title' => [
@@ -150,8 +153,8 @@ class ChangeController extends Controller {
 					'date' => $change->getDate(),
 					'version' => $change->getVersion(),
 					'title' => htmlentities($change->getTitle()),
-					'type' => $change->getType(),
-					'CSSClassForType' => $change->getCSSClassForType(),
+					'plainType' => $change->getType(),
+					'type' => $translator->trans('tag.'.$change->getType()),
 					'changeContents_head' => [
 						$translator->trans('label.filename'),
 						[
@@ -191,7 +194,6 @@ class ChangeController extends Controller {
 			$qb->select('count(a.id) AS results, YEAR(a.date) AS year, MONTH(a.date) AS month, DAY(a.date) AS day, a.date')
 				->from('AppBundle:Change', 'a')
 				->where('a.project = :project')
-				->andWhere('a.type = :type')
 				->groupBy('year')
 				->addGroupBy('month')
 				->addGroupBy('day');
@@ -233,12 +235,24 @@ class ChangeController extends Controller {
 				}
 			}
 			
-			$tags = ['feature', 'bugfix', 'cleanup', 'task', ''];
+			$tags = EnumChangeTypeType::$values;
 			$dateArray = [];
 			$statistics = [];
+			$originalQb = $qb;
+			/** @var ArrayCollection $queryParams */
+			$queryParams = $query->getParameters();
 			foreach($tags AS $tag) {
+				$queryParamsCopy = clone $queryParams;
+				$qb = clone $originalQb;
+				if(empty($tag)) {
+					$qb->andWhere('a.type IS NULL');
+					$tag = 'undefined';
+				}else{
+					$queryParamsCopy->add(new Parameter('type', $tag));
+					$qb->andWhere('a.type = :type');
+				}
+				$query->setParameters($queryParamsCopy);
 				$query->setDQL($qb->getDQL());
-				$query->setParameter('type', $tag);
 				$results = $query->execute();
 				foreach($results AS $result) {
 					if($result['results'] == 0) {
@@ -246,12 +260,8 @@ class ChangeController extends Controller {
 					}
 					/** @var \DateTime $date */
 					$date = $result['date'];
-					$_tag = $tag;
-					if(empty($tag)) {
-						$_tag = 'not specified';
-					}
 					$formattedDate = $date->format('Y-m-d');
-					$statistics[$_tag][$formattedDate] = intval($result['results']);
+					$statistics[$tag][$formattedDate] = intval($result['results']);
 					if(!in_array($formattedDate, $dateArray)) {
 						$dateArray[] = $formattedDate;
 					}

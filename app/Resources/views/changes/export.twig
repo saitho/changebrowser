@@ -1,0 +1,50 @@
+<form action="{{ path('ajax_change_export') }}" method="GET" id="exportForm" target="_blank">
+    <input name="form_submit" value="true" type="hidden" />
+    <input name="project_id" value="{{ project_id }}" type="hidden" />
+    <div class="row">
+        <div class="col-md-6">
+            <strong>Format</strong>
+            <div class="form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="format" id="format-markdown" value="markdown" checked>
+                    Markdown
+                </label>
+            </div>
+            <div class="form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" type="radio" name="format" id="format-text" value="text">
+                    Text
+                </label>
+            </div>
+            <label for="versions">Versions</label>
+            <select name="versions[]" id="versions" class="form-control" multiple>
+                <option value="">{{ 'label.unversioned'|trans }}</option>
+                {% for version in versions %}
+                    <option value="{{ version }}">{{ version }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6">
+            <strong>Labels</strong>
+            {% for tag in tags %}
+                {% set altTag = tag %}
+                {% if tag == null %}
+                    {% set altTag = 'undefined' %}
+                {% endif %}
+                <div class="form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" type="checkbox" name="tags[]" value="{{ tag }}" checked>
+                        {% set transName = 'tag.'~altTag %}
+                        <span class="badge badge-tag-{{ altTag }}">{{ transName|trans }}</span>
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('select#versions option').prop('selected', true);
+    });
+</script>
