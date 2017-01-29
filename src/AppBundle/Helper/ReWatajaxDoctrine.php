@@ -10,6 +10,7 @@ class ReWatajaxDoctrine {
 	private $query;
 	
 	private $table;
+	private $params;
 	
 	public function __construct(\Doctrine\ORM\EntityManager $entityManager, $tableName=null) {
 		$this->em = $entityManager;
@@ -39,10 +40,11 @@ class ReWatajaxDoctrine {
 		$this->table = $table;
 	}
 	function setParams($params) {
-		$this->query->setParameters($params);
+		$this->params = $params;
 	}
 	
 	function findResults() {
+		$this->query->setParameters($this->params);
 		$this->qb->select('a')->from($this->table, 'a');
 		if(!empty($this->where)) {
 			$this->qb->where($this->where);

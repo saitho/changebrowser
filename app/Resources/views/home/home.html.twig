@@ -34,8 +34,8 @@
     </div>
     <hr />
 
-    <div class="chartArea">
-        <canvas id="canvas" style="width:auto; height: 350px"></canvas>
+    <div class="chartArea hidden-md-down">
+        <canvas id="canvas" style="width:100%; max-width:1110px; height: 350px"></canvas>
     </div>
 
     <div id="body">
@@ -48,7 +48,7 @@
 {% block javascripts %}
     <script src="{{ url('ajaxpaths') }}"></script>
     {{ parent() }}
-    <script src="{{ asset('js/tableobject.js') }}"></script>
+    <script src="{{ asset('js/rewatajax.js') }}"></script>
     <script src="{{ asset('js/modal.js') }}"></script>
     <script type="text/javascript">
         $(document).ready(function () {

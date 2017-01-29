@@ -60,7 +60,7 @@ function rewatajaxParseBodyData(response, header_data) {
 
 (function($) {
     $.fn.extend({
-        rewatajax: function(options, connectorData, outputToDiv, staticResult) {
+        rewatajax: function(options, connectorData, staticResult) {
             var defaults = {
                 table_class: '',
                 sort_by: '',
@@ -114,16 +114,16 @@ function rewatajaxParseBodyData(response, header_data) {
                 return;
             }
             var allSortableSelector = 'table#'+tableId+' > thead > tr > th[data-sort-by]';
-            var allFilterableSelector = 'table#'+tableId+' > thead > tr > th[data-filterable]';
             var tableClass = options.table_class;
 
-            _this.handleConnectorResponse = function(headerData, bodyData, responseOptions) {
+            /* AJAX stuff */
+            this.handleConnectorResponse = function(headerData, bodyData, responseOptions) {
                 header_data = headerData;
                 body_data = bodyData;
                 response_options = responseOptions;
                 _this.updatePager();
             };
-            _this.callConnector = function(callWhenFinished) {
+            this.callConnector = function(callWhenFinished) {
                 connectorData['sort_by'] = options.sort_by;
                 connectorData['sort_mode'] = options.sort_mode;
                 connectorData['per_page'] = options.per_page;
@@ -155,7 +155,8 @@ function rewatajaxParseBodyData(response, header_data) {
                 }
             };
 
-            _this.searchKeyUp = function (string) {
+            /* Search and filters */
+            this.searchKeyUp = function (string) {
                 var _this = this;
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(function () {
@@ -167,8 +168,38 @@ function rewatajaxParseBodyData(response, header_data) {
                 options.search = string;
                 _this.callConnector(function() { _this.updateContent('search'); });
             };
+            this.createSearch = function (tableContainer) {
+                var search = document.createElement('div');
+                search.className = 'table_search';
 
-            _this.getFilterForm = function(key) {
+                var results_div = document.createElement('div');
+                results_div.className = 'pull-left';
+                results_div.className = 'col-md-3 text-right pull-right';
+
+                var result_counter = document.createElement('span');
+                result_counter.className = 'rewatajax_resultcounter';
+                results_div.append(result_counter);
+                search.append(results_div);
+
+                var search_div = document.createElement('div');
+                search_div.className = 'pull-left col-md-9 row';
+
+                var search_input = document.createElement('input');
+                search_input.type = 'text';
+                search_input.className = 'rewatajax_search_input form-control col-md-4';
+                search_input.placeholder = options.language.search_text;
+                var thisFunction = this;
+                $(search_input).keyup(function () {
+                    thisFunction.searchKeyUp($(this).val());
+                });
+
+                search_div.append(search_input);
+                search.append(search_div);
+                _this.trigger('rewatajax.createSearch', [search_div]);
+                tableContainer.prepend(search);
+            };
+
+            this.getFilterForm = function(key) {
                 var type = header_data[key].type;
                 var form = '';
                 switch(type) {
@@ -179,136 +210,26 @@ function rewatajaxParseBodyData(response, header_data) {
                 }
                 return form;
             };
-
-            _this.getHead = function() {
-                var thead = document.createElement('thead');
-                var tr = document.createElement('tr');
-
-                for(var key in header_data) {
-                    var name = header_data[key];
-                    var titleTh = document.createElement('th');
-                    var thValue = name;
-                    if(name.constructor === Object) {
-                        thValue = name.content;
-                        if(name.id) {
-                            titleTh.id = name.id;
-                        }
-                        var thClass = '';
-                        if(name.class) {
-                            thClass += name.class;
-                        }
-                        if(name.width) {
-                            titleTh.width = name.width;
-                        }
-                        if(name.sortable) {
-                            titleTh.dataset.sortBy = key;
-                            titleTh.dataset.sortMode = '';
-                            if(response_options.sortedBy == key) {
-                                var sortMode = 'up';
-                                titleTh.dataset.sortMode = 'desc';
-                                if(response_options.sortMode == 'desc') {
-                                    sortMode = 'down';
-                                    titleTh.dataset.sortMode = 'asc';
-                                }
-                            }
-                        }
-                        if(thClass) {
-                            titleTh.className = thClass.trim();
+            this.filterActive = function(filterKey) {
+                for(var k in options.filter) {
+                    for(var k2 in options.filter[k].filterOptions) {
+                        if(options.filter[k].filterOptions[k2].filterKey == filterKey) {
+                            return true;
                         }
                     }
-                    var innerHTML = '<label>'+thValue+'</label>';
-                    if(name.filterable) {
-                        titleTh.dataset.filterable = '';
-                        var className = 'rewatajax-filter';
-                        if(_this.filterActive(key)) {
-                            className += ' active';
-                        }
-                        innerHTML += '<a class="'+className+'" id="filter-'+key+'" tabindex="0" role="button" data-html="true" data-toggle="popover" data-placement="top" data-trigger="click" title="'+options.language.filter+' <button class=\'close\'>&times;</button>" data-content="'+_this.getFilterForm(key)+'"><i class="fa fa-filter"></i></a>';
-                    }
-                    titleTh.innerHTML = innerHTML;
-                    tr.appendChild(titleTh);
                 }
-
-                thead.appendChild(tr);
-                return thead;
+                return false;
             };
-            _this.getBody = function() {
-                var tbody = document.createElement('tbody');
-                if(body_data.length === 0) {
-                    var tr = document.createElement('tr');
-                    var td = document.createElement('td');
-                    td.colSpan = Object.keys(header_data).length;
-                    td.className = 'no-results';
-                    td.innerText = options.language.no_entries_message;
-                    tr.appendChild(td);
-                    tbody.appendChild(tr);
-                    return tbody;
-                }
-                $(body_data).each(function(key, element) {
-                    var tr = document.createElement('tr');
-                    $(element.columns).each(function(k, v) {
-                        var td = document.createElement('td');
-                        if(v == null) {
-                            tr.appendChild(td);
-                        }else {
-                            _this.addValueToTd(td, v);
-                            tr.appendChild(td);
-                        }
-                    });
-                    tbody.appendChild(tr);
-                    if(element.additionalFullWidthRow != null) {
-                        tr = document.createElement('tr');
-                        if(!element.additionalFullWidthRow.id) {
-                            element.additionalFullWidthRow.id = '';
-                        }
-                        tr.className = 'hidden-row hidden-row-'+element.additionalFullWidthRow.id;
-                        tr.style.display = 'none';
-                        var td = document.createElement('td');
-                        td.colSpan = Object.keys(header_data).length;
-                        if(element.additionalFullWidthRow.html) {
-                            if(_this.isElement(element.additionalFullWidthRow.html)) {
-                                elementsFromHtml = element.additionalFullWidthRow.html;
-                            }else{
-                                var div = document.createElement('div');
-                                div.innerHTML = element.additionalFullWidthRow.html;
-                                var elementsFromHtml = div.firstChild.cloneNode(true);
-                            }
-                            td.appendChild(elementsFromHtml);
-                        }else{
-                            var text = document.createTextNode(element.additionalFullWidthRow.text);
-                            td.appendChild(text);
-                        }
-                        tr.appendChild(td);
-                        tbody.appendChild(tr);
+            this.hasFilter = function(filterName) {
+                $(options.filter).each(function(k, v) {
+                    if(v.filterType === filterName) {
+                        return true;
                     }
                 });
-                return tbody;
+                return false;
             };
 
-            this.createSearch = function (tableContainer) {
-                var search = document.createElement('div');
-                search.className = 'table_search';
-
-                var _this = this;
-                var result_counter = document.createElement('span');
-                result_counter.style.cssText = 'float: right';
-                result_counter.className = 'rewatajax_resultcounter col-md-9 text-right';
-                search.append(result_counter);
-
-                var search_input = document.createElement('input');
-                search_input.type = 'text';
-                search_input.className = 'rewatajax_search_input form-control col-md-3';
-                search_input.style.cssText = 'float: left';
-                search_input.placeholder = options.language.search_text;
-                $(search_input).keyup(function () {
-                    _this.searchKeyUp($(this).val());
-                });
-
-                search.append(search_input);
-
-                tableContainer.prepend(search);
-            };
-
+            /* Paginator and formatting */
             this.format = function(str, arr) {
                 return str.replace(/%(\d+)/g, function(_,m) {
                     return arr[--m];
@@ -404,13 +325,13 @@ function rewatajaxParseBodyData(response, header_data) {
              * @param o object
              * @returns bool
              */
-            _this.isElement = function(o){
+            this.isElement = function(o){
                 return (
                     typeof HTMLElement === 'object' ? o instanceof HTMLElement : //DOM2
                         o && typeof o === 'object' && o !== null && o.nodeType === 1 && typeof o.nodeName==='string'
                 );
             };
-            _this.addValueToTd = function(td, value) {
+            this.addValueToTd = function(td, value) {
                 if(isElement(value)) {
                     td.appendChild(value);
                 }else{
@@ -428,29 +349,113 @@ function rewatajaxParseBodyData(response, header_data) {
                 }
             };
 
-            _this.filterActive = function(filterKey) {
-                for(var k in options.filter) {
-                    for(var k2 in options.filter[k].filterOptions) {
-                        if(options.filter[k].filterOptions[k2].filterKey == filterKey) {
-                            return true;
+            this.getHead = function() {
+                var thead = document.createElement('thead');
+                var tr = document.createElement('tr');
+
+                for(var key in header_data) {
+                    var name = header_data[key];
+                    var titleTh = document.createElement('th');
+                    var thValue = name;
+                    if(name.constructor === Object) {
+                        thValue = name.content;
+                        if(name.id) {
+                            titleTh.id = name.id;
+                        }
+                        var thClass = '';
+                        if(name.class) {
+                            thClass += name.class;
+                        }
+                        if(name.width) {
+                            titleTh.width = name.width;
+                        }
+                        if(name.sortable) {
+                            titleTh.dataset.sortBy = key;
+                            titleTh.dataset.sortMode = '';
+                            if(response_options.sortedBy == key) {
+                                var sortMode = 'up';
+                                titleTh.dataset.sortMode = 'desc';
+                                if(response_options.sortMode == 'desc') {
+                                    sortMode = 'down';
+                                    titleTh.dataset.sortMode = 'asc';
+                                }
+                            }
+                        }
+                        if(thClass) {
+                            titleTh.className = thClass.trim();
                         }
                     }
+                    var innerHTML = '<label>'+thValue+'</label>';
+                    if(name.filterable) {
+                        titleTh.dataset.filterable = '';
+                        var className = 'rewatajax-filter';
+                        if(_this.filterActive(key)) {
+                            className += ' active';
+                        }
+                        innerHTML += '<a class="'+className+'" id="filter-'+key+'" tabindex="0" role="button" data-html="true" data-toggle="popover" data-placement="top" data-trigger="click" title="'+options.language.filter+' <button class=\'close\'>&times;</button>" data-content="'+_this.getFilterForm(key)+'"><i class="fa fa-filter"></i></a>';
+                    }
+                    titleTh.innerHTML = innerHTML;
+                    tr.appendChild(titleTh);
                 }
-                return false;
-            };
 
-            _this.hasFilter = function(filterName) {
-                $(options.filter).each(function(k, v) {
-                    if(v.filterType === filterName) {
-                        return true;
+                thead.appendChild(tr);
+                return thead;
+            };
+            this.getBody = function() {
+                var tbody = document.createElement('tbody');
+                if(body_data.length === 0) {
+                    var tr = document.createElement('tr');
+                    var td = document.createElement('td');
+                    td.colSpan = Object.keys(header_data).length;
+                    td.className = 'no-results';
+                    td.innerText = options.language.no_entries_message;
+                    tr.appendChild(td);
+                    tbody.appendChild(tr);
+                    return tbody;
+                }
+                $(body_data).each(function(key, element) {
+                    var tr = document.createElement('tr');
+                    $(element.columns).each(function(k, v) {
+                        var td = document.createElement('td');
+                        if(v == null) {
+                            tr.appendChild(td);
+                        }else {
+                            _this.addValueToTd(td, v);
+                            tr.appendChild(td);
+                        }
+                    });
+                    tbody.appendChild(tr);
+                    if(element.additionalFullWidthRow != null) {
+                        tr = document.createElement('tr');
+                        if(!element.additionalFullWidthRow.id) {
+                            element.additionalFullWidthRow.id = '';
+                        }
+                        tr.className = 'hidden-row hidden-row-'+element.additionalFullWidthRow.id;
+                        tr.style.display = 'none';
+                        var td = document.createElement('td');
+                        td.colSpan = Object.keys(header_data).length;
+                        if(element.additionalFullWidthRow.html) {
+                            if(_this.isElement(element.additionalFullWidthRow.html)) {
+                                elementsFromHtml = element.additionalFullWidthRow.html;
+                            }else{
+                                var div = document.createElement('div');
+                                div.innerHTML = element.additionalFullWidthRow.html;
+                                var elementsFromHtml = div.firstChild.cloneNode(true);
+                            }
+                            td.appendChild(elementsFromHtml);
+                        }else{
+                            var text = document.createTextNode(element.additionalFullWidthRow.text);
+                            td.appendChild(text);
+                        }
+                        tr.appendChild(td);
+                        tbody.appendChild(tr);
                     }
                 });
-                return false;
+                return tbody;
             };
-
-            _this.updateHead = function(type) {
+            this.updateHead = function(type) {
                 var thead = _this.getHead().children;
-                $(outputToDiv).find('table#'+tableId+' > thead').html(thead);
+                _this.find('table#'+tableId+' > thead').html(thead);
 
                 $('[data-toggle="popover"]').popover({
                     html: true
@@ -460,10 +465,11 @@ function rewatajaxParseBodyData(response, header_data) {
                         $('[data-toggle="popover"]').popover('hide');
                     });
 
-                    if($('input.daterange').data('daterangepicker')) {
-                        $('input.daterange').data('daterangepicker').remove();
+                    var $dateRangeInput = $('input.daterange');
+                    if($dateRangeInput.data('daterangepicker')) {
+                        $dateRangeInput.data('daterangepicker').remove();
                     }
-                    $('input.daterange').daterangepicker(options.daterangepicker)
+                    $dateRangeInput.daterangepicker(options.daterangepicker)
                         .on('apply.daterangepicker', function(ev, picker) {
                             var formattedStart = picker.startDate.format(options.daterangepicker.locale.format);
                             var formattedEnd = picker.endDate.format(options.daterangepicker.locale.format);
@@ -501,12 +507,12 @@ function rewatajaxParseBodyData(response, header_data) {
                 });
                 _this.trigger('rewatajax.updateHead', [type]);
             };
-            _this.updateContent = function(type) {
+            this.updateContent = function(type) {
                 var tbody = _this.getBody().children;
-                $(outputToDiv).find('table#'+tableId+' > tbody').html(tbody);
+                _this.find('table#'+tableId+' > tbody').html(tbody);
                 _this.trigger('rewatajax.updateContent', [type]);
             };
-            _this.drawTable = function() {
+            this.drawTable = function() {
                 if(!header_data) {
                     console.log('Header data missing.');
                     return;
@@ -522,11 +528,11 @@ function rewatajaxParseBodyData(response, header_data) {
                 table.appendChild(cached_header);
                 var tbody = _this.getBody();
                 table.appendChild(tbody);
-                $(outputToDiv).html(table);
+                _this.html(table);
                 _this.trigger('rewatajax.drawTable', [type]);
             };
 
-            _this.init = function() {
+            this.init = function() {
                 var tableContainer = $(this);
                 _this.cleanup(tableContainer);
                 tableContainer.innerHTML = '';
@@ -569,15 +575,6 @@ function rewatajaxParseBodyData(response, header_data) {
                     _this.callConnector(function() { _this.updateContent('sort'); });
                 });
 
-                //$('div.datepicker > input').datepicker({
-                //    showOn: ""
-                //});
-                tableContainer.on('click', 'span[data-action="showDatepicker"] > span', function() {
-                    var id = $(this).data('id');
-                    console.log($(this));
-                    //$('#'+id).datepicker("show");
-                });
-
                 $(document).keydown(function( event ) {
                     var tag = event.target.tagName.toLowerCase();
                     if(tag != 'input' && tag != 'select') {
@@ -595,13 +592,12 @@ function rewatajaxParseBodyData(response, header_data) {
                 _this.trigger('rewatajax.init', []);
             };
 
-            _this.cleanup = function(tableContainer) {
+            this.cleanup = function(tableContainer) {
                 $(document).unbind('keydown');
                 if(tableContainer) {
                     tableContainer.unbind('click');
                 }
             };
-            _this.init();
             return this;
         }
     });
@@ -657,18 +653,15 @@ function createTableObject(tableOptions, theadObject, tbodyObject, noResultsMess
         table.appendChild(thead);
     };
 
-    var sortableSelector = 'table#'+tableId+' > thead > tr > th.sortable';
-    $('body').on('click', sortableSelector+' > span', function() {
+    $('body').on('click', 'table#'+tableId+' > thead > tr > th.sortable > span', function() {
+        var sortableSelector = 'table#'+tableId+' > thead > tr > th.sortable';
         var parent = $(this).parent('th');
-        var direction = '';
         if(parent.hasClass('sortable-up')) {
             $(sortableSelector+'-up').removeClass('sortable-up');
             parent.addClass('sortable-down');
-            direction = 'desc';
         }else{
             $(sortableSelector+'-down').removeClass('sortable-down');
             parent.addClass('sortable-up');
-            direction = 'asc';
         }
     });
 
@@ -685,7 +678,7 @@ function createTableObject(tableOptions, theadObject, tbodyObject, noResultsMess
         );
     };
     _this.addValueToTd = function(td, value) {
-        if(isElement(value)) {
+        if(_this.isElement(value)) {
             td.appendChild(value);
         }else{
             var tdValue = value;

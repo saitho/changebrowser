@@ -9,7 +9,7 @@ namespace modal.js {
     }
 }
 
-namespace tableobject.js {
+namespace rewatajax.js {
     class rewatajax {
         + rewatajax(options : Object, connectorData : Object, outputToDiv : string[, staticResult : array])
         - defaults : object
