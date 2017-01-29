@@ -288,7 +288,6 @@ function refreshGraph(monthLabels, datasets) {
         var activePoints = myLineChart.getElementsAtEvent(evt);
         if(activePoints[0]) {
             var index = activePoints[0]._index;
-
             var filterLink = $('a#filter-date');
             filterLink.popover("show");
 
@@ -296,7 +295,6 @@ function refreshGraph(monthLabels, datasets) {
             window.setTimeout(function () {
                 var popoverId = filterLink.attr('aria-describedby');
                 var $input = $('div#'+popoverId+' > div.popover-content > input#date-dateFilter-range');
-                console.log('div#'+popoverId+' > div.popover-content > input#date-dateFilter-range');
                 var drp = $input.data('daterangepicker');
                 var date = new Date(monthLabels[index]);
                 drp.setStartDate(date);
@@ -305,7 +303,6 @@ function refreshGraph(monthLabels, datasets) {
             }, 0);
         }
     };
-
 
     // Hook into main event handler
     var parentEventHandler = Chart.Controller.prototype.eventHandler;
