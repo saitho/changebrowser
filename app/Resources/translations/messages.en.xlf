@@ -246,6 +246,35 @@
         <source>label.diff</source>
         <target>Diff</target>
       </trans-unit>
+      <trans-unit id="action.fetch_data">
+        <source>action.fetch_data</source>
+        <target>Fetch data</target>
+      </trans-unit>
+      <trans-unit id="label.graphTooltip.total">
+        <source>label.graphTooltip.total</source>
+        <target>Total</target>
+      </trans-unit>
+
+      <trans-unit id="status.modified">
+        <source>status.modified</source>
+        <target>modified</target>
+      </trans-unit>
+      <trans-unit id="status.added">
+        <source>status.added</source>
+        <target>added</target>
+      </trans-unit>
+      <trans-unit id="status.renamed">
+        <source>status.renamed</source>
+        <target>renamed</target>
+      </trans-unit>
+      <trans-unit id="status.removed">
+        <source>status.removed</source>
+        <target>removed</target>
+      </trans-unit>
+      <trans-unit id="label.export_changelog">
+        <source>label.export_changelog</source>
+        <target>Export changes</target>
+      </trans-unit>
 
       <trans-unit id="rewatajax.search_results">
         <source>rewatajax.search_results</source>

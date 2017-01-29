@@ -191,10 +191,39 @@ function loadProject(projectId) {
         }
     };
 
-    $body.rewatajax(options, { project_id: projectId }, 'body div#body')
+    // cleanup event watchers
+    $body.unbind('rewatajax.callConnector');
+    $body.unbind('rewatajax.createSearch');
+
+    var rewatajax = $body.rewatajax(options, { project_id: projectId })
         .on('rewatajax.callConnector', function(e, response) {
             refreshGraph(response.statistics.xAxisLabels, response.statistics.datasets);
+        })
+        .on('rewatajax.createSearch', function(e, search_div) {
+            var inputGroup = document.createElement('div');
+            inputGroup.className = 'input-group col-md-8';
+
+            var inputGroupBtn = document.createElement('div');
+            inputGroupBtn.className = 'input-group-btn';
+
+            var a = document.createElement('a');
+            a.setAttribute('data-toggle', 'tooltip');
+            a.setAttribute('data-placement', 'top');
+            a.setAttribute('aria-haspopup', 'true');
+            a.setAttribute('aria-expanded', 'false');
+            a.title = Translator.trans('label.export_changelog');
+
+            a.className = 'btn btn-xs btn-success';
+            a.href = 'javascript:;';
+            var i = document.createElement('i');
+            i.className = 'fa fa-file-text';
+            a.appendChild(i);
+            inputGroupBtn.appendChild(a);
+            inputGroup.appendChild(inputGroupBtn);
+
+            search_div.appendChild(inputGroup);
         });
+    rewatajax.init();
 }
 
 function refreshGraph(monthLabels, datasets) {
@@ -390,7 +419,14 @@ $(document).ready(function() {
                     header: response.modal.header,
                     content: response.modal.content,
                     footer: {
-                        showSaveButton: true
+                        buttons: {
+                            saveButton: {
+                                type: 'submit',
+                                submitForm: 'projectForm',
+                                class: 'btn btn-primary',
+                                text: 'Save changes'
+                            }
+                        }
                     }
                 };
                 createModal(modalId, modalConfig);

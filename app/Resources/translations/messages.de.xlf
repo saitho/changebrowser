@@ -246,6 +246,18 @@
         <source>label.diff</source>
         <target>Diff</target>
       </trans-unit>
+      <trans-unit id="action.fetch_data">
+        <source>action.fetch_data</source>
+        <target>Daten holen</target>
+      </trans-unit>
+      <trans-unit id="label.graphTooltip.total">
+        <source>label.graphTooltip.total</source>
+        <target>Total</target>
+      </trans-unit>
+      <trans-unit id="label.export_changelog">
+        <source>label.export_changelog</source>
+        <target>Änderungen exportieren</target>
+      </trans-unit>
 
       <trans-unit id="rewatajax.search_results">
         <source>rewatajax.search_results</source>

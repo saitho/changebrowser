@@ -137,7 +137,7 @@ class ChangeController extends Controller {
 						['content' => $content->getFilename().' <a target="_blank" href="'.
 							$this->generateUrl('ajax_changecontent_diff', ['id' => $content->getId()]).
 							'" class="btn btn-primary btn-sm">'.$translator->trans('label.diff').'</a>'],
-						['content' => $content->getStatus(), 'class' => 'text-center table-'.$content->getCssStatus()],
+						['content' => $translator->trans('status.'.$content->getStatus().''), 'class' => 'text-center table-'.$content->getCssStatus()],
 						['content' => $content->getAdditions(), 'class' => 'text-center'],
 						['content' => $content->getChanges(), 'class' => 'text-center'],
 						['content' => $content->getDeletions(), 'class' => 'text-center']
@@ -197,6 +197,7 @@ class ChangeController extends Controller {
 				->addGroupBy('day');
 			
 			$query = $em->createQuery();
+			$query->setParameter('project', $project);
 			if(!empty($options['search'])) {
 				$orX = $qb->expr()->orX();
 				foreach($response['header'] AS $k => $v) {
@@ -237,7 +238,6 @@ class ChangeController extends Controller {
 			$statistics = [];
 			foreach($tags AS $tag) {
 				$query->setDQL($qb->getDQL());
-				$query->setParameter('project', $project);
 				$query->setParameter('type', $tag);
 				$results = $query->execute();
 				foreach($results AS $result) {
@@ -257,10 +257,6 @@ class ChangeController extends Controller {
 					}
 				}
 			}
-			// adds day before to let the graph start at zero
-			$date = new \DateTime(min($dateArray));
-			$date->sub(new \DateInterval('P1D'));
-			$dateArray[] = $date->format('Y-m-d');
 			
 				// add todays date if not already added
 			// $date = new \DateTime();
