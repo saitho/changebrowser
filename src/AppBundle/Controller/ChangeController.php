@@ -257,6 +257,18 @@ class ChangeController extends Controller {
 					}
 				}
 			}
+			// adds day before to let the graph start at zero
+			$date = new \DateTime(min($dateArray));
+			$date->sub(new \DateInterval('P1D'));
+			$dateArray[] = $date->format('Y-m-d');
+			
+				// add todays date if not already added
+			// $date = new \DateTime();
+			// $dateFormatted = $date->format('Y-m-d');
+			// if(!in_array($dateFormatted, $dateArray)) {
+			// 	$dateArray[] = $dateFormatted;
+			// }
+			sort($dateArray);
 			
 			// but we have to complete the other tags as they might be shorter
 			foreach($statistics AS &$statistic) {
