@@ -18,7 +18,7 @@
             </div>
             <label for="versions">Versions</label>
             <select name="versions[]" id="versions" class="form-control" multiple>
-                <option value="">{{ 'label.unversioned'|trans }}</option>
+                <option value="">{{ 'label.unreleased'|trans }}</option>
                 {% for version in versions %}
                     <option value="{{ version }}">{{ version }}</option>
                 {% endfor %}

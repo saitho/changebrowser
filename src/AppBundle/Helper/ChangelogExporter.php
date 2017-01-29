@@ -63,7 +63,7 @@ class ChangelogExporter {
 			}
 			$versionText = $version;
 			if(empty($versionText)) {
-				$versionText = $this->translator->trans('label.unversioned');
+				$versionText = $this->translator->trans('label.unreleased');
 			}
 			$content .= $this->formatGenerator->generateVersionHeader($versionText);
 			foreach($changes AS $change) {

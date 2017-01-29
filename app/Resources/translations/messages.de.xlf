@@ -284,9 +284,9 @@
         <target>Andere</target>
       </trans-unit>
 
-      <trans-unit id="label.unversioned">
-        <source>label.unversioned</source>
-        <target>Keine Version</target>
+      <trans-unit id="label.unreleased">
+        <source>label.unreleased</source>
+        <target>Unveröffentlicht</target>
       </trans-unit>
 
       <trans-unit id="rewatajax.search_results">
