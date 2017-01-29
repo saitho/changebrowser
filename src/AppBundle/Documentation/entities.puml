@@ -69,6 +69,7 @@ namespace AppBundle\Entity {
         + setAuthor(author : string)
         + setExternalId(externalId : string)
     }
+    Change o-> "1" Change : parent
     class ChangeContent extends AbstractEntity {
     	- externalId : string
     	+ getExternalId() : string

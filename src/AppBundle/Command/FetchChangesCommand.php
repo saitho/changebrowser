@@ -146,6 +146,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
 		$author = $changeDetails['change']['author'];
 		$date = $changeDetails['change']['date'];
 		$version = $changeDetails['change']['version'];
+		$parents = $changeDetails['change']['parents'];
 		$_version = $version;
 		
 		// only get first line to avoid very long commit messages (e.g. TYPO3 CMS)
@@ -161,6 +162,9 @@ class FetchChangesCommand extends ContainerAwareCommand {
 		$change->setExternalId($externalId);
 		$change->setProject($project);
 		$change->setVersion($version);
+		if(!empty($parents)) {
+			$change->setParent($parents[0]);
+		}
 		
 		$dateObject = new \DateTime($date);
 		$dateObject->setTimezone(new \DateTimeZone('UTC'));

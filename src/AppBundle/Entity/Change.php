@@ -34,6 +34,12 @@ class Change extends AbstractEntity {
 	
 	/**
 	 * @var string
+	 * @ORM\Column(type="string", nullable=true)
+	 */
+	private $parent;
+	
+	/**
+	 * @var string
 	 *
 	 * @ORM\Column(type="string")
 	 */
@@ -101,6 +107,20 @@ class Change extends AbstractEntity {
 	 */
 	public function setExternalId($externalId) {
 		$this->externalId = $externalId;
+	}
+	
+	/**
+	 * @param string $parent
+	 */
+	public function setParent($parent) {
+		$this->parent = $parent;
+	}
+	
+	/**
+	 * @return bool
+	 */
+	public function hasParent() {
+		return !empty($this->parent);
 	}
 	
 	/**
