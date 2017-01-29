@@ -5,4 +5,7 @@ class EnumChangeTypeType extends EnumType
 {
 	protected $name = 'enumChangeType';
 	static public $values = ['feature', 'bugfix', 'task', 'cleanup', null];
+	public function getValues() {
+		return self::$values;
+	}
 }
