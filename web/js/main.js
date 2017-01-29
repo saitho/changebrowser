@@ -288,7 +288,21 @@ function refreshGraph(monthLabels, datasets) {
         var activePoints = myLineChart.getElementsAtEvent(evt);
         if(activePoints[0]) {
             var index = activePoints[0]._index;
-            console.log(monthLabels[index]);
+
+            var filterLink = $('a#filter-date');
+            filterLink.popover("show");
+
+            // needs zero timeout in order to access the data property
+            window.setTimeout(function () {
+                var popoverId = filterLink.attr('aria-describedby');
+                var $input = $('div#'+popoverId+' > div.popover-content > input#date-dateFilter-range');
+                console.log('div#'+popoverId+' > div.popover-content > input#date-dateFilter-range');
+                var drp = $input.data('daterangepicker');
+                var date = new Date(monthLabels[index]);
+                drp.setStartDate(date);
+                drp.setEndDate(date);
+                drp.clickApply();
+            }, 0);
         }
     };
 
