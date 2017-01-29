@@ -289,6 +289,10 @@ class ChangeController extends Controller {
 				'datasets' => $statistics,
 				'xAxisLabels' => $dateArray
 			];
+			$response['flags'] = [
+				'hasChanges' => $project->hasChanges(),
+				'hasCompleteChanges' => $project->hasCompleteChanges()
+			];
 		}
 		//handle data
 		return new Response(json_encode($response), 200, ['content-type' => 'text/json']);

@@ -35,6 +35,19 @@ class Project extends AbstractEntity {
 		return $this->changes;
 	}
 	
+	public function hasCompleteChanges() {
+		foreach ($this->changes AS $change) {
+			/** @var Change $change */
+			if(!$change->hasParent()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	public function hasChanges() {
+		return count($this->changes) > 0;
+	}
+	
 	/**
 	 * @var array
 	 *

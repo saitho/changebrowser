@@ -106,6 +106,8 @@ namespace AppBundle\Entity {
         + setOptions(array : array)
         + getOptions() : array
         + getMetadata() : array
+        + hasChanges() : bool
+        + hasCompleteChanges() : bool
     }
     class User extends AbstractEntity implements \Symfony\Component\Security\Core\User.UserInterface {
         - username : string

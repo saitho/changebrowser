@@ -98,21 +98,30 @@ function submitForm(url, form, modal, callback) {
     });
 }
 
-function flashMessage(message, type) {
+function flashMessage(message, type, manualClose) {
     if(type == undefined) {
         type = 'info';
     }
-    $.bootstrapGrowl(message, {
-        ele: 'body', // which element to append to
-        type: type, // (null, 'info', 'error', 'success')
-        offset: {from: 'top', amount: 10}, // 'top', or 'bottom'
-        align: 'center', // ('left', 'right', or 'center')
-        width: 'auto', // (integer, or 'auto')
-        delay: 4000,
+
+    var options = {
         allow_dismiss: false,
-        newest_on_top: true,
-        stackup_spacing: 10 // spacing between consecutively stacked growls.
-    });
+        element: 'body',
+        type: type, // (null, 'info', 'error', 'success')
+        offset: 10,
+        placement: {
+            from: 'top',
+            align: 'center'
+        },
+        delay: 4000,
+        newest_on_top: true
+    };
+
+    if(manualClose) {
+        options.allow_dismiss = true;
+        options.delay = 0;
+    }
+
+    $.notify({message: message}, options);
 }
 
 function format(str, arr) {
@@ -193,6 +202,19 @@ function loadProject(projectId) {
 
     var rewatajax = $body.rewatajax(options, { project_id: projectId })
         .on('rewatajax.callConnector', function(e, response) {
+            if(!response.flags.hasChanges) {
+                flashMessage(
+                    Translator.trans('text.warning.no_changes', {project_id: projectId}),
+                    'warning',
+                    true
+                );
+            }else if(!response.flags.hasCompleteChanges) {
+                flashMessage(
+                    Translator.trans('text.warning.incomplete_changes', {project_id: projectId}),
+                    'warning',
+                    true
+                );
+            }
             refreshGraph(response.statistics.xAxisLabels, response.statistics.datasets);
         })
         .on('rewatajax.createSearch', function(e, search_div) {

@@ -263,6 +263,15 @@
         <target>Changelog-Exporter</target>
       </trans-unit>
 
+      <trans-unit id="text.warning.incomplete_changes">
+        <source>text.warning.incomplete_changes</source>
+        <target>Bei diesem Projekt fehlen möglicherweise Änderungen. Bitte führe den Command <![CDATA[<strong>sudo php bin/console app:changes:fetch %project_id% -c</strong>]]> aus, um die übrigen Änderungen zu importieren.</target>
+      </trans-unit>
+      <trans-unit id="text.warning.no_changes">
+        <source>text.warning.no_changes</source>
+        <target>Für dieses Projekt wurden noch keine Änderungen geladen. Bitte führe den Command <![CDATA[<strong>sudo php bin/console app:changes:fetch %project_id%</strong>]]> aus, um den Datenimport zu starten.</target>
+      </trans-unit>
+
       <trans-unit id="tag.task">
         <source>tag.task</source>
         <target>Task</target>
