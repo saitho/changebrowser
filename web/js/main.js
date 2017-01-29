@@ -55,12 +55,14 @@ function rewatajaxParseBodyData(response, header_data) {
                             transformedText = '';
                             break;
                         }else{
-                            transformedText = transformedText.replace('!_self', originalFieldValue);
+                            var expression = '!_self';
+                            transformedText = transformedText.replace(new RegExp(expression, 'g'), originalFieldValue);
                         }
                     }
                     if(transformedText && transformedText != '') {
                         for(var replaceKey in fieldIndex) {
-                            transformedText = transformedText.replace('!'+replaceKey, fieldIndex[replaceKey]);
+                            expression = '!'+replaceKey;
+                            transformedText = transformedText.replace(new RegExp(expression, 'g'), fieldIndex[replaceKey]);
                         }
                     }else{
                         transformedText = change[headerKey];
@@ -236,7 +238,7 @@ function refreshGraph(monthLabels, datasets) {
                         for(var i in tooltipItems) {
                             total += tooltipItems[i].yLabel;
                         }
-                        return '--- Total: '+total;
+                        return '--- '+Translator.trans('label.graphTooltip.total')+': '+total;
                     }
                 }
             },
@@ -289,50 +291,49 @@ function refreshGraph(monthLabels, datasets) {
     }
 
     var ctx = document.getElementById("canvas").getContext("2d");
-    window.myLineChart = new Chart(ctx, config);
 
+    if(1 < datasetConfig.length) {
+        window.myLineChart = new Chart(ctx, config);
 
+        canvas.onclick = function(evt){
+            var activePoints = myLineChart.getElementsAtEvent(evt);
+            if(activePoints[0]) {
+                var index = activePoints[0]._index;
+                var filterLink = $('a#filter-date');
+                filterLink.popover("show");
 
-    canvas.onclick = function(evt){
-        var activePoints = myLineChart.getElementsAtEvent(evt);
-        if(activePoints[0]) {
-            var index = activePoints[0]._index;
-            var filterLink = $('a#filter-date');
-            filterLink.popover("show");
+                // needs zero timeout in order to access the data property
+                window.setTimeout(function () {
+                    var popoverId = filterLink.attr('aria-describedby');
+                    var $input = $('div#'+popoverId+' > div.popover-content > input#date-dateFilter-range');
+                    var drp = $input.data('daterangepicker');
+                    var date = new Date(monthLabels[index]);
+                    drp.setStartDate(date);
+                    drp.setEndDate(date);
+                    drp.clickApply();
+                }, 0);
+            }
+        };
 
-            // needs zero timeout in order to access the data property
-            window.setTimeout(function () {
-                var popoverId = filterLink.attr('aria-describedby');
-                var $input = $('div#'+popoverId+' > div.popover-content > input#date-dateFilter-range');
-                var drp = $input.data('daterangepicker');
-                var date = new Date(monthLabels[index]);
-                drp.setStartDate(date);
-                drp.setEndDate(date);
-                drp.clickApply();
-            }, 0);
-        }
-    };
-
-    // Hook into main event handler
-    var parentEventHandler = Chart.Controller.prototype.eventHandler;
-    Chart.Controller.prototype.eventHandler = function() {
-        var ret = parentEventHandler.apply(this, arguments);
-
-        this.clear();
-        this.draw();
-
-        var yScale = this.scales['y-axis-0'];
-
-        // Draw the vertical line here
-        var eventPosition = Chart.helpers.getRelativePosition(arguments[0], this.chart);
-        this.chart.ctx.beginPath();
-        this.chart.ctx.moveTo(eventPosition.x, yScale.getPixelForValue(yScale.max));
-        this.chart.ctx.strokeStyle = "#ff0000";
-        this.chart.ctx.lineTo(eventPosition.x, yScale.getPixelForValue(yScale.min));
-        this.chart.ctx.stroke();
-
-        return ret;
-    };
+        // Sets a vertical red line in the graph that moves with the mouse position
+        // line is hidden when hovering data points
+     //   var parentEventHandler = Chart.Controller.prototype.eventHandler;
+     //   Chart.Controller.prototype.eventHandler = function() {
+     //       var ret = parentEventHandler.apply(this, arguments);
+     //       this.clear();
+     //       this.draw();
+     //       var yScale = this.scales['y-axis-0'];
+     //       // Draw the vertical line here
+     //       var eventPosition = Chart.helpers.getRelativePosition(arguments[0], this.chart);
+     //       this.chart.ctx.beginPath();
+     //       this.chart.ctx.moveTo(eventPosition.x, yScale.getPixelForValue(yScale.max));
+     //       this.chart.ctx.strokeStyle = "#ff0000";
+     //       this.chart.ctx.lineTo(eventPosition.x, yScale.getPixelForValue(yScale.min));
+     //       this.chart.ctx.stroke();
+     //       return ret;
+     //   };
+    } else {
+    }
 }
 
 $(document).ready(function() {

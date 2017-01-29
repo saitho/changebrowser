@@ -34,12 +34,14 @@ function rewatajaxParseBodyData(response, header_data) {
                             transformedText = '';
                             break;
                         }else{
-                            transformedText = transformedText.replace('!_self', originalFieldValue);
+                            var expression = '!_self';
+                            transformedText = transformedText.replace(new RegExp(expression, 'g'), originalFieldValue);
                         }
                     }
                     if(transformedText && transformedText != '') {
                         for(var replaceKey in fieldIndex) {
-                            transformedText = transformedText.replace('!'+replaceKey, fieldIndex[replaceKey]);
+                            expression = '!'+replaceKey;
+                            transformedText = transformedText.replace(new RegExp(expression, 'g'), fieldIndex[replaceKey]);
                         }
                     }else{
                         transformedText = change[headerKey];
