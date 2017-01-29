@@ -83,7 +83,7 @@ function rewatajaxParseBodyData(response, header_data) {
     return changeData;
 }
 
-function submitForm(url, form, modal) {
+function submitForm(url, form, modal, callback) {
     $.ajax({
         method: $(form).attr('method'),
         url: url,
@@ -91,12 +91,8 @@ function submitForm(url, form, modal) {
         dataType: 'json'
     }).done(function( response ) {
         if(response.status) {
-            if(modal) {
-                modal.modal('hide');
-                var option = document.createElement('option');
-                option.value = response.id;
-                option.innerText = response.title;
-                $('select#projectList').append(option);
+            if(callback) {
+                callback(response, modal, form);
             }
         }
     });
@@ -206,19 +202,19 @@ function loadProject(projectId) {
             var inputGroupBtn = document.createElement('div');
             inputGroupBtn.className = 'input-group-btn';
 
-            var a = document.createElement('a');
-            a.setAttribute('data-toggle', 'tooltip');
-            a.setAttribute('data-placement', 'top');
-            a.setAttribute('aria-haspopup', 'true');
-            a.setAttribute('aria-expanded', 'false');
-            a.title = Translator.trans('label.export_changelog');
+            var button = document.createElement('button');
+            button.id = 'export-changes';
+            button.setAttribute('data-toggle', 'tooltip');
+            button.setAttribute('data-placement', 'top');
+            button.setAttribute('aria-haspopup', 'true');
+            button.setAttribute('aria-expanded', 'false');
+            button.title = Translator.trans('label.export_changelog');
 
-            a.className = 'btn btn-xs btn-success';
-            a.href = 'javascript:;';
+            button.className = 'btn btn-xs btn-success';
             var i = document.createElement('i');
             i.className = 'fa fa-file-text';
-            a.appendChild(i);
-            inputGroupBtn.appendChild(a);
+            button.appendChild(i);
+            inputGroupBtn.appendChild(button);
             inputGroup.appendChild(inputGroupBtn);
 
             search_div.appendChild(inputGroup);
@@ -232,7 +228,7 @@ function refreshGraph(monthLabels, datasets) {
         task: 'rgb(99,108,114)',
         bugfix: 'rgb(217,83,79)',
         cleanup: 'rgb(240,173,78)',
-        _none: 'rgb(230,230,230)'
+        undefined: 'rgb(214,214,214)'
     };
 
     var datasetConfig = [];
@@ -275,7 +271,16 @@ function refreshGraph(monthLabels, datasets) {
                 mode: 'index'
             },
             legend: {
-                position: 'bottom'
+                position: 'bottom',
+                labels: {
+                    generateLabels: function(chart) {
+                        labels = Chart.defaults.global.legend.labels.generateLabels(chart);
+                        for(var i in labels) {
+                            labels[i].text = Translator.trans('tag.'+labels[i].text);
+                        }
+                        return labels;
+                    }
+                }
             },
             scales: {
                 xAxes: [{
@@ -402,7 +407,15 @@ $(document).ready(function() {
 
                 $('form#projectForm').submit(function( event ) {
                     event.preventDefault();
-                    submitForm(url, this, $modal);
+                    submitForm(url, this, $modal, function(response) {
+                        if(response) {
+                            modal.modal('hide');
+                            var option = document.createElement('option');
+                            option.value = response.id;
+                            option.innerText = response.title;
+                            $('select#projectList').append(option);
+                        }
+                    });
                 });
             }
         });
@@ -434,6 +447,42 @@ $(document).ready(function() {
             }
         });
     });
+
+    $body.on('click', 'button#export-changes', function() {
+        var url = paths.ajax_change_export;
+        $.ajax({
+            method: 'GET',
+            url: url,
+            data: {project_id: currently_loaded_project},
+            dataType: 'json'
+        }).done(function (response) {
+            if (response.status) {
+                var modalConfig = {
+                    header: response.modal.header,
+                    content: response.modal.content,
+                    footer: {
+                        buttons: {
+                            closeButton: {
+                                type: 'close',
+                                class: 'btn btn-default',
+                                text: 'Close'
+                            },
+                            saveButton: {
+                                type: 'submit',
+                                submitForm: 'exportForm',
+                                class: 'btn btn-primary',
+                                text: 'Export'
+                            }
+                        }
+                    }
+                };
+                createModal(modalId, modalConfig);
+                var $modal = $('div#'+modalId);
+                $modal.modal('show');
+            }
+        });
+    });
+
     $('button#fetchdata-button').click(function() {
         var projectId = currently_loaded_project;
         var $projectBarButtons = $('div#projectBar button');

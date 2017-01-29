@@ -60,7 +60,6 @@ namespace AppBundle\Entity {
         + getTitle() : string
         + getVersion() : string
         + getType() : string
-        + getCSSClassForType() : string
         + getAuthor() : string
         + getExternalId() : string
         + setTitle(title : string)

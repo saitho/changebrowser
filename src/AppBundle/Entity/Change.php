@@ -51,27 +51,7 @@ class Change extends AbstractEntity {
 	 * @ORM\Column(type="enumChangeType", nullable=true)
 	 */
 	private $type;
-	
-	/**
-	 * @return string
-	 */
-	public function getCSSClassForType() {
-		switch($this->type) {
-			case 'cleanup':
-				return 'warning';
-				break;
-			case 'bugfix':
-				return 'danger';
-				break;
-			case 'task':
-				return 'default';
-				break;
-			default:
-				return 'info';
-				break;
-		}
-	}
-	
+		
 	/**
 	 * @var string
 	 *
@@ -190,6 +170,9 @@ class Change extends AbstractEntity {
 	 * @return string
 	 */
 	public function getType() {
+		if(empty($this->type)) {
+			return 'undefined';
+		}
 		return $this->type;
 	}
 	

@@ -1,3 +1,39 @@
+
+/** Badge tags **/
+.badge-tag-task {
+    background-color:#636c72;
+}
+.badge-tag-task[href]:focus,
+.badge-tag-task[href]:hover {
+    background-color:#4b5257;
+}
+.badge-tag-feature{ background-color:#5bc0de
+}
+.badge-tag-feature[href]:focus,
+.badge-tag-feature[href]:hover {
+    background-color:#31b0d5;
+}
+.badge-tag-cleanup {
+    background-color:#f0ad4e;
+}
+.badge-tag-cleanup[href]:focus,
+.badge-tag-cleanup[href]:hover {
+    background-color:#ec971f;
+}
+.badge-tag-bugfix{
+    background-color:#d9534f;
+}
+.badge-tag-bugfix[href]:focus,.badge-danger[href]:hover{
+    background-color:#c9302c;
+}
+.badge-tag-undefined {
+    background-color: #d6d6d6;
+}
+.badge-tag-undefined[href]:focus,
+.badge-tag-undefined[href]:hover {
+    background-color: #a3a3a3;
+}
+
 .bootstrap-growl {
     height: 50px;
 }
