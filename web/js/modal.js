@@ -3,6 +3,14 @@ function createModal(id, modalConfig) {
         var headerDiv = document.createElement('div');
         headerDiv.className = 'modal-header';
 
+        if(modalConfig.header) {
+            var titleHeader = document.createElement('h4');
+            titleHeader.className = 'modal-title';
+            var titleText = document.createTextNode(modalConfig.header);
+            titleHeader.appendChild(titleText);
+            headerDiv.appendChild(titleHeader);
+        }
+
         var closeButton = document.createElement('button');
         closeButton.type = 'button';
         closeButton.className = 'close';
@@ -13,14 +21,6 @@ function createModal(id, modalConfig) {
         buttonContent.innerHTML = '&times;';
         closeButton.appendChild(buttonContent);
         headerDiv.appendChild(closeButton);
-
-        if(modalConfig.header) {
-            var titleHeader = document.createElement('h4');
-            titleHeader.className = 'modal-title';
-            var titleText = document.createTextNode(modalConfig.header);
-            titleHeader.appendChild(titleText);
-            headerDiv.appendChild(titleHeader);
-        }
 
         contentDiv.appendChild(headerDiv);
     };
