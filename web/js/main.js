@@ -197,11 +197,11 @@ function loadProject(projectId) {
 
 function refreshGraph(monthLabels, datasets) {
     window.chartColors = {
-        feature: 'rgb(255, 99, 132)',
-        task: 'rgb(255, 159, 64)',
-        bugfix: 'rgb(255, 205, 86)',
-        cleanup: 'rgb(75, 192, 192)',
-        _none: 'rgb(255,255,255)'
+        feature: 'rgb(91,192,222)',
+        task: 'rgb(99,108,114)',
+        bugfix: 'rgb(217,83,79)',
+        cleanup: 'rgb(240,173,78)',
+        _none: 'rgb(230,230,230)'
     };
 
     var datasetConfig = [];
@@ -229,7 +229,16 @@ function refreshGraph(monthLabels, datasets) {
             },
             tooltips: {
                 mode: 'index',
-                intersect: false
+                intersect: false,
+                callbacks: {
+                    afterBody : function(tooltipItems, data) {
+                        var total = 0;
+                        for(var i in tooltipItems) {
+                            total += tooltipItems[i].yLabel;
+                        }
+                        return '--- Total: '+total;
+                    }
+                }
             },
             hover: {
                 mode: 'index'

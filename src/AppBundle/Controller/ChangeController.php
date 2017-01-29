@@ -233,6 +233,7 @@ class ChangeController extends Controller {
 			}
 			
 			$tags = ['feature', 'bugfix', 'cleanup', 'task', ''];
+			$dateArray = [];
 			$statistics = [];
 			foreach($tags AS $tag) {
 				$query->setDQL($qb->getDQL());
@@ -240,40 +241,35 @@ class ChangeController extends Controller {
 				$query->setParameter('type', $tag);
 				$results = $query->execute();
 				foreach($results AS $result) {
+					if($result['results'] == 0) {
+						continue;
+					}
 					/** @var \DateTime $date */
 					$date = $result['date'];
 					$_tag = $tag;
 					if(empty($tag)) {
 						$_tag = 'not specified';
 					}
-					$statistics[$_tag][$date->format('Y-m-d')] = $result['results'];
-				}
-			}
-			
-			// Find array with the most elements
-			$largestArray = [];
-			foreach($statistics AS $statistic) {
-				if(count($statistic) > count($largestArray)) {
-					$largestArray = $statistic;
-				}
-			}
-			// based on that we can get the x-axis sections
-			$xAxisLabels = array_keys($largestArray);
-			// but we have to complete the other tags as they might be shorter
-			foreach($statistics AS &$statistic) {
-				if(count($statistic) == count($largestArray)) {
-					continue;
-				}
-				foreach($xAxisLabels AS $section) {
-					if(empty($statistic[$section])) {
-						$statistic[$section] = 0;
+					$formattedDate = $date->format('Y-m-d');
+					$statistics[$_tag][$formattedDate] = intval($result['results']);
+					if(!in_array($formattedDate, $dateArray)) {
+						$dateArray[] = $formattedDate;
 					}
 				}
 			}
 			
+			// but we have to complete the other tags as they might be shorter
+			foreach($statistics AS &$statistic) {
+				$arrayDiff = array_diff($dateArray, array_keys($statistic));
+				foreach ($arrayDiff AS $key) {
+					$statistic[$key] = 0;
+				}
+				ksort($statistic);
+			}
+			
 			$response['statistics'] = [
 				'datasets' => $statistics,
-				'xAxisLabels' => $xAxisLabels
+				'xAxisLabels' => $dateArray
 			];
 		}
 		//handle data
