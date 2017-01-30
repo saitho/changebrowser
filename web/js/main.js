@@ -240,6 +240,43 @@ function loadProject(projectId) {
             inputGroup.appendChild(inputGroupBtn);
 
             search_div.appendChild(inputGroup);
+
+            var exportFunction = function() {
+                var url = paths.ajax_change_export;
+                $.ajax({
+                    method: 'GET',
+                    url: url,
+                    data: {project_id: currently_loaded_project},
+                    dataType: 'json'
+                }).done(function (response) {
+                    if (response.status) {
+                        var modalConfig = {
+                            header: response.modal.header,
+                            content: response.modal.content,
+                            footer: {
+                                buttons: {
+                                    closeButton: {
+                                        type: 'close',
+                                        class: 'btn btn-default',
+                                        text: 'Close'
+                                    },
+                                    saveButton: {
+                                        type: 'submit',
+                                        submitForm: 'exportForm',
+                                        class: 'btn btn-primary',
+                                        text: 'Export'
+                                    }
+                                }
+                            }
+                        };
+                        createModal(modalId, modalConfig);
+                        var $modal = $('div#'+modalId);
+                        $modal.modal('show');
+                    }
+                });
+            };
+            $body.unbind('click', exportFunction);
+            $body.on('click', 'button#export-changes', exportFunction);
         });
     rewatajax.init();
 }
@@ -466,41 +503,6 @@ $(document).ready(function() {
                 };
                 createModal(modalId, modalConfig);
                 $('div#'+modalId).modal('show');
-            }
-        });
-    });
-
-    $body.on('click', 'button#export-changes', function() {
-        var url = paths.ajax_change_export;
-        $.ajax({
-            method: 'GET',
-            url: url,
-            data: {project_id: currently_loaded_project},
-            dataType: 'json'
-        }).done(function (response) {
-            if (response.status) {
-                var modalConfig = {
-                    header: response.modal.header,
-                    content: response.modal.content,
-                    footer: {
-                        buttons: {
-                            closeButton: {
-                                type: 'close',
-                                class: 'btn btn-default',
-                                text: 'Close'
-                            },
-                            saveButton: {
-                                type: 'submit',
-                                submitForm: 'exportForm',
-                                class: 'btn btn-primary',
-                                text: 'Export'
-                            }
-                        }
-                    }
-                };
-                createModal(modalId, modalConfig);
-                var $modal = $('div#'+modalId);
-                $modal.modal('show');
             }
         });
     });
