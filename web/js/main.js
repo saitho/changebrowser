@@ -281,10 +281,10 @@ function loadProject(projectId) {
                 dataType: 'json'
             }).done(function( response ) {
                 if(response.status == true) {
-                    var titleField = $('button.changeDetailsButton[data-id='+changeId+']')
-                        .parents('tr.rewatajax-row')
-                        .find('td.rewatajax-column[data-type="showTitle"]');
+                    var actionButton = $('button.changeDetailsButton[data-id='+changeId+']');
+                    var titleField = actionButton.parents('tr.rewatajax-row').find('td.rewatajax-column[data-type="showTitle"]');
                     titleField.text(refreshTitle);
+                    actionButton.data('editedtitle', titleInput);
 
                     var infoField = $('div.modal-body small#titleInput-info');
                     infoField.html('');

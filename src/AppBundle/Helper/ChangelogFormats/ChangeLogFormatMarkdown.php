@@ -27,6 +27,10 @@ class ChangeLogFormatMarkdown extends AbstractChangeLogFormat {
 	}
 	
 	public function generateChangeEntry(Change $change) : string {
+		$editedTitle = $change->getEditedTitle();
+		if(!empty($editedTitle)) {
+			return '- '.$editedTitle.PHP_EOL;
+		}
 		return '- '.$change->getTitle().PHP_EOL;
 	}
 }
