@@ -3,15 +3,9 @@
 namespace AppBundle\Controller;
 
 use AppBundle\DBAL\EnumChangeTypeType;
-use AppBundle\Entity\Change;
-use AppBundle\Entity\ChangeContent;
 use AppBundle\Entity\Project;
 use AppBundle\Helper\ChangelogExporter;
-use AppBundle\Helper\ReWatajaxDoctrine;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Query\Parameter;
-use Doctrine\ORM\QueryBuilder;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -25,10 +19,12 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class ExporterController extends Controller {
 	/**
-	 * @Route("/", name="ajax_change_export")
-	 * @Method({"GET", "POST"})
+	 * @param Request $request
 	 * @return \Symfony\Component\HttpFoundation\Response
 	 * @throws \Exception
+	 *
+	 * @Route("/", name="ajax_change_export")
+	 * @Method({"GET", "POST"})
 	 */
 	public function exportChangesAction(Request $request) {
 		$response = ['status' => false, 'message' => ''];
@@ -100,22 +96,5 @@ class ExporterController extends Controller {
 		
 		//handle data
 		return new Response(json_encode($response), 200, ['content-type' => 'text/json']);
-	}
-	
-	/**
-	 * @param string $localFileName
-	 * @Route("/download/{localFileName}", name="ajax_change_download", requirements={"localFileName": ".*"})
-	 * @Method("GET")
-	 */
-	public function exportChangesDownload($localFileName) {
-		$fileName = 'test.txt';
-		$file_out = 'Hallo';
-		$out = strlen($file_out);
-		header('Cache-Control: public'); // needed for internet explorer
-		header('Content-Length: '.$out);
-		header('Content-type: text/plain');
-		header('Content-Disposition: attachment; filename='.$fileName);
-		echo $file_out;
-		die();
 	}
 }

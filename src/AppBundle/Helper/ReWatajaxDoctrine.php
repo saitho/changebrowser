@@ -1,20 +1,23 @@
 <?php
 namespace AppBundle\Helper;
+use \Doctrine\ORM\EntityManager;
+use \Doctrine\ORM\QueryBuilder;
+use \Doctrine\ORM\Query;
 
 class ReWatajaxDoctrine {
-	/** @var \Doctrine\ORM\EntityManager $em */
+	/** @var EntityManager $em */
 	private $em;
-	/** @var \Doctrine\ORM\QueryBuilder $qb */
+	/** @var QueryBuilder $qb */
 	private $qb;
-	/** @var \Doctrine\ORM\Query $query */
+	/** @var Query $query */
 	private $query;
 	
 	private $table;
 	private $params;
 	
-	public function __construct(\Doctrine\ORM\EntityManager $entityManager, $tableName=null) {
+	public function __construct(EntityManager $entityManager, $tableName=null) {
 		$this->em = $entityManager;
-		$this->qb = new \Doctrine\ORM\QueryBuilder($this->em);
+		$this->qb = new QueryBuilder($this->em);
 		$this->query = $this->em->createQuery();
 		$this->table = $tableName;
 	}

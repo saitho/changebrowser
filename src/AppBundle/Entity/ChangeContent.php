@@ -21,7 +21,7 @@ class ChangeContent extends AbstractEntity {
 	/**
 	 * @return \AppBundle\Entity\Change
 	 */
-	public function getChange(): \AppBundle\Entity\Change {
+	public function getChange(): Change {
 		return $this->change;
 	}
 	
@@ -170,7 +170,7 @@ class ChangeContent extends AbstractEntity {
 	/**
 	 * @param \AppBundle\Entity\Change $change
 	 */
-	public function setChange(\AppBundle\Entity\Change $change) {
+	public function setChange(Change $change) {
 		$this->change = $change;
 	}
 	

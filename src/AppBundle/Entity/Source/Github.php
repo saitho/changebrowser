@@ -27,12 +27,13 @@ class Github extends AbstractSource {
 	}
 	
 	/**
-	 * @param                           $action
-	 * @param array                     $options
-	 * @return Object
+	 * @param       $action
+	 * @param array $options
+	 * @param array $params
+	 * @return mixed
 	 * @throws \Exception
 	 */
-	private function getFromURL($action, $options=[], $params=[]) {
+	private function getFromURL($action, array $options=[], array $params=[]) {
 		// '{commitId}' => $changeLogId
 		$url = constant('self::'.$action.'Url');
 		

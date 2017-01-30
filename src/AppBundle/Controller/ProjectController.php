@@ -45,9 +45,11 @@ class ProjectController extends Controller {
 		return $project;
 	}
 	/**
+	 * @param Request $request
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 *
 	 * @Route("/details", name="ajax_project_details")
 	 * @Method("GET")
-	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
 	public function detailsAction(Request $request) {
 		$project_id = $request->get('project_id');
@@ -66,9 +68,11 @@ class ProjectController extends Controller {
 		return new Response(json_encode($response), 200, ['content-type' => 'text/json']);
 	}
 	/**
+	 * @param Request $request
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 *
 	 * @Route("/add", name="ajax_project_add")
 	 * @Method({"GET", "POST"})
-	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
 	public function createAction(Request $request) {
 		try {

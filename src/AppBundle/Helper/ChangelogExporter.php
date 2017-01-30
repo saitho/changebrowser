@@ -5,7 +5,6 @@ use AppBundle\Entity\Change;
 use AppBundle\Entity\Project;
 use AppBundle\Helper\ChangelogFormats\AbstractChangeLogFormat;
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\CssSelector\XPath\TranslatorInterface;
 use Symfony\Component\Translation\Translator;
 
 class ChangelogExporter {

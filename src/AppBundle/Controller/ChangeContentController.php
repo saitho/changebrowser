@@ -7,6 +7,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @Route("/changes/content")
@@ -14,6 +15,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
  */
 class ChangeContentController extends Controller {
 	/**
+	 * @param ChangeContent $content
+	 * @return Response
+	 *
 	 * @Route("/diff/{id}", name="ajax_changecontent_diff")
 	 * @Method("GET")
 	 */

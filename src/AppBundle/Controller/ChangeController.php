@@ -7,8 +7,8 @@ use AppBundle\Entity\Change;
 use AppBundle\Entity\ChangeContent;
 use AppBundle\Entity\Project;
 use AppBundle\Helper\ReWatajaxDoctrine;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Parameter;
 use Doctrine\ORM\QueryBuilder;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -98,7 +98,7 @@ class ChangeController extends Controller {
 		$dateArray = [];
 		$statistics = [];
 		$originalQb = $qb;
-		/** @var ArrayCollection $queryParams */
+		/** @var Query $query */
 		$queryParams = $query->getParameters();
 		foreach($tags AS $tag) {
 			$queryParamsCopy = clone $queryParams;
@@ -151,9 +151,11 @@ class ChangeController extends Controller {
 	}
 	
 	/**
+	 * @param Request $request
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 *
 	 * @Route("/list", name="ajax_loadProject")
 	 * @Method("GET")
-	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
 	public function showForProjectAction(Request $request) {
 		$response = ['status' => false, 'message' => ''];
@@ -273,9 +275,11 @@ class ChangeController extends Controller {
 		return new Response(json_encode($response), 200, ['content-type' => 'text/json']);
 	}
 	/**
+	 * @param Request $request
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 *
 	 * @Route("/details", name="ajax_change_details")
 	 * @Method({"GET", "POST"})
-	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
 	public function changeDetailsAction(Request $request) {
 		$response = ['status' => true, 'message' => ''];

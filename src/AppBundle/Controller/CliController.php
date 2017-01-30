@@ -17,9 +17,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class CliController extends Controller {
 	/**
+	 * @param Request $request
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 *
 	 * @Route("/fetch_data", name="ajax_cli_fetchData")
 	 * @Method({"POST", "GET"})
-	 * @return \Symfony\Component\HttpFoundation\Response
 	 */
 	public function fetchDataAction(Request $request) {
 		$configuration = ['command' => 'app:changes:fetch'];
