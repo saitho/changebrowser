@@ -262,6 +262,10 @@
         <source>title.export_changes</source>
         <target>Changelog-Exporter</target>
       </trans-unit>
+      <trans-unit id="title.changeDetails">
+        <source>title.changeDetails</source>
+        <target>Change-Details</target>
+      </trans-unit>
 
       <trans-unit id="text.warning.incomplete_changes">
         <source>text.warning.incomplete_changes</source>

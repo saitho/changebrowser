@@ -279,6 +279,10 @@
         <source>title.export_changes</source>
         <target>Changelog exporter</target>
       </trans-unit>
+      <trans-unit id="title.changeDetails">
+        <source>title.changeDetails</source>
+        <target>Change details</target>
+      </trans-unit>
 
       <trans-unit id="text.warning.incomplete_changes">
         <source>text.warning.incomplete_changes</source>

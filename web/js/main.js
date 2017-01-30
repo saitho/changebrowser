@@ -16,73 +16,6 @@ function toggleDetails(changeId) {
 var modalId = 'universalModal';
 var currently_loaded_project = null;
 
-
-function rewatajaxParseBodyData(response, header_data) {
-    var changeData = [];
-    $(response).each(function(key, change) {
-        var subTable = createTableObject(
-            {id: 'subtable-'+change.id, class: 'table table-bordered changecontent-table'},
-            change.changeContents_head,
-            change.changeContents_content
-        );
-
-        var fieldIndex = [];
-        for(var changeKey in change) {
-            if(header_data[changeKey]) {
-                if(change[changeKey] == '' || change[changeKey] == undefined) {
-                    continue;
-                }
-            }
-            fieldIndex[changeKey] = change[changeKey];
-        }
-
-        var columns = [];
-        for(var headerKey in header_data) {
-            var headerValueType = header_data[headerKey].type;
-            var headerValueTransform = header_data[headerKey].transform;
-            var originalFieldValue = fieldIndex[headerKey];
-
-            //if(headerValueTransform != '' && headerValueTransform != undefined) {
-            var transformedText = '';
-            switch(headerValueType) {
-                case 'date':
-                    transformedText = new Date(originalFieldValue.date).toLocaleString();
-                    break;
-                default:
-                    transformedText = headerValueTransform;
-                    if(transformedText && transformedText.match('!_self')) {
-                        if(originalFieldValue == undefined || !originalFieldValue) {
-                            transformedText = '';
-                            break;
-                        }else{
-                            var expression = '!_self';
-                            transformedText = transformedText.replace(new RegExp(expression, 'g'), originalFieldValue);
-                        }
-                    }
-                    if(transformedText && transformedText != '') {
-                        for(var replaceKey in fieldIndex) {
-                            expression = '!'+replaceKey;
-                            transformedText = transformedText.replace(new RegExp(expression, 'g'), fieldIndex[replaceKey]);
-                        }
-                    }else{
-                        transformedText = change[headerKey];
-                    }
-                    break;
-            }
-            columns.push(transformedText);
-        }
-
-        changeData.push({
-            columns: columns,
-            additionalFullWidthRow: {
-                html: subTable,
-                id: change.id
-            }
-        });
-    });
-    return changeData;
-}
-
 function submitForm(url, form, modal, callback) {
     $.ajax({
         method: $(form).attr('method'),
@@ -269,8 +202,8 @@ function loadProject(projectId) {
                                 }
                             }
                         };
-                        createModal(modalId, modalConfig);
                         var $modal = $('div#'+modalId);
+                        $modal.createModal(modalConfig);
                         $modal.modal('show');
                     }
                 });
@@ -279,6 +212,55 @@ function loadProject(projectId) {
             $body.on('click', 'button#export-changes', exportFunction);
         });
     rewatajax.init();
+
+    var changeDetailsFunction = function() {
+        var changeId = $(this).data('id');
+        var containerName = 'changeDetails-container-'+changeId;
+
+        var modalConfig = {
+            header: Translator.trans('title.changeDetails'),
+            content: '<div id="'+containerName+'"></div>',
+            footer: {
+                buttons: {
+                    closeButton: {
+                        type: 'close',
+                        class: 'btn btn-default',
+                        text: 'Close'
+                    },
+                    saveButton: {
+                        type: 'submit',
+                        submitForm: 'projectForm',
+                        class: 'btn btn-primary',
+                        text: 'Save changes'
+                    }
+                }
+            }
+        };
+        var $modal = $('div#'+modalId);
+        $modal.createModal(modalConfig);
+        $modal.modal('show');
+
+        var options = {
+            id: 'detailTable',
+            ajax_connector: paths.ajax_change_details,
+            pager_max_buttons: 15,
+            search: false,
+            language: {
+                dateFilter_range: Translator.trans('rewatajax.dateFilter_range'),
+                filter: Translator.trans('rewatajax.filter'),
+                search_results: Translator.trans('rewatajax.search_results'),
+                search_text: Translator.trans('rewatajax.search_text'),
+                no_entries_message: Translator.trans('rewatajax.no_entries_message')
+            },
+            format: {
+                dateISO: Translator.trans('lang.dateISO')
+            }
+        };
+        var rewatajaxDetails = $('div#'+containerName).rewatajax(options, { change_id: changeId });
+        rewatajaxDetails.init();
+    };
+    $body.unbind('click', changeDetailsFunction);
+    $body.on('click', 'button.changeDetailsButton', changeDetailsFunction);
 }
 
 function refreshGraph(monthLabels, datasets) {
@@ -460,8 +442,8 @@ $(document).ready(function() {
                         }
                     }
                 };
-                createModal(modalId, modalConfig);
                 var $modal = $('div#'+modalId);
+                $modal.createModal(modalConfig);
                 $modal.modal('show');
 
                 $('form#projectForm').submit(function( event ) {
@@ -501,8 +483,9 @@ $(document).ready(function() {
                         }
                     }
                 };
-                createModal(modalId, modalConfig);
-                $('div#'+modalId).modal('show');
+                var $modal = $('div#'+modalId);
+                $modal.createModal(modalConfig);
+                $modal.modal('show');
             }
         });
     });

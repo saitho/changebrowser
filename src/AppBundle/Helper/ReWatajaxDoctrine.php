@@ -50,7 +50,9 @@ class ReWatajaxDoctrine {
 			$this->qb->where($this->where);
 		}
 		
-		$this->qb->orderBy('a.'.$this->options['sortedBy'], $this->options['sortMode']);
+		if(!empty($this->options['sortedBy']) && !empty($this->options['sortMode'])) {
+			$this->qb->orderBy('a.'.$this->options['sortedBy'], $this->options['sortMode']);
+		}
 		if(!empty($this->options['search'])) {
 			$orX = $this->qb->expr()->orX();
 			foreach($this->headerConfiguration AS $k => $v) {

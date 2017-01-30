@@ -35,6 +35,7 @@ class HomeController extends Controller {
 	 */
 	public function getPathsAction(Request $request) {
 		$paths = [
+			'ajax_change_details: \''.$this->generateUrl('ajax_change_details').'\'',
 			'ajax_change_export: \''.$this->generateUrl('ajax_change_export').'\'',
 			'ajax_loadProject: \''.$this->generateUrl('ajax_loadProject').'\'',
 			'ajax_project_details: \''.$this->generateUrl('ajax_project_details').'\'',

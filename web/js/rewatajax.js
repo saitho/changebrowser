@@ -1,6 +1,4 @@
 // todo: rename change* fields for standalone release
-// todo: remove additionalFullWidthRow for standalone release
-// todo: remove createTableObject or make better use of it for standalone release
 
 function rewatajaxParseBodyData(response, header_data) {
     var changeData = [];
@@ -51,9 +49,7 @@ function rewatajaxParseBodyData(response, header_data) {
             columns.push(transformedText);
         }
 
-        changeData.push({
-            columns: columns
-        });
+        changeData.push(columns);
     });
     return changeData;
 }
@@ -69,7 +65,8 @@ function rewatajaxParseBodyData(response, header_data) {
                 per_page: 30,
                 pager_max_buttons: 5,
                 ajax_connector: '/ajax.php',
-                search: '',
+                search: true,
+                searchWord: '',
                 search_timeout: 300,
                 language: {
                     filter: 'Filter',
@@ -128,7 +125,7 @@ function rewatajaxParseBodyData(response, header_data) {
                 connectorData['sort_mode'] = options.sort_mode;
                 connectorData['per_page'] = options.per_page;
                 connectorData['current_page'] = options.current_page;
-                connectorData['search'] = options.search;
+                connectorData['search'] = options.searchWord;
                 connectorData['filter'] = options.filter;
 
                 if(staticResult != undefined) {
@@ -165,7 +162,7 @@ function rewatajaxParseBodyData(response, header_data) {
             };
             this.search = function (string) {
                 options.current_page = 1;
-                options.search = string;
+                options.searchWord = string;
                 _this.callConnector(function() { _this.updateContent('search'); });
             };
             this.createSearch = function (tableContainer) {
@@ -174,7 +171,7 @@ function rewatajaxParseBodyData(response, header_data) {
 
                 var results_div = document.createElement('div');
                 results_div.className = 'pull-left';
-                results_div.className = 'col-md-3 text-right pull-right';
+                results_div.className = 'col-md-4 text-right pull-right';
 
                 var result_counter = document.createElement('span');
                 result_counter.className = 'rewatajax_resultcounter';
@@ -182,7 +179,7 @@ function rewatajaxParseBodyData(response, header_data) {
                 search.append(results_div);
 
                 var search_div = document.createElement('div');
-                search_div.className = 'pull-left col-md-9 row';
+                search_div.className = 'pull-left col-md-8 row';
 
                 var search_input = document.createElement('input');
                 search_input.type = 'text';
@@ -332,7 +329,7 @@ function rewatajaxParseBodyData(response, header_data) {
                 );
             };
             this.addValueToTd = function(td, value) {
-                if(isElement(value)) {
+                if(this.isElement(value)) {
                     td.appendChild(value);
                 }else{
                     var tdValue = value;
@@ -415,7 +412,7 @@ function rewatajaxParseBodyData(response, header_data) {
                 }
                 $(body_data).each(function(key, element) {
                     var tr = document.createElement('tr');
-                    $(element.columns).each(function(k, v) {
+                    $(element).each(function(k, v) {
                         var td = document.createElement('td');
                         if(v == null) {
                             tr.appendChild(td);
@@ -538,7 +535,7 @@ function rewatajaxParseBodyData(response, header_data) {
                 tableContainer.innerHTML = '';
                 var table = document.createElement('table');
                 table.id = tableId;
-                table.className = tableClass;
+                table.className = 'rewatajax-table '+tableClass;
                 var thead = document.createElement('thead');
                 thead.id = tableId+'_thead';
                 table.appendChild(thead);
@@ -552,7 +549,9 @@ function rewatajaxParseBodyData(response, header_data) {
 
                 tableContainer.html(table);
 
-                _this.createSearch(tableContainer);
+                if(options.search) {
+                    _this.createSearch(tableContainer);
+                }
                 var paginator = document.createElement('nav');
                 paginator.setAttribute('aria-label', 'Page navigation');
                 paginator.className = 'pagination_container';
@@ -602,158 +601,3 @@ function rewatajaxParseBodyData(response, header_data) {
         }
     });
 })(jQuery);
-
-function createTableObject(tableOptions, theadObject, tbodyObject, noResultsMessage, options) {
-    var _this = this;
-    var tableId = tableOptions.id;
-    if(!tableId) {
-        return;
-    }
-    var tableClass = tableOptions.class;
-
-    _this.createHead = function(table, theadObject, tbodyObject, noResultsMessage, options) {
-        var thead = document.createElement('thead');
-        var tr = document.createElement('tr');
-
-        for(var key in theadObject) {
-            var name = theadObject[key];
-            var titleTh = document.createElement('th');
-            var thValue = name;
-            if(name.constructor === Object) {
-                thValue = name.content;
-                if(name.id) {
-                    titleTh.id = name.id;
-                }
-                var thClass = '';
-                if(name.class) {
-                    thClass += name.class;
-                }
-                if(name.width) {
-                    titleTh.width = name.width;
-                }
-                if(name.sortable) {
-                    thClass += ' sortable';
-                    if(options.sortedBy == key) {
-                        var sortMode = 'up';
-                        if(options.sortMode == 'desc') {
-                            sortMode = 'down';
-                        }
-                        thClass += ' sortable-'+sortMode;
-                    }
-                }
-                if(thClass) {
-                    titleTh.className = thClass.trim();
-                }
-            }
-            titleTh.innerHTML = '<span>'+thValue+'</span>';
-            tr.appendChild(titleTh);
-        }
-
-        thead.appendChild(tr);
-        table.appendChild(thead);
-    };
-
-    $('body').on('click', 'table#'+tableId+' > thead > tr > th.sortable > span', function() {
-        var sortableSelector = 'table#'+tableId+' > thead > tr > th.sortable';
-        var parent = $(this).parent('th');
-        if(parent.hasClass('sortable-up')) {
-            $(sortableSelector+'-up').removeClass('sortable-up');
-            parent.addClass('sortable-down');
-        }else{
-            $(sortableSelector+'-down').removeClass('sortable-down');
-            parent.addClass('sortable-up');
-        }
-    });
-
-    /**
-     * Returns true if it is a DOM element
-     * http://stackoverflow.com/questions/384286/javascript-isdom-how-do-you-check-if-a-javascript-object-is-a-dom-object
-     * @param o object
-     * @returns bool
-     */
-    _this.isElement = function(o){
-        return (
-            typeof HTMLElement === 'object' ? o instanceof HTMLElement : //DOM2
-                o && typeof o === 'object' && o !== null && o.nodeType === 1 && typeof o.nodeName==='string'
-        );
-    };
-    _this.addValueToTd = function(td, value) {
-        if(_this.isElement(value)) {
-            td.appendChild(value);
-        }else{
-            var tdValue = value;
-            if(value.constructor === Object) {
-                tdValue = value.content;
-                if(value.id) {
-                    td.id = value.id;
-                }
-                if(value.class) {
-                    td.className = value.class;
-                }
-            }
-            td.innerHTML = tdValue;
-        }
-    };
-    _this.createBody = function(table, theadObject, tbodyObject, noResultsMessage, options) {
-        var tbody = document.createElement('tbody');
-        if(tbodyObject.length === 0) {
-            if(noResultsMessage !== null) {
-                var tr = document.createElement('tr');
-                var td = document.createElement('td');
-                td.colSpan = Object.keys(theadObject).length;
-                td.className = 'no-results';
-                var text = document.createTextNode(noResultsMessage);
-                td.appendChild(text);
-                tr.appendChild(td);
-                table.appendChild(tr);
-            }
-            return;
-        }
-        $(tbodyObject).each(function(key, element) {
-            var tr = document.createElement('tr');
-            $(element.columns).each(function(k, v) {
-                var td = document.createElement('td');
-                if(v == null) {
-                    tr.appendChild(td);
-                }else {
-                    _this.addValueToTd(td, v);
-                    tr.appendChild(td);
-                }
-            });
-            tbody.appendChild(tr);
-            if(element.additionalFullWidthRow != null) {
-                tr = document.createElement('tr');
-                if(!element.additionalFullWidthRow.id) {
-                    element.additionalFullWidthRow.id = '';
-                }
-                tr.className = 'hidden-row hidden-row-'+element.additionalFullWidthRow.id;
-                tr.style.display = 'none';
-                var td = document.createElement('td');
-                td.colSpan = Object.keys(theadObject).length;
-                if(element.additionalFullWidthRow.html) {
-                    if(_this.isElement(element.additionalFullWidthRow.html)) {
-                        elementsFromHtml = element.additionalFullWidthRow.html;
-                    }else{
-                        var div = document.createElement('div');
-                        div.innerHTML = element.additionalFullWidthRow.html;
-                        var elementsFromHtml = div.firstChild.cloneNode(true);
-                    }
-                    td.appendChild(elementsFromHtml);
-                }else{
-                    var text = document.createTextNode(element.additionalFullWidthRow.text);
-                    td.appendChild(text);
-                }
-                tr.appendChild(td);
-                tbody.appendChild(tr);
-            }
-        });
-        table.appendChild(tbody);
-    };
-
-    var table = document.createElement('table');
-    table.id = tableId;
-    table.className = tableClass;
-    _this.createHead(table, theadObject, tbodyObject, noResultsMessage, options);
-    _this.createBody(table, theadObject, tbodyObject, noResultsMessage, options);
-    return table;
-}

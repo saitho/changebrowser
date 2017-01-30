@@ -50,41 +50,41 @@ ul.dropdown-menu.locales {
     margin: 0 15px;                  /* optional */
 }
 
-table#changeTable > thead > tr > th[data-sort-mode] > label {
+table.rewatajax-table > thead > tr > th[data-sort-mode] > label {
     cursor: pointer;
     padding-right: 20px;
 }
 
-table#changeTable > thead > tr > th[data-sort-mode] > label {
+table.rewatajax-table > thead > tr > th[data-sort-mode] > label {
     background: url(../images/sorting-inactive.png) no-repeat 99%;
 }
-table#changeTable > thead > tr > th[data-sort-mode="desc"] > label {
+table.rewatajax-table > thead > tr > th[data-sort-mode="desc"] > label {
     background: url(../images/sorting-down.png) no-repeat 99% !important;
 }
-table#changeTable > thead > tr > th[data-sort-mode="asc"] > label {
+table.rewatajax-table > thead > tr > th[data-sort-mode="asc"] > label {
     background: url(../images/sorting-up.png) no-repeat 99% !important;
 }
-table#changeTable > thead > tr > th[data-filterable] > a.rewatajax-filter {
+table.rewatajax-table > thead > tr > th[data-filterable] > a.rewatajax-filter {
     color: lightgrey;
 }
-table#changeTable > thead > tr > th[data-filterable] > a.rewatajax-filter.active {
+table.rewatajax-table > thead > tr > th[data-filterable] > a.rewatajax-filter.active {
     color: #0275d8;
+}
+
+table.rewatajax-table {
+    width: 100%;
+}
+table.rewatajax-table td {
+    line-height: 28px;
+}
+
+table.rewatajax-table td.no-results {
+    text-align: center;
 }
 
 label.control-label {
     line-height: 45px;
     vertical-align: middle;
-}
-
-div#body > table#changeTable {
-    width: 100%;
-}
-div#body > table#changeTable td {
-    line-height: 28px;
-}
-
-div#body > table#changeTable td.no-results {
-    text-align: center;
 }
 
 /*

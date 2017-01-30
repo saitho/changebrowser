@@ -89,10 +89,9 @@ class ChangeController extends Controller {
 				'actions' => [
 					'virtual' => true,
 					'content' => '',
-					'transform' => '<a href="javascript:toggleDetails(\'!id\');" '.
-						'class="pull-right btn btn-xs btn-primary">'.
-						'<i id="dropDown-activator-!id" class="fa fa-angle-down"></i>'.
-						'</a>',
+					'transform' => '<button class="pull-right btn btn-xs btn-primary changeDetailsButton" data-id="!id">'.
+						'<i class="fa fa-info-circle"></i>'.
+						'</button>',
 					'width' => '5%'
 				]
 			];
@@ -294,6 +293,69 @@ class ChangeController extends Controller {
 				'hasCompleteChanges' => $project->hasCompleteChanges()
 			];
 		}
+		//handle data
+		return new Response(json_encode($response), 200, ['content-type' => 'text/json']);
+	}
+	/**
+	 * @Route("/details", name="ajax_change_details")
+	 * @Method("GET")
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 */
+	public function changeDetailsAction(Request $request) {
+		$response = ['status' => true, 'message' => ''];
+		$change_id = $request->get('change_id');
+		
+		$translator = $this->get('translator');
+		
+		$response['header'] = [
+			$translator->trans('label.filename'),
+			[
+				'content' => $translator->trans('label.status'),
+				'width' => '10%',
+				'class' => 'text-center'
+			],
+			[
+				'content' => $translator->trans('label.changecontent.additions'),
+				'width' => '5%',
+				'class' => 'text-center'
+			],
+			[
+				'content' => $translator->trans('label.changecontent.deletions'),
+				'width' => '5%',
+				'class' => 'text-center'
+			],
+			[
+				'content' => $translator->trans('label.changecontent.changes'),
+				'width' => '5%',
+				'class' => 'text-center'
+			]
+		];
+		/** @var EntityManager $em */
+		$em = $this->getDoctrine()->getManager();
+		$rewatajax = new ReWatajaxDoctrine($em);
+		$rewatajax->setHeaderConfiguration($response['header']);
+		
+		$rewatajax->setTable('AppBundle:ChangeContent');
+		$rewatajax->setWhere('a.change = :change');
+		$rewatajax->setParams(['change' => $change_id]);
+		
+		$result = $rewatajax->findResults();
+		$body_data = [];
+		/** @var ChangeContent $content */
+		foreach($result AS $content) {
+			$body_data[] = [
+				['content' => $content->getFilename().' <a target="_blank" href="'.
+					$this->generateUrl('ajax_changecontent_diff', ['id' => $content->getId()]).
+					'" class="btn btn-primary btn-sm">'.$translator->trans('label.diff').'</a>'],
+				['content' => $translator->trans('status.'.$content->getStatus().''), 'class' => 'text-center table-'.$content->getCssStatus()],
+				['content' => $content->getAdditions(), 'class' => 'text-center'],
+				['content' => $content->getChanges(), 'class' => 'text-center'],
+				['content' => $content->getDeletions(), 'class' => 'text-center']
+			];
+		}
+		
+		$response['body_data'] = $body_data;
+		$response['options'] = $rewatajax->getOptions();
 		//handle data
 		return new Response(json_encode($response), 200, ['content-type' => 'text/json']);
 	}
