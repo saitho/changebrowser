@@ -254,6 +254,23 @@
         <source>label.graphTooltip.total</source>
         <target>Total</target>
       </trans-unit>
+      <trans-unit id="status.modified">
+        <source>status.modified</source>
+        <target>geändert</target>
+      </trans-unit>
+      <trans-unit id="status.added">
+        <source>status.added</source>
+        <target>hinzugefügt</target>
+      </trans-unit>
+      <trans-unit id="status.renamed">
+        <source>status.renamed</source>
+        <target>umbenannt</target>
+      </trans-unit>
+      <trans-unit id="status.removed">
+        <source>status.removed</source>
+        <target>entfernt</target>
+      </trans-unit>
+
       <trans-unit id="label.export_changelog">
         <source>label.export_changelog</source>
         <target>Änderungen exportieren</target>

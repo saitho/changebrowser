@@ -26,7 +26,7 @@ include_once __DIR__.'/../var/bootstrap.php.cache';
 // $loader->unregister();
 // $apcLoader->register(true);
 
-$kernel = new AppKernel('prod', false);
+$kernel = new AppKernel('prod', true);
 $kernel->loadClassCache();
 
 // When using the HTTP Cache to improve application performance, the application
