@@ -213,13 +213,33 @@ function loadProject(projectId) {
         });
     rewatajax.init();
 
+    var infoIcon = function(text) {
+        return '<i class="fa fa-info" title="'+text+'" data-toggle="tooltip" data-placement="right"></i>';
+    };
+
     var changeDetailsFunction = function() {
         var changeId = $(this).data('id');
         var containerName = 'changeDetails-container-'+changeId;
 
+        var originalTitleInfo = '';
+        var originalTitle = $(this).data('title');
+        var editedTitle = $(this).data('editedtitle');
+        var title = originalTitle;
+        if(editedTitle != '') {
+            originalTitleInfo = Translator.trans('label.originalTitle')+': '+title;
+            title = editedTitle;
+        }
+
+        var content = '<div class="form-group">' +
+            '<label for="titleInput">'+Translator.trans('label.changeTitle')+'</label>' +
+            '<input type="text" class="form-control" id="titleInput" required value="'+title+'">' +
+            '<small class="form-text text-muted" id="titleInput-info">'+originalTitleInfo+'</small>' +
+        '</div><hr />' +
+            '<div id="'+containerName+'"></div>';
+
         var modalConfig = {
             header: Translator.trans('title.changeDetails'),
-            content: '<div id="'+containerName+'"></div>',
+            content: content,
             footer: {
                 buttons: {
                     closeButton: {
@@ -227,9 +247,8 @@ function loadProject(projectId) {
                         class: 'btn btn-default',
                         text: 'Close'
                     },
-                    saveButton: {
+                    'changeDetails-save': {
                         type: 'submit',
-                        submitForm: 'projectForm',
                         class: 'btn btn-primary',
                         text: 'Save changes'
                     }
@@ -239,6 +258,45 @@ function loadProject(projectId) {
         var $modal = $('div#'+modalId);
         $modal.createModal(modalConfig);
         $modal.modal('show');
+
+        var saveButton = $('button#changeDetails-save');
+        saveButton.unbind('click');
+        saveButton.click(function() {
+           var titleInput = $('div.modal-body input#titleInput').val();
+           var refreshTitle = titleInput;
+           var addNote = true;
+            if(titleInput == editedTitle) {
+                return;
+            }else if(titleInput == originalTitle) {
+                titleInput = '';
+                refreshTitle = originalTitle;
+                addNote = false;
+            }
+
+            // Ajax request
+            $.ajax({
+                method: 'POST',
+                url: paths.ajax_change_details,
+                data: { change_id: changeId, edited_title: titleInput },
+                dataType: 'json'
+            }).done(function( response ) {
+                if(response.status == true) {
+                    var titleField = $('button.changeDetailsButton[data-id='+changeId+']')
+                        .parents('tr.rewatajax-row')
+                        .find('td.rewatajax-column[data-type="showTitle"]');
+                    titleField.text(refreshTitle);
+
+                    var infoField = $('div.modal-body small#titleInput-info');
+                    infoField.html('');
+                    if(addNote) {
+                        var text = Translator.trans('label.originalTitle')+': '+originalTitle;
+                        console.log(text);
+                       titleField.append(' '+infoIcon(text));
+                       infoField.html(text);
+                    }
+                }
+            });
+        });
 
         var options = {
             id: 'detailTable',
@@ -413,7 +471,9 @@ function refreshGraph(monthLabels, datasets) {
 
 $(document).ready(function() {
     // Enable tooltips
-    $('[data-toggle="tooltip"]').tooltip();
+    $('body').tooltip({
+        selector: '[data-toggle="tooltip"]'
+    });
 
     $('button#button-project-add').click(function() {
         $.ajax({

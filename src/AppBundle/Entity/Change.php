@@ -25,6 +25,13 @@ class Change extends AbstractEntity {
 	private $title;
 	
 	/**
+	 * @var string
+	 *
+	 * @ORM\Column(type="string", nullable=true)
+	 */
+	private $editedTitle;
+	
+	/**
 	 * @var Project
 	 *
 	 * Many Changes have One Project.
@@ -136,6 +143,20 @@ class Change extends AbstractEntity {
 	 */
 	public function getTitle() {
 		return $this->title;
+	}
+	
+	/**
+	 * @param string $editedTitle
+	 */
+	public function setEditedTitle($editedTitle) {
+		$this->editedTitle = $editedTitle;
+	}
+	
+	/**
+	 * @return string
+	 */
+	public function getEditedTitle() {
+		return $this->editedTitle;
 	}
 	
 	/**

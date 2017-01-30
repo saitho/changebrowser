@@ -1,16 +1,14 @@
-// todo: rename change* fields for standalone release
-
 function rewatajaxParseBodyData(response, header_data) {
-    var changeData = [];
-    $(response).each(function(key, change) {
+    var dataStorage = [];
+    $(response).each(function(key, data) {
         var fieldIndex = [];
-        for(var changeKey in change) {
-            if(header_data[changeKey]) {
-                if(change[changeKey] == '' || change[changeKey] == undefined) {
+        for(var dataKey in data) {
+            if(header_data[dataKey]) {
+                if(data[dataKey] == undefined) {
                     continue;
                 }
             }
-            fieldIndex[changeKey] = change[changeKey];
+            fieldIndex[dataKey] = data[dataKey];
         }
 
         var columns = [];
@@ -28,7 +26,7 @@ function rewatajaxParseBodyData(response, header_data) {
                 default:
                     transformedText = headerValueTransform;
                     if(transformedText && transformedText.match('!_self')) {
-                        if(originalFieldValue == undefined || !originalFieldValue) {
+                        if((originalFieldValue == undefined || !originalFieldValue) && !header_data[headerKey].virtual) {
                             transformedText = '';
                             break;
                         }else{
@@ -42,16 +40,16 @@ function rewatajaxParseBodyData(response, header_data) {
                             transformedText = transformedText.replace(new RegExp(expression, 'g'), fieldIndex[replaceKey]);
                         }
                     }else{
-                        transformedText = change[headerKey];
+                        transformedText = data[headerKey];
                     }
                     break;
             }
-            columns.push(transformedText);
+            columns.push({key: headerKey, content: transformedText});
         }
 
-        changeData.push(columns);
+        dataStorage.push(columns);
     });
-    return changeData;
+    return dataStorage;
 }
 
 (function($) {
@@ -412,41 +410,39 @@ function rewatajaxParseBodyData(response, header_data) {
                 }
                 $(body_data).each(function(key, element) {
                     var tr = document.createElement('tr');
+                    tr.className = 'rewatajax-row';
                     $(element).each(function(k, v) {
                         var td = document.createElement('td');
-                        if(v == null) {
+                        td.className = 'rewatajax-column';
+                        if(v.key) {
+                            td.setAttribute('data-type', v.key);
+                        }
+                        var value = v.content;
+                        if(value == null) {
                             tr.appendChild(td);
                         }else {
-                            _this.addValueToTd(td, v);
+                            if(_this.isElement(value)) {
+                                td.appendChild(value);
+                            }else{
+                                var tdValue = value;
+                                if(value.constructor === Object) {
+                                    tdValue = value.content.content;
+                                    if(value.id) {
+                                        td.id = value.id;
+                                    }
+                                    if(value.class) {
+                                        td.className = value.class;
+                                    }
+                                }
+                                td.innerHTML = tdValue;
+                            }
+
+
+                            _this.addValueToTd(td, v.content, v.key);
                             tr.appendChild(td);
                         }
                     });
                     tbody.appendChild(tr);
-                    if(element.additionalFullWidthRow != null) {
-                        tr = document.createElement('tr');
-                        if(!element.additionalFullWidthRow.id) {
-                            element.additionalFullWidthRow.id = '';
-                        }
-                        tr.className = 'hidden-row hidden-row-'+element.additionalFullWidthRow.id;
-                        tr.style.display = 'none';
-                        var td = document.createElement('td');
-                        td.colSpan = Object.keys(header_data).length;
-                        if(element.additionalFullWidthRow.html) {
-                            if(_this.isElement(element.additionalFullWidthRow.html)) {
-                                elementsFromHtml = element.additionalFullWidthRow.html;
-                            }else{
-                                var div = document.createElement('div');
-                                div.innerHTML = element.additionalFullWidthRow.html;
-                                var elementsFromHtml = div.firstChild.cloneNode(true);
-                            }
-                            td.appendChild(elementsFromHtml);
-                        }else{
-                            var text = document.createTextNode(element.additionalFullWidthRow.text);
-                            td.appendChild(text);
-                        }
-                        tr.appendChild(td);
-                        tbody.appendChild(tr);
-                    }
                 });
                 return tbody;
             };

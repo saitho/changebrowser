@@ -98,9 +98,13 @@
         <source>label.id</source>
         <target>ID</target>
       </trans-unit>
-      <trans-unit id="1dac0a2327e9a4b8516f7ffc8d27871f" resname="label.title">
-        <source>label.title</source>
+      <trans-unit id="1dac0a2327e9a4b8516f7ffc8d27871f" resname="label.changeTitle">
+        <source>label.changeTitle</source>
         <target>Titel</target>
+      </trans-unit>
+      <trans-unit id="label.originalTitle" resname="label.originalTitle">
+        <source>label.originalTitle</source>
+        <target>Ursprünglicher Titel</target>
       </trans-unit>
       <trans-unit id="15534ea437585961cc72992fc9722073" resname="label.actions">
         <source>label.actions</source>
