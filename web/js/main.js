@@ -16,7 +16,7 @@ function toggleDetails(changeId) {
 var modalId = 'universalModal';
 var currently_loaded_project = null;
 
-function submitForm(url, form, modal, callback) {
+function submitForm(url, form, callback) {
     $.ajax({
         method: $(form).attr('method'),
         url: url,
@@ -25,7 +25,7 @@ function submitForm(url, form, modal, callback) {
     }).done(function( response ) {
         if(response.status) {
             if(callback) {
-                callback(response, modal, form);
+                callback(response, form);
             }
         }
     });
@@ -476,9 +476,10 @@ $(document).ready(function() {
     });
 
     $('button#button-project-add').click(function() {
+        var url = paths.ajax_project_add;
         $.ajax({
             method: 'GET',
-            url: paths.ajax_project_add,
+            url: url,
             data: {  },
             dataType: 'json'
         }).done(function( response ) {
@@ -508,9 +509,9 @@ $(document).ready(function() {
 
                 $('form#projectForm').submit(function( event ) {
                     event.preventDefault();
-                    submitForm(url, this, $modal, function(response) {
+                    submitForm(url, this, function(response) {
                         if(response) {
-                            modal.modal('hide');
+                            $modal.modal('hide');
                             var option = document.createElement('option');
                             option.value = response.id;
                             option.innerText = response.title;
