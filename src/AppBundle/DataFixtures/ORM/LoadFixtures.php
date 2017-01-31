@@ -38,8 +38,7 @@ class LoadFixtures implements FixtureInterface, ContainerAwareInterface {
 		$project->setOptions([
 			'source' => [
 				'vendor' => 'saitho',
-				'repository' => 'changebrowser',
-				'accessToken' => '172ebc7651b9daa618806c03fff8c25848e5a9c4'
+				'repository' => 'changebrowser'
 				// 'accessToken' => '' // here you can enter a access token (required for private repositories)
 			]
 		]);
