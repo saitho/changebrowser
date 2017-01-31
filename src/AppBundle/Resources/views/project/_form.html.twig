@@ -1,20 +1,5 @@
 {{ form_start(form, { 'name': 'projectForm', attr: attr|default({'id': 'projectForm'}) }) }}
     {{ form_widget(form) }}
-{% if not ajax_mode %}
-    <input type="submit" value="{{ button_label|default('label.create_project'|trans) }}"
-           class="{{ button_css|default("btn btn-primary") }}" />
-
-    {% if include_saveAndCreateNew|default(false) %}
-        <input type="submit" name="saveAndCreateNew" value="{{ 'label.save_and_create_new'|trans }}"
-               class="{{ button_css|default("btn btn-default") }}" />
-    {% endif %}
-
-    {% if include_back_to_home_link|default(false) %}
-        <a href="{{ path('project_index') }}" class="btn btn-link">
-            {{ 'action.back_to_list'|trans }}
-        </a>
-    {% endif %}
-{% endif %}
 {{ form_end(form) }}
 
 {% if additionalFields %}

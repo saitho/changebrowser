@@ -102,6 +102,10 @@
         <source>label.changeTitle</source>
         <target>Titel</target>
       </trans-unit>
+      <trans-unit id="label.title" resname="label.title">
+        <source>label.title</source>
+        <target>Titel</target>
+      </trans-unit>
       <trans-unit id="label.originalTitle" resname="label.originalTitle">
         <source>label.originalTitle</source>
         <target>Ursprünglicher Titel</target>

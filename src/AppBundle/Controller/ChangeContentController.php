@@ -2,7 +2,10 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\Change;
 use AppBundle\Entity\ChangeContent;
+use AppBundle\Helper\ReWatajaxDoctrine;
+use Doctrine\ORM\EntityManager;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -65,7 +68,7 @@ class ChangeContentController extends Controller {
 			}
 		} // end foreach
 		//handle data
-		return $this->render('home/diff.html.twig', [
+		return $this->render('@App/home/diff.html.twig', [
 			'content' => $content,
 			'newLines_left' => $newLines_left,
 			'newLines_right' => $newLines_right,

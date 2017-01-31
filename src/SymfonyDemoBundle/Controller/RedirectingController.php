@@ -1,12 +1,12 @@
 <?php
-namespace AppBundle\Controller;
+namespace SymfonyDemoBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class RedirectingController
- * @package AppBundle\Controller
+ * @package SymfonyDemoBundle\Controller
  * @see http://symfony.com/doc/current/routing/redirect_trailing_slash.html
  */
 class RedirectingController extends Controller {

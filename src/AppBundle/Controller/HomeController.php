@@ -21,7 +21,7 @@ class HomeController extends Controller {
     public function indexAction() {
 		$entityManager = $this->getDoctrine()->getManager();
 		$projects = $entityManager->getRepository(Project::class)->findBy([], ['title' => 'ASC']);
-        return $this->render('home/home.html.twig', ['projects' => $projects]);
+        return $this->render('@App/home/home.html.twig', ['projects' => $projects]);
     }
 	
 	/**

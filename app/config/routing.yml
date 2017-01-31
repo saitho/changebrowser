@@ -12,6 +12,14 @@ app:
         _locale: '%app_locales%'
     defaults:
         _locale: '%locale%'
+symfonyDemo:
+    resource: '@SymfonyDemoBundle/Controller/'
+    type:     annotation
+    prefix:   /{_locale}
+    requirements:
+        _locale: '%app_locales%'
+    defaults:
+        _locale: '%locale%'
 
 # These lines define a route using YAML configuration. The controller used by
 # the route (FrameworkBundle:Template:template) is a convenient shortcut when
