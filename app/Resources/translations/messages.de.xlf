@@ -184,7 +184,7 @@
       </trans-unit>
       <trans-unit id="076ded3bf15349cea56c64b743ccbee1" resname="label.source_Github.accessToken">
         <source>label.source_Github.accessToken</source>
-        <target>GitHub Access Token</target>
+        <target>GitHub Access Token (für private Repositories)</target>
       </trans-unit>
       <trans-unit id="9ffd4e7f08e266ed265d2da43d1c90f1" resname="label.source_Github.vendor">
         <source>label.source_Github.vendor</source>

@@ -102,7 +102,7 @@ class ProjectController extends Controller {
 					$additionalFields[$source->getId()] = $source->getOptions();
 				}
 				$content = $this->get('twig')->render(
-					':project:create.html.twig',
+					'@App/project/create.html.twig',
 					[
 						'form' => $form->createView(),
 						'additionalFields' => $additionalFields
