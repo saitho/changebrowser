@@ -2,25 +2,58 @@
 
 ## Vorwort
 
+## Systemanforderungen
+* PHP 7
+* MySQL-Server
+
 ## Installation
 
-1. Datenbankverbindung in config/parameters.yml anpassen
+1. Lade die Dateien auf Deinen Server
+2. Verbinde dich mit Deinem Server und wechsle in das Projektverzeichnis
+3. Installiere die Pakete über Composer
 
-2. Dateien auf den Server laden
+`php bin/composer.phar install`
 
-`php bin/console doctrine:database:create`
+Nach dem Installieren der Pakete wird die Paramater-Konfigurationsdatei erstellt.
+Hierbei wirst du nach folgenden Eingaben gefragt:
 
-`php bin/console doctrine:schema:create`
+* locale
+  * Standardsprache (de oder en)
+  * auf der Seite lässt sich die Sprache ebenfalls umstellen
+  * für Demozwecke einfach Enter drücken
+* SYMFONY_SECRET
+  * für Demozwecke einfach Enter drücken
+* database_host
+  * Host deiner MySQL-Datenbank (WICHTIG!)
+* database_dbname
+  * Name deiner MySQL-Datenbank (WICHTIG!)
+* database_user
+  * Benutzername für deine MySQL-Datenbank (WICHTIG!)
+* database_password
+  * Passwort des MySQL-Benutzers (WICHTIG!)
+* github_clientId und github_clientSecret
+  * siehe https://github.com/settings/developers
 
-`php bin/console doctrine:fixtures:load`
+Ggf. dem Ordner "var/" Schreibrechte geben, z.B. mit:
+``sudo chmod -R 0770 var/``
+
+4. Tabellen erstellen:
+
+``php bin/console doctrine:schema:create``
+
+5. Beispieldaten laden:
+
+``php bin/console doctrine:fixtures:load``
+
+Hierbei wird ein Adminnutzer für den Login angelegt sowie zwei Beispielprojekte.
+
+Über folgenden Command können die Änderungen importiert werden (CLI-Ausführung für Erstimport empfohlen!):
 
 `php bin/console app:changes:fetch`
 
-* options
-  * --complete (-c): looks for changes before the earliest indexed change
-  * --update (-u): updates already indexed changes (e.g. version numbers)
-
-
+* Weitere Optionen
+  * --complete (-c): sucht nach Änderungen vor dem ältesten gespeicherten Change
+  * --update (-u): aktualisiert die gespeicherten Daten (nützlich wenn z.B. eine Version gesetzt wurde)
 
 
 ## Weitere Ideen
