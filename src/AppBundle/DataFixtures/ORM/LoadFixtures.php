@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the Symfony package.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace AppBundle\DataFixtures\ORM;
 
 use AppBundle\Entity\Project;
@@ -19,19 +10,6 @@ use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-/**
- * Defines the sample data to load in the database when running the unit and
- * functional tests.
- *
- * Execute this command to load the data:
- *
- *   $ php bin/console doctrine:fixtures:load
- *
- * See http://symfony.com/doc/current/bundles/DoctrineFixturesBundle/index.html
- *
- * @author Ryan Weaver <weaverryan@gmail.com>
- * @author Javier Eguiluz <javier.eguiluz@gmail.com>
- */
 class LoadFixtures implements FixtureInterface, ContainerAwareInterface {
     /** @var ContainerInterface */
     private $container;
@@ -41,11 +19,14 @@ class LoadFixtures implements FixtureInterface, ContainerAwareInterface {
      */
     public function load(ObjectManager $manager) {
         $this->loadUsers($manager);
-        
+	
 		$github = new Github();
-		$github->create();
+		$github->create([
+			'clientId' => $this->container->getParameter('github_clientId'),
+			'clientSecret' => $this->container->getParameter('github_clientSecret')
+		]);
 		$manager->persist($github);
-		
+	
 		$project = new Project();
 		$project->setSource($github);
 		$project->setOptions(['source' => ['vendor' => 'saitho', 'repository' => 'watajax-doctrine']]);
@@ -59,23 +40,35 @@ class LoadFixtures implements FixtureInterface, ContainerAwareInterface {
 				'vendor' => 'saitho',
 				'repository' => 'changebrowser',
 				'accessToken' => '172ebc7651b9daa618806c03fff8c25848e5a9c4'
+				// 'accessToken' => '' // here you can enter a access token (required for private repositories)
 			]
 		]);
-		$project->setTitle('This project (private)');
+		$project->setTitle('Changebrowser (private)');
 		$manager->persist($project);
+		
+		/*
+		$phabricator = new \AppBundle\Entity\Source\Phabricator();
+		$phabricator->create();
+		$manager->persist($phabricator);
+	
+		$project = new Project();
+		$project->setSource($phabricator);
+		$project->setOptions([
+			'source' => [
+				'repository' => 'Git-Test',
+				'conduitApiToken' => 'api-yfx5ss55a4ja5bgeaibyvjyvuwed',
+				'phabricatorURL' => 'https://test-d63kbr46aiuq.phacility.com/'
+			]
+		]);
+		$project->setTitle('Phabricator-Test');
+		$manager->persist($project);
+		*/
 		
 		$manager->flush();
     }
 
     private function loadUsers(ObjectManager $manager) {
         $passwordEncoder = $this->container->get('security.password_encoder');
-
-        $johnUser = new User();
-        $johnUser->setUsername('john_user');
-        $johnUser->setEmail('john_user@symfony.com');
-        $encodedPassword = $passwordEncoder->encodePassword($johnUser, 'kitten');
-        $johnUser->setPassword($encodedPassword);
-        $manager->persist($johnUser);
 
         $annaAdmin = new User();
         $annaAdmin->setUsername('anna_admin');
