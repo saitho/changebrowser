@@ -85,7 +85,7 @@ class ExporterController extends Controller {
 			$response['modal'] = [
 				'header' => $this->get('translator')->trans('title.export_changes'),
 				'content' => $this->get('twig')->render(
-					'changes/export.twig', [
+					'@App/changes/export.twig', [
 						'project_id' => $project_id,
 						'versions' => $versionArray,
 						'tags' => EnumChangeTypeType::$values
