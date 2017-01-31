@@ -11,7 +11,6 @@
 
 namespace SymfonyDemoBundle\Twig;
 
-use SymfonyDemoBundle\Utils\Markdown;
 use Symfony\Component\Intl\Intl;
 
 /**
@@ -29,30 +28,15 @@ use Symfony\Component\Intl\Intl;
  */
 class AppExtension extends \Twig_Extension
 {
-    /**
-     * @var Markdown
-     */
-    private $parser;
 
     /**
      * @var array
      */
     private $locales;
 
-    public function __construct(Markdown $parser, $locales)
+    public function __construct($locales)
     {
-        $this->parser = $parser;
         $this->locales = $locales;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getFilters()
-    {
-        return [
-            new \Twig_SimpleFilter('md2html', [$this, 'markdownToHtml'], ['is_safe' => ['html']]),
-        ];
     }
 
     /**
@@ -65,17 +49,6 @@ class AppExtension extends \Twig_Extension
         ];
     }
 
-    /**
-     * Transforms the given Markdown content into HTML content.
-     *
-     *  @param string $content
-     *
-     * @return string
-     */
-    public function markdownToHtml($content)
-    {
-        return $this->parser->toHtml($content);
-    }
 
     /**
      * Takes the list of codes of the locales (languages) enabled in the

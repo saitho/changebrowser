@@ -7,6 +7,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -21,7 +22,7 @@ class ChangeContentController extends Controller {
 	 * @Route("/diff/{id}", name="ajax_changecontent_diff")
 	 * @Method("GET")
 	 */
-	public function showForProjectAction(ChangeContent $content) {
+	public function diffAction(ChangeContent $content) {
 		/** @var $content ChangeContent */
 		$lines = explode("\n", $content->getPatch());
 		$newLines_left = [];
@@ -70,5 +71,83 @@ class ChangeContentController extends Controller {
 			'newLines_right' => $newLines_right,
 			'newLines_spacers' => $newLines_spacers
 		]);
+	}
+	/**
+	 * @param Request $request
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 *
+	 * @Route("/details", name="ajax_change_details")
+	 * @Method({"GET", "POST"})
+	 */
+	public function showAction(Request $request) {
+		$response = ['status' => true, 'message' => ''];
+		$change_id = $request->get('change_id');
+		$translator = $this->get('translator');
+		
+		if($request->getMethod() == 'POST') {
+			/** @var EntityManager $em */
+			$em = $this->getDoctrine()->getManager();
+			$changeRepo = $em->getRepository(Change::class);
+			$change = $changeRepo->find($change_id);
+			$newEditedTitle = $request->get('edited_title');
+			if($change->getEditedTitle() != $newEditedTitle) {
+				$change->setEditedTitle($newEditedTitle);
+				$em->persist($change);
+				$em->flush();
+				$response['message'] = 'test';
+			}
+		}else{
+			$response['header'] = [
+				$translator->trans('label.filename'),
+				[
+					'content' => $translator->trans('label.status'),
+					'width' => '10%',
+					'class' => 'text-center'
+				],
+				[
+					'content' => $translator->trans('label.changecontent.additions'),
+					'width' => '5%',
+					'class' => 'text-center'
+				],
+				[
+					'content' => $translator->trans('label.changecontent.deletions'),
+					'width' => '5%',
+					'class' => 'text-center'
+				],
+				[
+					'content' => $translator->trans('label.changecontent.changes'),
+					'width' => '5%',
+					'class' => 'text-center'
+				]
+			];
+			/** @var EntityManager $em */
+			$em = $this->getDoctrine()->getManager();
+			$rewatajax = new ReWatajaxDoctrine($em);
+			$rewatajax->setHeaderConfiguration($response['header']);
+			
+			$rewatajax->setTable('AppBundle:ChangeContent');
+			$rewatajax->setWhere('a.change = :change');
+			$rewatajax->setParams(['change' => $change_id]);
+			
+			$result = $rewatajax->findResults();
+			$body_data = [];
+			/** @var ChangeContent $content */
+			foreach($result AS $content) {
+				$body_data[] = [
+					['content' => $content->getFilename().' <a target="_blank" href="'.
+						$this->generateUrl('ajax_changecontent_diff', ['id' => $content->getId()]).
+						'" class="btn btn-primary btn-sm">'.$translator->trans('label.diff').'</a>'],
+					['content' => $translator->trans('status.'.$content->getStatus()), 'class' => 'text-center table-'.$content->getCssStatus()],
+					['content' => $content->getAdditions(), 'class' => 'text-center'],
+					['content' => $content->getChanges(), 'class' => 'text-center'],
+					['content' => $content->getDeletions(), 'class' => 'text-center']
+				];
+			}
+			
+			$response['body_data'] = $body_data;
+			$response['options'] = $rewatajax->getOptions();
+		}
+		//handle data
+		return new Response(json_encode($response), 200, ['content-type' => 'text/json']);
 	}
 }

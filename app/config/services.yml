@@ -1,18 +1,11 @@
 services:
-    # First we define some basic services to make these utilities available in
-    # the entire application
-    slugger:
-        class: SymfonyDemoBundle\Utils\Slugger
-
-    markdown:
-        class: SymfonyDemoBundle\Utils\Markdown
 
     # These are the Twig extensions that create new filters and functions for
     # using them in the templates
     app.twig.app_extension:
         public:    false
         class:     SymfonyDemoBundle\Twig\AppExtension
-        arguments: ['@markdown', '%app_locales%']
+        arguments: ['%app_locales%']
         tags:
             - { name: twig.extension }
 

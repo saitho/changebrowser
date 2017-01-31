@@ -26,24 +26,6 @@ use Symfony\Component\HttpFoundation\Response;
  * @Security("has_role('ROLE_ADMIN')")
  */
 class ProjectController extends Controller {
-	
-	/**
-	 * @param int $project_id
-	 * @return \AppBundle\Entity\Project
-	 * @throws \Exception
-	 */
-	private function getProjectFromId($project_id=0) {
-		if(empty($project_id)) {
-			throw new \Exception($this->get('translator')->trans('Missing Project ID'));
-		}
-		$projectRepo = $this->getDoctrine()->getRepository(Project::class);
-		/** @var Project $project */
-		$project = $projectRepo->find($project_id);
-		if(empty($project)) {
-			throw new \Exception($this->get('translator')->trans('Project not found'));
-		}
-		return $project;
-	}
 	/**
 	 * @param Request $request
 	 * @return \Symfony\Component\HttpFoundation\Response
@@ -54,7 +36,15 @@ class ProjectController extends Controller {
 	public function detailsAction(Request $request) {
 		$project_id = $request->get('project_id');
 		try {
-			$project = $this->getProjectFromId($project_id);
+			if(empty($project_id)) {
+				throw new \Exception($this->get('translator')->trans('Missing Project ID'));
+			}
+			$projectRepo = $this->getDoctrine()->getRepository(Project::class);
+			/** @var Project $project */
+			$project = $projectRepo->find($project_id);
+			if(empty($project)) {
+				throw new \Exception($this->get('translator')->trans('Project not found'));
+			}
 			
 			$content = $this->get('twig')->render(':project:details.html.twig', array('project' => $project));
 			$response = ['status' => true, 'modal' => [
@@ -67,6 +57,7 @@ class ProjectController extends Controller {
 		
 		return new Response(json_encode($response), 200, ['content-type' => 'text/json']);
 	}
+	
 	/**
 	 * @param Request $request
 	 * @return \Symfony\Component\HttpFoundation\Response

@@ -23,25 +23,7 @@ use Symfony\Component\HttpFoundation\Response;
  * @Security("has_role('ROLE_ADMIN')")
  */
 class ChangeController extends Controller {
-	/**
-	 * @param int $project_id
-	 * @return \AppBundle\Entity\Project
-	 * @throws \Exception
-	 */
-	private function getProjectFromId($project_id=0) {
-		if(empty($project_id)) {
-			throw new \Exception($this->get('translator')->trans('Missing Project ID'));
-		}
-		$projectRepo = $this->getDoctrine()->getRepository(Project::class);
-		/** @var Project $project */
-		$project = $projectRepo->find($project_id);
-		if(empty($project)) {
-			throw new \Exception($this->get('translator')->trans('Project not found'));
-		}
-		return $project;
-	}
-	
-	
+
 	private function getStatistics(Project $project, $response) {
 		// Statistics
 		// can't re-use QueryBuilder and Query from ReWatajax (does not return anything...!?)
@@ -157,13 +139,21 @@ class ChangeController extends Controller {
 	 * @Route("/list", name="ajax_loadProject")
 	 * @Method("GET")
 	 */
-	public function showForProjectAction(Request $request) {
+	public function listAction(Request $request) {
 		$response = ['status' => false, 'message' => ''];
 		$project_id = $request->get('project_id');
 				
 		$project = null;
 		try {
-			$project = $this->getProjectFromId($project_id);
+			if(empty($project_id)) {
+				throw new \Exception($this->get('translator')->trans('Missing Project ID'));
+			}
+			$projectRepo = $this->getDoctrine()->getRepository(Project::class);
+			/** @var Project $project */
+			$project = $projectRepo->find($project_id);
+			if(empty($project)) {
+				throw new \Exception($this->get('translator')->trans('Project not found'));
+			}
 			$response['status'] = true;
 		} catch(\Exception $e) {
 			$response = ['status' => false, 'message' => $e->getMessage()];
@@ -270,84 +260,6 @@ class ChangeController extends Controller {
 				'hasChanges' => $project->hasChanges(),
 				'hasCompleteChanges' => $project->hasCompleteChanges()
 			];
-		}
-		//handle data
-		return new Response(json_encode($response), 200, ['content-type' => 'text/json']);
-	}
-	/**
-	 * @param Request $request
-	 * @return \Symfony\Component\HttpFoundation\Response
-	 *
-	 * @Route("/details", name="ajax_change_details")
-	 * @Method({"GET", "POST"})
-	 */
-	public function changeDetailsAction(Request $request) {
-		$response = ['status' => true, 'message' => ''];
-		$change_id = $request->get('change_id');
-		$translator = $this->get('translator');
-		
-		if($request->getMethod() == 'POST') {
-			/** @var EntityManager $em */
-			$em = $this->getDoctrine()->getManager();
-			$changeRepo = $em->getRepository(Change::class);
-			$change = $changeRepo->find($change_id);
-			$newEditedTitle = $request->get('edited_title');
-			if($change->getEditedTitle() != $newEditedTitle) {
-				$change->setEditedTitle($newEditedTitle);
-				$em->persist($change);
-				$em->flush();
-				$response['message'] = 'test';
-			}
-		}else{
-			$response['header'] = [
-				$translator->trans('label.filename'),
-				[
-					'content' => $translator->trans('label.status'),
-					'width' => '10%',
-					'class' => 'text-center'
-				],
-				[
-					'content' => $translator->trans('label.changecontent.additions'),
-					'width' => '5%',
-					'class' => 'text-center'
-				],
-				[
-					'content' => $translator->trans('label.changecontent.deletions'),
-					'width' => '5%',
-					'class' => 'text-center'
-				],
-				[
-					'content' => $translator->trans('label.changecontent.changes'),
-					'width' => '5%',
-					'class' => 'text-center'
-				]
-			];
-			/** @var EntityManager $em */
-			$em = $this->getDoctrine()->getManager();
-			$rewatajax = new ReWatajaxDoctrine($em);
-			$rewatajax->setHeaderConfiguration($response['header']);
-			
-			$rewatajax->setTable('AppBundle:ChangeContent');
-			$rewatajax->setWhere('a.change = :change');
-			$rewatajax->setParams(['change' => $change_id]);
-			
-			$result = $rewatajax->findResults();
-			$body_data = [];
-			/** @var ChangeContent $content */
-			foreach($result AS $content) {
-				$body_data[] = [
-					['content' => $content->getFilename().' <a target="_blank" href="'.
-						$this->generateUrl('ajax_changecontent_diff', ['id' => $content->getId()]).
-						'" class="btn btn-primary btn-sm">'.$translator->trans('label.diff').'</a>'],
-					['content' => $translator->trans('status.'.$content->getStatus()), 'class' => 'text-center table-'.$content->getCssStatus()],
-					['content' => $content->getAdditions(), 'class' => 'text-center'],
-					['content' => $content->getChanges(), 'class' => 'text-center'],
-					['content' => $content->getDeletions(), 'class' => 'text-center']
-				];
-			}
-			
-			$response['body_data'] = $body_data;
-			$response['options'] = $rewatajax->getOptions();
 		}
 		//handle data
 		return new Response(json_encode($response), 200, ['content-type' => 'text/json']);
