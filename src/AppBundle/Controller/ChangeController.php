@@ -169,7 +169,8 @@ class ChangeController extends Controller {
 				],
 				'showTitle' => [
 					'content' => $translator->trans('label.changeTitle'),
-					'sortable' => true
+					'sortable' => true,
+					'searchFieldName' => ['editedTitle', 'title']	// in search mode: will search in title if editedTitle is empty
 				],
 				'author' => [
 					'content' => $translator->trans('label.author'),
