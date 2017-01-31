@@ -46,7 +46,7 @@ class ProjectController extends Controller {
 				throw new \Exception($this->get('translator')->trans('Project not found'));
 			}
 			
-			$content = $this->get('twig')->render(':project:details.html.twig', array('project' => $project));
+			$content = $this->get('twig')->render('@App/project/details.html.twig', array('project' => $project));
 			$response = ['status' => true, 'modal' => [
 				'header' => $project->getTitle(),
 				'content' => $content
