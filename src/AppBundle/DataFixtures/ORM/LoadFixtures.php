@@ -42,7 +42,7 @@ class LoadFixtures implements FixtureInterface, ContainerAwareInterface {
 				// 'accessToken' => '' // here you can enter a access token (required for private repositories)
 			]
 		]);
-		$project->setTitle('Changebrowser (private)');
+		$project->setTitle('Changebrowser');
 		$manager->persist($project);
 		
 		/*
