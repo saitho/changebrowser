@@ -294,11 +294,11 @@
 
       <trans-unit id="text.warning.incomplete_changes">
         <source>text.warning.incomplete_changes</source>
-        <target>Some changes might be missing for this project. Please run the command <![CDATA[<strong>sudo php bin/console app:changes:fetch %project_id% -c</strong>]]> to fetch the missing changes.</target>
+        <target>Some changes might be missing for this project. Please run the command <![CDATA[<strong>php bin/console app:changes:fetch %project_id% -c</strong>]]> to fetch the missing changes.</target>
       </trans-unit>
       <trans-unit id="text.warning.no_changes">
         <source>text.warning.no_changes</source>
-        <target>No changes have been imported for this project yet. Please run the command <![CDATA[<strong>sudo php bin/console app:changes:fetch %project_id%</strong>]]> to start the data import.</target>
+        <target>No changes have been imported for this project yet. Please run the command <![CDATA[<strong>php bin/console app:changes:fetch %project_id%</strong>]]> to start the data import.</target>
       </trans-unit>
 
       <trans-unit id="tag.task">

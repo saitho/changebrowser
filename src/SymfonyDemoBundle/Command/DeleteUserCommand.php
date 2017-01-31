@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace AppBundle\Command;
+namespace SymfonyDemoBundle\Command;
 
 use AppBundle\Entity\User;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -25,7 +25,7 @@ use Symfony\Component\Console\Question\Question;
  * To use this command, open a terminal window, enter into your project
  * directory and execute the following:
  *
- *     $ php bin/console app:delete-user
+ *     $ php bin/console symfonydemo:delete-user
  *
  * Check out the code of the src/AppBundle/Command/AddUserCommand.php file for
  * the full explanation about Symfony commands.
@@ -49,7 +49,7 @@ class DeleteUserCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('app:delete-user')
+            ->setName('symfonydemo:delete-user')
             ->setDescription('Deletes users from the database')
             ->addArgument('username', InputArgument::REQUIRED, 'The username of an existing user')
             ->setHelp(<<<'HELP'
@@ -85,7 +85,7 @@ HELP
             'If you prefer to not use this interactive wizard, provide the',
             'arguments required by this command as follows:',
             '',
-            ' $ php bin/console app:delete-user username',
+            ' $ php bin/console symfonydemo:delete-user username',
             '',
         ]);
 

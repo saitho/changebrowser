@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace AppBundle\Command;
+namespace SymfonyDemoBundle\Command;
 
 use AppBundle\Entity\User;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -26,7 +26,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  * To use this command, open a terminal window, enter into your project directory
  * and execute the following:
  *
- *     $ php bin/console app:list-users
+ *     $ php bin/console symfonydemo:list-users
  *
  * See http://symfony.com/doc/current/cookbook/console/console_command.html
  *
@@ -45,8 +45,8 @@ class ListUsersCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            // a good practice is to use the 'app:' prefix to group all your custom application commands
-            ->setName('app:list-users')
+            // a good practice is to use the 'symfonydemo:' prefix to group all your custom application commands
+            ->setName('symfonydemo:list-users')
             ->setDescription('Lists all the existing users')
             ->setHelp(<<<'HELP'
 The <info>%command.name%</info> command lists all the users registered in the application:
@@ -133,7 +133,7 @@ HELP
         $mailer = $this->getContainer()->get('mailer');
 
         $message = $mailer->createMessage()
-            ->setSubject(sprintf('app:list-users report (%s)', date('Y-m-d H:i:s')))
+            ->setSubject(sprintf('symfonydemo:list-users report (%s)', date('Y-m-d H:i:s')))
             ->setFrom($this->getContainer()->getParameter('app.notifications.email_sender'))
             ->setTo($recipient)
             ->setBody($contents, 'text/plain')

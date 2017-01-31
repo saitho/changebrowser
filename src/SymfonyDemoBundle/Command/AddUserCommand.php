@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace AppBundle\Command;
+namespace SymfonyDemoBundle\Command;
 
 use AppBundle\Entity\User;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -26,11 +26,11 @@ use Symfony\Component\Console\Question\Question;
  * To use this command, open a terminal window, enter into your project
  * directory and execute the following:
  *
- *     $ php bin/console app:add-user
+ *     $ php bin/console symfonydemo:add-user
  *
  * To output detailed information, increase the command verbosity:
  *
- *     $ php bin/console app:add-user -vv
+ *     $ php bin/console symfonydemo:add-user -vv
  *
  * See http://symfony.com/doc/current/cookbook/console/console_command.html
  *
@@ -51,8 +51,8 @@ class AddUserCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            // a good practice is to use the 'app:' prefix to group all your custom application commands
-            ->setName('app:add-user')
+            // a good practice is to use the 'symfonydemo:' prefix to group all your custom application commands
+            ->setName('symfonydemo:add-user')
             ->setDescription('Creates users and stores them in the database')
             ->setHelp($this->getCommandHelp())
             // commands can optionally define arguments and/or options (mandatory and optional)
@@ -94,7 +94,7 @@ class AddUserCommand extends ContainerAwareCommand
             'If you prefer to not use this interactive wizard, provide the',
             'arguments required by this command as follows:',
             '',
-            ' $ php bin/console app:add-user username password email@example.com',
+            ' $ php bin/console symfonydemo:add-user username password email@example.com',
             '',
         ]);
 

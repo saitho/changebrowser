@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the Symfony package.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace AppBundle\Command;
 
 use AppBundle\DBAL\EnumChangeTypeType;
@@ -229,13 +220,7 @@ class FetchChangesCommand extends ContainerAwareCommand {
         $projectId = $input->getArgument('project');
 
         if(!empty($projectId)) {
-        	$project = null;
-        	if(is_numeric($projectId)) {
-				$project = $this->entityManager->getRepository(Project::class)->find($projectId);
-			}
-        	if(empty($project)) {
-				$project = $this->entityManager->getRepository(Project::class)->findOneBy(['externalId'=>$projectId]);
-			}
+        	$project = $this->entityManager->getRepository(Project::class)->find($projectId);
 			$this->fetchChangesForProject($project, $output);
 		}else{
 			$projects = $this->entityManager->getRepository(Project::class)->findAll();
