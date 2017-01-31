@@ -1,0 +1,31 @@
+table.rewatajax-table > thead > tr > th[data-sort-mode] > label {
+    cursor: pointer;
+    padding-right: 20px;
+}
+
+table.rewatajax-table > thead > tr > th[data-sort-mode] > label {
+    background: url(../images/sorting-inactive.png) no-repeat 99%;
+}
+table.rewatajax-table > thead > tr > th[data-sort-mode="desc"] > label {
+    background: url(../images/sorting-down.png) no-repeat 99% !important;
+}
+table.rewatajax-table > thead > tr > th[data-sort-mode="asc"] > label {
+    background: url(../images/sorting-up.png) no-repeat 99% !important;
+}
+table.rewatajax-table > thead > tr > th[data-filterable] > a.rewatajax-filter {
+    color: lightgrey;
+}
+table.rewatajax-table > thead > tr > th[data-filterable] > a.rewatajax-filter.active {
+    color: #0275d8;
+}
+
+table.rewatajax-table {
+    width: 100%;
+}
+table.rewatajax-table td {
+    line-height: 28px;
+}
+
+table.rewatajax-table td.no-results {
+    text-align: center;
+}

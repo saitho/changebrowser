@@ -48,8 +48,8 @@
 {% block javascripts %}
     <script src="{{ url('ajaxpaths') }}"></script>
     {{ parent() }}
-    <script src="{{ asset('js/rewatajax.js') }}"></script>
-    <script src="{{ asset('js/modal.js') }}"></script>
+    <script src="{{ asset('js/rewatajax.min.js') }}"></script>
+    <script src="{{ asset('js/modal.min.js') }}"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             var $projectSelect = $('select#projectList');
