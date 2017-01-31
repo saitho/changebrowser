@@ -30,7 +30,7 @@ class LoadFixtures implements FixtureInterface, ContainerAwareInterface {
 		$project = new Project();
 		$project->setSource($github);
 		$project->setOptions(['source' => ['vendor' => 'saitho', 'repository' => 'watajax-doctrine']]);
-		$project->setTitle('Doctrine Implementation for WATAJAX (public)');
+		$project->setTitle('Doctrine Implementation for WATAJAX');
 		$manager->persist($project);
 	
 		$project = new Project();
