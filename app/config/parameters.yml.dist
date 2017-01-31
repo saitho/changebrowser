@@ -19,7 +19,6 @@ parameters:
     database_user:     "symfony"
     database_password: "symfony"
 
-    github_accesstoken: ""
     github_clientId: ""
     github_clientSecret: ""
 
