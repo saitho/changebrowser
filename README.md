@@ -2,6 +2,8 @@
 
 ## Vorwort
 
+Dieses Projekt entstand im Rahmen der Code Competition Januar 2017 von IT-Talents.de. Werde hier je nach Lust und Laune weiterentwickeln.
+
 ## Systemanforderungen
 * PHP 7
 * MySQL-Server
@@ -56,7 +58,7 @@ Hierbei wird ein Adminnutzer für den Login angelegt sowie zwei Beispielprojekte
   * --update (-u): aktualisiert die gespeicherten Daten (nützlich wenn z.B. eine Version gesetzt wurde)
 
 
-## Weitere Ideen
+## Weitere Ideen, zu denen ich bisher noch nicht gekommen bin
 
 * Auflistung aller Änderungen zu einer Datei
 * Integration weiterer Repositories
