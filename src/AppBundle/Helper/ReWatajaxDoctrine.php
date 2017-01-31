@@ -62,7 +62,20 @@ class ReWatajaxDoctrine {
 				if(!empty($v['virtual'])) {
 					continue;
 				}
-				$orX->add('a.'.$k.' LIKE :search');
+				if(!empty($v['searchFieldName'])) {
+					$orX2 = $this->qb->expr()->orX();
+					for($i=0; !empty($v['searchFieldName'][$i]); $i++) {
+						$andX = $this->qb->expr()->andX();
+						$andX->add('a.'.$v['searchFieldName'][$i].' LIKE :search');
+						for($i2=0; $i2 < $i; $i2++) {
+							$andX->add('a.'.$v['searchFieldName'][$i2].' IS NULL');
+						}
+						$orX2->add($andX);
+					}
+					$orX->add($orX2);
+				}else{
+					$orX->add('a.'.$k.' LIKE :search');
+				}
 			}
 			$this->qb->andWhere($orX);
 			$this->query->setParameter('search', '%'.$this->options['search'].'%');
