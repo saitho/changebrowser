@@ -222,6 +222,7 @@ function loadProject(projectId) {
         var containerName = 'changeDetails-container-'+changeId;
 
         var originalTitleInfo = '';
+        var currentType = $(this).data('type');
         var originalTitle = $(this).data('title');
         var editedTitle = $(this).data('editedtitle');
         var title = originalTitle;
@@ -234,7 +235,26 @@ function loadProject(projectId) {
             '<label for="titleInput">'+Translator.trans('label.changeTitle')+'</label>' +
             '<input type="text" class="form-control" id="titleInput" required value="'+title+'">' +
             '<small class="form-text text-muted" id="titleInput-info">'+originalTitleInfo+'</small>' +
-        '</div><hr />' +
+        '</div>';
+        content += '<div class="form-group">' +
+            '<label for="titleInput">'+Translator.trans('label.type')+'</label>'+
+            '<select id="typeSelect" name="type" class="form-control">';
+                for(var i in types) {
+                    var type = types[i];
+                    if(currentType == type) {
+                        content += '<option value="'+type+'" selected>';
+                    }else{
+                        content += '<option value="'+type+'">';
+                    }
+                    if(type == '') {
+                        type = 'undefined';
+                    }
+                    content += Translator.trans('tag.'+type);
+                    content += '</option>';
+                }
+            content += '</select>';
+        content += '</div>';
+content += '<hr />' +
             '<div id="'+containerName+'"></div>';
 
         var modalConfig = {
@@ -272,25 +292,35 @@ function loadProject(projectId) {
                 refreshTitle = originalTitle;
                 addNote = false;
             }
+            var typeSelect = $('div.modal-body select#typeSelect option:selected');
+            var type = typeSelect.val();
+            var typeReadable = typeSelect.text();
 
             // Ajax request
             $.ajax({
                 method: 'POST',
                 url: paths.ajax_change_details,
-                data: { change_id: changeId, edited_title: titleInput },
+                data: { change_id: changeId, edited_title: titleInput, type: type },
                 dataType: 'json'
             }).done(function( response ) {
                 if(response.status == true) {
+                    if(type == '') {
+                        type = 'undefined';
+                    }
                     var actionButton = $('button.changeDetailsButton[data-id='+changeId+']');
                     var titleField = actionButton.parents('tr.rewatajax-row').find('td.rewatajax-column[data-type="showTitle"]');
                     titleField.text(refreshTitle);
+
+                    var typeField = actionButton.parents('tr.rewatajax-row').find('td.rewatajax-column:nth-of-type(1)');
+                    typeField.html('<span class="badge badge-tag-'+type+'">'+typeReadable+'</span>');
+                    actionButton.data('type', type);
+
                     actionButton.data('editedtitle', titleInput);
 
                     var infoField = $('div.modal-body small#titleInput-info');
                     infoField.html('');
                     if(addNote) {
                         var text = Translator.trans('label.originalTitle')+': '+originalTitle;
-                        console.log(text);
                        titleField.append(' '+infoIcon(text));
                        infoField.html(text);
                     }

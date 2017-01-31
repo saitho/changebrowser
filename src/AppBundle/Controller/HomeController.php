@@ -1,6 +1,7 @@
 <?php
 namespace AppBundle\Controller;
 
+use AppBundle\DBAL\EnumChangeTypeType;
 use AppBundle\Entity\Project;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -45,6 +46,16 @@ class HomeController extends Controller {
 		$js = 'var paths = {'.PHP_EOL;
 		$js .= implode(','.PHP_EOL, $paths);
 		$js .= '};'.PHP_EOL;
+		
+		// Types
+		$types = EnumChangeTypeType::$values;
+		foreach($types AS &$type) {
+			$type = '"'.$type.'"';
+		}
+		
+		$js .= 'var types = [';
+		$js .= implode(',', $types);
+		$js .= '];'.PHP_EOL;
         		
 		$response = new Response($js);
 		$response->prepare($request);
